@@ -498,5 +498,130 @@
   "url": "http://helpautism.ru/wp-content/themes/zerif-lite/css/ie.css",
   "timestamp": "20171006011936",
   "mime": "text/css"
+ },
+ "wp-content/plugins/woocommerce/assets/js/frontend/cart-fragments.min.js": {
+  "url": "https://helpautism.ru/wp-content/plugins/woocommerce/assets/js/frontend/cart-fragments.min.js?ver=3.0.8",
+  "timestamp": "20211202030227",
+  "mime": "application/x-javascript"
+ },
+ "wp-content/themes/zerif-lite/css/responsive.css": {
+  "url": "http://helpautism.ru/wp-content/themes/zerif-lite/css/responsive.css?ver=v1",
+  "timestamp": "20220121212831",
+  "mime": "text/css"
+ },
+ "wp-content/themes/zerif-lite/fonts/FontinSans_Cyrillic_R_46b.otf": {
+  "url": "https://helpautism.ru/wp-content/themes/zerif-lite/fonts/FontinSans_Cyrillic_R_46b.otf",
+  "timestamp": "20220518074901",
+  "mime": "text/html"
+ },
+ "wp-content/themes/zerif-lite/fonts/Tolstyak.ttf": {
+  "url": "http://helpautism.ru/wp-content/themes/zerif-lite/fonts/Tolstyak.ttf",
+  "timestamp": "20171024105934",
+  "mime": "application/font-sfnt"
+ },
+ "wp-content/themes/zerif-lite/fonts/fontawesome-webfont__78ce0913.svg": {
+  "url": "https://helpautism.ru/wp-content/themes/zerif-lite/fonts/fontawesome-webfont.svg?v=4.2.0",
+  "timestamp": "20220518074903",
+  "mime": "image/svg+xml"
+ },
+ "wp-content/themes/zerif-lite/fonts/fontawesome-webfont__78ce0913.eot": {
+  "url": "https://helpautism.ru/wp-content/themes/zerif-lite/fonts/fontawesome-webfont.eot?v=4.2.0",
+  "timestamp": "20220518074917",
+  "mime": "application/vnd.ms-fontobject"
+ },
+ "wp-content/themes/zerif-lite/images/left-arrow.png": {
+  "url": "http://helpautism.ru/wp-content/themes/zerif-lite/images/left-arrow.png",
+  "timestamp": "20190212030848",
+  "mime": "text/html"
+ },
+ "wp-content/themes/zerif-lite/images/lines-dark.png": {
+  "url": "http://helpautism.ru/wp-content/themes/zerif-lite/images/lines-dark.png",
+  "timestamp": "20171024110525",
+  "mime": "image/png"
+ },
+ "wp-content/themes/zerif-lite/images/loading.gif": {
+  "url": "http://helpautism.ru/wp-content/themes/zerif-lite/images/loading.gif",
+  "timestamp": "20190212032716",
+  "mime": "text/html"
+ },
+ "wp-content/themes/zerif-lite/images/menu-icon.png": {
+  "url": "https://helpautism.ru/wp-content/themes/zerif-lite/images/menu-icon.png",
+  "timestamp": "20220518074845",
+  "mime": "image/png"
+ },
+ "wp-content/themes/zerif-lite/images/right-arrow.png": {
+  "url": "http://helpautism.ru/wp-content/themes/zerif-lite/images/right-arrow.png",
+  "timestamp": "20190212064359",
+  "mime": "text/html"
+ },
+ "wp-content/themes/zerif-lite/images/social/ai.svg": {
+  "url": "http://helpautism.ru/wp-content/themes/zerif-lite/images/social/ai.svg",
+  "timestamp": "20171024105204",
+  "mime": "image/svg+xml"
+ },
+ "wp-content/themes/zerif-lite/images/social/cd.jpg": {
+  "url": "http://helpautism.ru/wp-content/themes/zerif-lite/images/social/cd.jpg",
+  "timestamp": "20171024112103",
+  "mime": "image/jpeg"
+ },
+ "wp-content/themes/zerif-lite/images/social/em.svg": {
+  "url": "http://helpautism.ru/wp-content/themes/zerif-lite/images/social/em.svg",
+  "timestamp": "20171024110656",
+  "mime": "image/svg+xml"
+ },
+ "wp-content/themes/zerif-lite/images/social/emh.svg": {
+  "url": "https://helpautism.ru/wp-content/themes/zerif-lite/images/social/emh.svg",
+  "timestamp": "20220518074846",
+  "mime": "image/svg+xml"
+ },
+ "wp-content/themes/zerif-lite/images/social/fb.svg": {
+  "url": "http://helpautism.ru/wp-content/themes/zerif-lite/images/social/fb.svg",
+  "timestamp": "20190211204609",
+  "mime": "text/html"
+ },
+ "wp-content/themes/zerif-lite/images/social/fbh.svg": {
+  "url": "https://helpautism.ru/wp-content/themes/zerif-lite/images/social/fbh.svg",
+  "timestamp": "20220518074847",
+  "mime": "image/svg+xml"
+ },
+ "wp-content/themes/zerif-lite/images/social/i.svg": {
+  "url": "http://helpautism.ru/wp-content/themes/zerif-lite/images/social/i.svg",
+  "timestamp": "20171024111947",
+  "mime": "image/svg+xml"
+ },
+ "wp-content/themes/zerif-lite/images/social/ih.svg": {
+  "url": "http://helpautism.ru/wp-content/themes/zerif-lite/images/social/ih.svg",
+  "timestamp": "20171024112247",
+  "mime": "image/svg+xml"
+ },
+ "wp-content/themes/zerif-lite/images/social/ok.svg": {
+  "url": "http://helpautism.ru/wp-content/themes/zerif-lite/images/social/ok.svg",
+  "timestamp": "20171024105616",
+  "mime": "image/svg+xml"
+ },
+ "wp-content/themes/zerif-lite/images/social/okh.svg": {
+  "url": "http://helpautism.ru/wp-content/themes/zerif-lite/images/social/okh.svg",
+  "timestamp": "20171024104820",
+  "mime": "image/svg+xml"
+ },
+ "wp-content/themes/zerif-lite/images/social/phs.svg": {
+  "url": "https://helpautism.ru/wp-content/themes/zerif-lite/images/social/phs.svg",
+  "timestamp": "20220518074848",
+  "mime": "image/svg+xml"
+ },
+ "wp-content/themes/zerif-lite/images/social/ps.svg": {
+  "url": "http://helpautism.ru/wp-content/themes/zerif-lite/images/social/ps.svg",
+  "timestamp": "20190212064355",
+  "mime": "text/html"
+ },
+ "wp-content/themes/zerif-lite/images/social/psh.svg": {
+  "url": "http://helpautism.ru/wp-content/themes/zerif-lite/images/social/psh.svg",
+  "timestamp": "20171024104706",
+  "mime": "image/svg+xml"
+ },
+ "wp-content/themes/zerif-lite/images/search_icon.png": {
+  "url": "http://helpautism.ru/wp-content/themes/zerif-lite/images/search_icon.png",
+  "timestamp": "20171024105127",
+  "mime": "image/png"
  }
 }
