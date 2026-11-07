@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Переадресация — Искра надежды</title>
+<script>
+  // Старые адреса WordPress (/2025/08/15/slug/, /6102-2/, /contacts/) -> новые (#/news/slug и т.д.)
+  (function () {
+    var parts = location.pathname.split("/").filter(Boolean);
+    var base = "/";
+    if (/\.github\.io$/.test(location.hostname) && parts.length) base = "/" + parts.shift() + "/";
+    var map = { "kontakty": "contacts", "contacts": "contacts", "o-nas": "about", "about": "about", "proekty": "projects", "projects": "projects", "novosti": "news", "news": "news", "pomoch": "help", "help": "help" };
+    var target = "#/";
+    var last = parts[parts.length - 1];
+    if (last) {
+      try { last = decodeURIComponent(last); } catch (e) {}
+      target = map[last] ? "#/" + map[last] : "#/news/" + encodeURIComponent(last);
+    }
+    location.replace(base + target);
+  })();
+</script>
+</head>
+<body style="font-family:system-ui,sans-serif;text-align:center;padding:60px">
+  <p>Переходим на новую страницу… <a href="./">На главную</a></p>
+</body>
+</html>
