@@ -1123,5 +1123,30 @@
   "url": "https://helpautism.ru/yanvar/",
   "timestamp": "20220119200526",
   "mime": "text/html"
+ },
+ "zhaloba/index.html": {
+  "url": "http://helpautism.ru/zhaloba/",
+  "timestamp": "20220117221528",
+  "mime": "text/html"
+ },
+ "j15.helpautism.ru/index.html": {
+  "url": "http://j15.helpautism.ru",
+  "timestamp": "20131016125116",
+  "mime": "text/html"
+ },
+ "vopros-yuristu/index.html": {
+  "url": "http://helpautism.ru/vopros-yuristu/",
+  "timestamp": "20220116120730",
+  "mime": "text/html"
+ },
+ "j15.helpautism.ru/minecraft/index.html": {
+  "url": "http://j15.helpautism.ru:80/minecraft",
+  "timestamp": "20140519012626",
+  "mime": "text/html"
+ },
+ "yurid-zashhita/index.html": {
+  "url": "https://helpautism.ru/yurid-zashhita/",
+  "timestamp": "20210806010613",
+  "mime": "text/html"
  }
 }
