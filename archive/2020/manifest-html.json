@@ -2373,5 +2373,255 @@
   "url": "http://helpautism.ru/category/sport-vmeste-po-nastoyashhemu/",
   "timestamp": "20201026211220",
   "mime": "text/html"
+ },
+ "deyatelnost/index__6f4362d2.html": {
+  "url": "http://helpautism.ru:80/deyatelnost/?wc-ajax=%%Endpoint%%",
+  "timestamp": "20180610055603",
+  "mime": "text/html"
+ },
+ "classes/index.html": {
+  "url": "http://helpautism.ru/classes/",
+  "timestamp": "20201020144733",
+  "mime": "text/html"
+ },
+ "club-mama-lounge/index.html": {
+  "url": "http://helpautism.ru/club-mama-lounge/",
+  "timestamp": "20201020140735",
+  "mime": "text/html"
+ },
+ "english/index.html": {
+  "url": "http://helpautism.ru:80/english/",
+  "timestamp": "20171110115737",
+  "mime": "text/html"
+ },
+ "event-location/iskra-nadezhdyi/index.html": {
+  "url": "http://helpautism.ru/event-location/iskra-nadezhdyi/",
+  "timestamp": "20200924070214",
+  "mime": "text/html"
+ },
+ "event-type/old/index.html": {
+  "url": "http://helpautism.ru/event-type/old/",
+  "timestamp": "20200920180619",
+  "mime": "text/html"
+ },
+ "event-type/sport/index.html": {
+  "url": "http://helpautism.ru/event-type/sport/",
+  "timestamp": "20200919143025",
+  "mime": "text/html"
+ },
+ "dvorec-tvorchestva-detej-i-molodezhi/index.html": {
+  "url": "http://helpautism.ru/dvorec-tvorchestva-detej-i-molodezhi/",
+  "timestamp": "20201001003349",
+  "mime": "text/html"
+ },
+ "event-type/teen/index.html": {
+  "url": "http://helpautism.ru/event-type/teen/",
+  "timestamp": "20200920172512",
+  "mime": "text/html"
+ },
+ "deyatelnost/index.html": {
+  "url": "http://helpautism.ru/deyatelnost/",
+  "timestamp": "20201020150328",
+  "mime": "text/html"
+ },
+ "events/adaptivnaya-fizkultura-2/index__0a911510.html": {
+  "url": "http://helpautism.ru/events/adaptivnaya-fizkultura-2/?ri=4",
+  "timestamp": "20210124063645",
+  "mime": "text/html"
+ },
+ "events/adaptivnaya-fizkultura-2/index__d7f3bccb.html": {
+  "url": "http://helpautism.ru/events/adaptivnaya-fizkultura-2/?ri=5",
+  "timestamp": "20210305160918",
+  "mime": "text/html"
+ },
+ "events/adaptivnaya-fizkultura-copy/index.html": {
+  "url": "http://helpautism.ru/events/adaptivnaya-fizkultura-copy/",
+  "timestamp": "20200927093343",
+  "mime": "text/html"
+ },
+ "events/adaptivnaya-fizkultura-2/index__b81f1e30.html": {
+  "url": "http://helpautism.ru/events/adaptivnaya-fizkultura-2/?ri=3",
+  "timestamp": "20210305155950",
+  "mime": "text/html"
+ },
+ "events/adaptivnaya-fizkultura-copy/index__b81f1e30.html": {
+  "url": "http://helpautism.ru/events/adaptivnaya-fizkultura-copy/?ri=3",
+  "timestamp": "20210305154405",
+  "mime": "text/html"
+ },
+ "events/adaptivnaya-fizkultura-copy/index__0a911510.html": {
+  "url": "http://helpautism.ru/events/adaptivnaya-fizkultura-copy/?ri=4",
+  "timestamp": "20210124064101",
+  "mime": "text/html"
+ },
+ "donation-service-terms/index.html": {
+  "url": "http://helpautism.ru/donation-service-terms/",
+  "timestamp": "20200929182757",
+  "mime": "text/html"
+ },
+ "events/adaptivnaya-fizkultura/index.html": {
+  "url": "http://helpautism.ru/events/adaptivnaya-fizkultura/",
+  "timestamp": "20201001075944",
+  "mime": "text/html"
+ },
+ "events/adaptivnaya-fizkultura-copy/index__adfff360.html": {
+  "url": "http://helpautism.ru/events/adaptivnaya-fizkultura-copy/?ri=1",
+  "timestamp": "20220120082529",
+  "mime": "text/html"
+ },
+ "events/adaptivnaya-fizkultura-copy/index__d7f3bccb.html": {
+  "url": "http://helpautism.ru/events/adaptivnaya-fizkultura-copy/?ri=5",
+  "timestamp": "20210305163355",
+  "mime": "text/html"
+ },
+ "events/adaptivnaya-fizkultura/index__3752a269.html": {
+  "url": "https://helpautism.ru/events/adaptivnaya-fizkultura/?ri=2",
+  "timestamp": "20220120075722",
+  "mime": "text/html"
+ },
+ "events/adaptivnaya-fizkultura/index__9395f623.html": {
+  "url": "https://helpautism.ru/events/adaptivnaya-fizkultura/?ri=0",
+  "timestamp": "20220120072453",
+  "mime": "text/html"
+ },
+ "events/adaptivnaya-fizkultura/index__0a911510.html": {
+  "url": "http://helpautism.ru/events/adaptivnaya-fizkultura/?ri=4",
+  "timestamp": "20210124060920",
+  "mime": "text/html"
+ },
+ "events/adaptivnaya-fizkultura/index__d7f3bccb.html": {
+  "url": "http://helpautism.ru/events/adaptivnaya-fizkultura/?ri=5",
+  "timestamp": "20210305163753",
+  "mime": "text/html"
+ },
+ "events/adaptivnaya-fizkultura/index__faf8ec70.html": {
+  "url": "https://helpautism.ru/events/adaptivnaya-fizkultura/?ri=6",
+  "timestamp": "20211202190134",
+  "mime": "text/html"
+ },
+ "events/adaptivnaya-fizkultura/index__b81f1e30.html": {
+  "url": "http://helpautism.ru/events/adaptivnaya-fizkultura/?ri=3",
+  "timestamp": "20210305163716",
+  "mime": "text/html"
+ },
+ "events/adaptivnaya-fizkultura-2/index.html": {
+  "url": "http://helpautism.ru/events/adaptivnaya-fizkultura-2/",
+  "timestamp": "20200920182022",
+  "mime": "text/html"
+ },
+ "events/kompyuternaya-gramotnost-15-2/index__faf8ec70.html": {
+  "url": "https://helpautism.ru/events/kompyuternaya-gramotnost-15-2/?ri=6",
+  "timestamp": "20211202195632",
+  "mime": "text/html"
+ },
+ "events/kompyuternaya-gramotnost-15/index.html": {
+  "url": "http://helpautism.ru/events/kompyuternaya-gramotnost-15/",
+  "timestamp": "20200924202500",
+  "mime": "text/html"
+ },
+ "events/kompyuternaya-gramotnost-15-2/index__adfff360.html": {
+  "url": "http://helpautism.ru/events/kompyuternaya-gramotnost-15-2/?ri=1",
+  "timestamp": "20201023061223",
+  "mime": "text/html"
+ },
+ "events/kompyuternaya-gramotnost-15/index__9395f623.html": {
+  "url": "https://helpautism.ru/events/kompyuternaya-gramotnost-15/?ri=0",
+  "timestamp": "20220120080228",
+  "mime": "text/html"
+ },
+ "events/kompyuternaya-gramotnost-15/index__adfff360.html": {
+  "url": "http://helpautism.ru/events/kompyuternaya-gramotnost-15/?ri=1",
+  "timestamp": "20211018080119",
+  "mime": "text/html"
+ },
+ "events/prikladnoe-tvorchestvo-15-2/index.html": {
+  "url": "http://helpautism.ru/events/prikladnoe-tvorchestvo-15-2/",
+  "timestamp": "20200924211548",
+  "mime": "text/html"
+ },
+ "events/prikladnoe-tvorchestvo-15-2/index__adfff360.html": {
+  "url": "http://helpautism.ru/events/prikladnoe-tvorchestvo-15-2/?ri=1",
+  "timestamp": "20210124064854",
+  "mime": "text/html"
+ },
+ "events/kompyuternaya-gramotnost-15-2/index.html": {
+  "url": "http://helpautism.ru/events/kompyuternaya-gramotnost-15-2/",
+  "timestamp": "20201001070734",
+  "mime": "text/html"
+ },
+ "events/prikladnoe-tvorchestvo-15-2/index__3752a269.html": {
+  "url": "http://helpautism.ru/events/prikladnoe-tvorchestvo-15-2/?ri=2",
+  "timestamp": "20210305164016",
+  "mime": "text/html"
+ },
+ "events/prikladnoe-tvorchestvo-15-3/index.html": {
+  "url": "http://helpautism.ru/events/prikladnoe-tvorchestvo-15-3/",
+  "timestamp": "20200927103728",
+  "mime": "text/html"
+ },
+ "events/prikladnoe-tvorchestvo-15-2/index__faf8ec70.html": {
+  "url": "https://helpautism.ru/events/prikladnoe-tvorchestvo-15-2/?ri=6",
+  "timestamp": "20211202190543",
+  "mime": "text/html"
+ },
+ "events/prikladnoe-tvorchestvo-15-3/index__9395f623.html": {
+  "url": "https://helpautism.ru/events/prikladnoe-tvorchestvo-15-3/?ri=0",
+  "timestamp": "20220521090008",
+  "mime": "text/html"
+ },
+ "events/prikladnoe-tvorchestvo-15-3/index__adfff360.html": {
+  "url": "http://helpautism.ru/events/prikladnoe-tvorchestvo-15-3/?ri=1",
+  "timestamp": "20220120071334",
+  "mime": "text/html"
+ },
+ "events/prikladnoe-tvorchestvo-15-3/index__3752a269.html": {
+  "url": "https://helpautism.ru/events/prikladnoe-tvorchestvo-15-3/?ri=2",
+  "timestamp": "20220521095950",
+  "mime": "text/html"
+ },
+ "events/prikladnoe-tvorchestvo-15/index.html": {
+  "url": "http://helpautism.ru/events/prikladnoe-tvorchestvo-15/",
+  "timestamp": "20200926082200",
+  "mime": "text/html"
+ },
+ "events/prikladnoe-tvorchestvo-15/index__9395f623.html": {
+  "url": "http://helpautism.ru/events/prikladnoe-tvorchestvo-15/?ri=0",
+  "timestamp": "20210305154204",
+  "mime": "text/html"
+ },
+ "events/prikladnoe-tvorchestvo-15/index__3752a269.html": {
+  "url": "http://helpautism.ru/events/prikladnoe-tvorchestvo-15/?ri=2",
+  "timestamp": "20210305155335",
+  "mime": "text/html"
+ },
+ "events/adaptivnaya-fizkultura/index__adfff360.html": {
+  "url": "https://helpautism.ru/events/adaptivnaya-fizkultura/?ri=1",
+  "timestamp": "20211202183909",
+  "mime": "text/html"
+ },
+ "events/prikladnoe-tvorchestvo-15-2/index__9395f623.html": {
+  "url": "http://helpautism.ru/events/prikladnoe-tvorchestvo-15-2/?ri=0",
+  "timestamp": "20210305154957",
+  "mime": "text/html"
+ },
+ "feeds/all.atom.xml": {
+  "url": "https://helpautism.ru/feeds/all.atom.xml",
+  "timestamp": "20250121174755",
+  "mime": "text/html"
+ },
+ "fevral/index.html": {
+  "url": "http://helpautism.ru/fevral/",
+  "timestamp": "20200920171150",
+  "mime": "text/html"
+ },
+ "events/prikladnoe-tvorchestvo-15/index__adfff360.html": {
+  "url": "http://helpautism.ru/events/prikladnoe-tvorchestvo-15/?ri=1",
+  "timestamp": "20210124050715",
+  "mime": "text/html"
+ },
+ "forum/index__6f4362d2.html": {
+  "url": "http://helpautism.ru:80/forum/?wc-ajax=%%Endpoint%%",
+  "timestamp": "20181115015217",
+  "mime": "text/html"
  }
 }
