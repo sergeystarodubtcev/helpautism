@@ -3243,5 +3243,130 @@
   "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=42&Itemid=1",
   "timestamp": "20100324110413",
   "mime": "text/html"
+ },
+ "joom/index__0da174e6.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=55&Itemid=1",
+  "timestamp": "20100324113727",
+  "mime": "text/html"
+ },
+ "joom/index__38e45370.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=36&Itemid=1",
+  "timestamp": "20100324120420",
+  "mime": "text/html"
+ },
+ "joom/index__5c0efb00.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=54&Itemid=1",
+  "timestamp": "20100324132551",
+  "mime": "text/html"
+ },
+ "joom/index__19589b03.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=59&Itemid=1",
+  "timestamp": "20100324113732",
+  "mime": "text/html"
+ },
+ "joom/index__eb2ede3c.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=60&Itemid=1",
+  "timestamp": "20100324111633",
+  "mime": "text/html"
+ },
+ "joom/index__34b37e17.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=58&Itemid=1",
+  "timestamp": "20100324105821",
+  "mime": "text/html"
+ },
+ "joom/index__bf68eb5e.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=56&Itemid=1",
+  "timestamp": "20100324120410",
+  "mime": "text/html"
+ },
+ "joom/index__0e179057.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=64&Itemid=1",
+  "timestamp": "20100324111657",
+  "mime": "text/html"
+ },
+ "joom/index__e7a5dff4.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=65&Itemid=1",
+  "timestamp": "20100324110418",
+  "mime": "text/html"
+ },
+ "joom/index__6b69b8cd.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=68&Itemid=1",
+  "timestamp": "20100324134033",
+  "mime": "text/html"
+ },
+ "joom/index__50255f15.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=69&Itemid=1",
+  "timestamp": "20100324111614",
+  "mime": "text/html"
+ },
+ "joom/index__68a264b1.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=75&Itemid=1",
+  "timestamp": "20100324134001",
+  "mime": "text/html"
+ },
+ "joom/index__86267935.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=76&Itemid=1",
+  "timestamp": "20100324120436",
+  "mime": "text/html"
+ },
+ "joom/index__206f891b.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=77&Itemid=1",
+  "timestamp": "20100324123430",
+  "mime": "text/html"
+ },
+ "joom/index__ac680c84.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=80&Itemid=1",
+  "timestamp": "20100324134112",
+  "mime": "text/html"
+ },
+ "joom/index__b7303c2e.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=63&Itemid=1",
+  "timestamp": "20100324122314",
+  "mime": "text/html"
+ },
+ "joom/index__cfff6cd9.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=82&Itemid=1",
+  "timestamp": "20100324132701",
+  "mime": "text/html"
+ },
+ "joom/index__f79076a4.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=81&Itemid=1",
+  "timestamp": "20100324113716",
+  "mime": "text/html"
+ },
+ "joom/index__b01f0121.php": {
+  "url": "http://www.helpautism.ru:80/joom/index.php?option=com_content&task=view&id=83&Itemid=1",
+  "timestamp": "20100324113759",
+  "mime": "text/html"
+ },
+ "lessons/index.html": {
+  "url": "http://helpautism.ru/lessons/",
+  "timestamp": "20201020135559",
+  "mime": "text/html"
+ },
+ "liliya-tuxvatullina-6-let/index.html": {
+  "url": "http://helpautism.ru/liliya-tuxvatullina-6-let/",
+  "timestamp": "20200927092500",
+  "mime": "text/html"
+ },
+ "kontakty/index.html": {
+  "url": "http://helpautism.ru:80/kontakty/",
+  "timestamp": "20200628000953",
+  "mime": "text/html"
+ },
+ "mc-event-category/general/index.html": {
+  "url": "http://helpautism.ru/mc-event-category/general/",
+  "timestamp": "20200919150631",
+  "mime": "text/html"
+ },
+ "mc-event-category/ivent/index.html": {
+  "url": "http://helpautism.ru/mc-event-category/ivent/",
+  "timestamp": "20200919144356",
+  "mime": "text/html"
+ },
+ "mass_media/index.html": {
+  "url": "http://helpautism.ru:80/mass_media/",
+  "timestamp": "20200628000958",
+  "mime": "text/html"
  }
 }
