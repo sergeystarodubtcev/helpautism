@@ -47,6 +47,9 @@ def html_pages(base):
             rel = os.path.relpath(os.path.join(d, f), base).replace(os.sep, "/")
             if rel.startswith(("_ext/", "wp-")) or "/feed/" in rel:
                 continue
+            with open(os.path.join(d, f), "rb") as fh:
+                if b"beget=begetok" in fh.read(3000):
+                    continue  # заглушка антибота Beget, а не страница
             res[rel] = os.path.join(d, f)
     return res
 

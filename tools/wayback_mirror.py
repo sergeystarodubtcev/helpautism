@@ -115,27 +115,37 @@ def main():
             continue
         if a.exclude and re.search(a.exclude, path):
             continue
+        # маленькие html-снимки — заглушка антибота Beget ("beget=begetok"), пропускаем
+        if "html" in mime and ln.isdigit() and int(ln) < 1000:
+            continue
         key = (host, path, q)
-        d = abs(int(ts) - target)
-        if key not in best or d < best[key][0]:
-            best[key] = (d, ts, orig, mime, ln)
+        best.setdefault(key, []).append((abs(int(ts) - target), ts, orig, mime, ln))
 
-    todo = sorted(best.items(), key=lambda kv: kv[0])
+    todo = sorted((k, sorted(v)) for k, v in best.items())
     print(f"К скачиванию: {len(todo)} адресов → {a.out}", flush=True)
     manifest, done = {}, [0]
     mpath = os.path.join(a.out, a.manifest)
     if os.path.exists(mpath):
         manifest = json.load(open(mpath))
 
+    def is_stub(b):
+        return b is not None and b"beget=begetok" in b[:3000]
+
     def job(item):
-        (host, path, q), (d, ts, orig, mime, ln) = item
+        (host, path, q), cands = item
+        d, ts, orig, mime, ln = cands[0]
         dst = local_path(a.out, host, path, q, mime)
         rel = os.path.relpath(dst, a.out)
-        if rel in manifest and os.path.exists(dst):
+        if rel in manifest and os.path.exists(dst) and not is_stub(open(dst, "rb").read(3000)):
             return
         if ln and ln.isdigit() and int(ln) > a.max_bytes:
             return
-        data = http(f"https://web.archive.org/web/{ts}id_/{orig}")
+        data = None
+        for d, ts, orig, mime, ln in cands[:4]:  # если попалась заглушка — пробуем соседние снимки
+            data = http(f"https://web.archive.org/web/{ts}id_/{orig}")
+            if data is not None and not is_stub(data):
+                break
+            data = None
         if data is None:
             return
         os.makedirs(os.path.dirname(dst), exist_ok=True)
