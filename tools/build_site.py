@@ -108,11 +108,37 @@ def clean_html(text, rel):
 
 
 def inject_enhance(text, rel):
+    # шрифты Google -> локальные (assets/fonts), без обращений к зарубежным серверам
+    fonts = relurl(rel, "/assets/fonts/fonts.css")
+    text = re.sub(r"(?is)<link[^>]+fonts\.googleapis\.com[^>]*>", "", text)
+    text = text.replace("</head>", f'<link rel="stylesheet" href="{fonts}">\n</head>', 1)
+    text = re.sub(r"(?:https?:)?//ajax\.googleapis\.com/ajax/libs/jquery/3\.1\.0/jquery\.min\.js", relurl(rel, "/assets/vendor/jquery-3.1.0.min.js"), text)
     css = relurl(rel, "/assets/enhance.css")
     js = relurl(rel, "/assets/enhance.js")
     text = text.replace("</head>", f'<link rel="stylesheet" href="{css}">\n</head>', 1)
     text = re.sub(r"</body>", f'<script src="{js}" defer></script>\n</body>', text, count=1, flags=re.I)
     return text
+
+
+THUMB_RE = re.compile(r"""(\b(?:src|data-src|href)=["'])([^"'#?]+\.(?:jpe?g|png|gif|webp))(["'])""", re.I)
+
+
+def fix_thumbs(text, rel):
+    """Нет уменьшенной копии (img-285x214.jpg) — подставляем оригинал (img.jpg), если он есть."""
+    base_dir = os.path.dirname(os.path.join(OUT, rel))
+
+    def fix(m):
+        url = m.group(2)
+        if re.match(r"^(https?:|//|data:)", url):
+            return m.group(0)
+        if os.path.exists(os.path.normpath(os.path.join(base_dir, urllib.parse.unquote(url)))):
+            return m.group(0)
+        orig = re.sub(r"-\d+x\d+(\.\w+)$", r"\1", url)
+        if orig != url and os.path.exists(os.path.normpath(os.path.join(base_dir, urllib.parse.unquote(orig)))):
+            return m.group(1) + orig + m.group(3)
+        return m.group(0)
+    text = THUMB_RE.sub(fix, text)
+    return re.sub(r"""\s+srcset=["'][^"']*["']""", "", text)  # srcset ссылается на отсутствующие размеры
 
 
 def extract_article(text):
@@ -193,6 +219,7 @@ def main():
         txt = clean_html(txt, rel)
         txt = localize(txt, rel)
         txt = inject_enhance(txt, rel)
+        txt = fix_thumbs(txt, rel)
         write(os.path.join(OUT, rel), txt)
         m = re.match(r"(\d{4})/(\d\d)/(\d\d)/([^/]+)/index\.html$", rel)
         if m:
@@ -200,7 +227,8 @@ def main():
             news.append({"date": "-".join(m.groups()[:3]), "slug": m.group(4), "title": html.unescape(title), "url": rel.rsplit("index.html", 1)[0]})
 
     # 2. своё: анимации, 404, служебное
-    os.makedirs(os.path.join(OUT, "assets"), exist_ok=True)
+    for sub in ("fonts", "vendor"):
+        shutil.copytree(os.path.join(ROOT, "assets", sub), os.path.join(OUT, "assets", sub), dirs_exist_ok=True)
     for f in ("enhance.css", "enhance.js"):
         shutil.copy2(os.path.join(ROOT, "assets", f), os.path.join(OUT, "assets", f))
     if os.path.exists(os.path.join(ROOT, "CNAME")):

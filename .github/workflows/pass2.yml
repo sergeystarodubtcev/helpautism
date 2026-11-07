@@ -1,0 +1,42 @@
+name: Second pass (full CDX, retry missing files)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/eager-curie-nnh11r]
+    paths:
+      - .github/workflows/pass2.yml
+
+permissions:
+  contents: write
+
+jobs:
+  pass2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cat > /tmp/save.sh <<'EOS'
+          #!/bin/bash
+          cd "$GITHUB_WORKSPACE"
+          git add -A archive
+          git commit -qm "Архив helpautism.ru (pass2): $(find archive -type f | wc -l) файлов" || exit 0
+          for i in 1 2 3 4 5; do
+            git pull -q --rebase -X theirs origin "$GITHUB_REF_NAME" && git push -q origin "HEAD:$GITHUB_REF_NAME" && exit 0
+            sleep $((RANDOM % 20 + 5))
+          done
+          EOS
+          chmod +x /tmp/save.sh
+          ( while sleep 300; do /tmp/save.sh; done ) &
+          # 1) полный список снимков (постранично) + картинки/файлы, которых не было в старом списке
+          python3 tools/wayback_mirror.py --refresh-cdx --target 20201020150025 --out archive/2020 --include '^/wp-content/uploads/' --manifest manifest-uploads.json --workers 3
+          /tmp/save.sh
+          # 2) повтор всего, на что ссылаются страницы, но что не скачалось
+          python3 tools/fetch_requisites.py --ts 20201020150025 --dir archive/2020 --workers 3 --retry-failed
+      - name: Final save
+        if: always()
+        run: /tmp/save.sh

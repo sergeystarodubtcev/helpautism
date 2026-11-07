@@ -34,21 +34,27 @@ def http(url, tries=3, binary=True):
         time.sleep(delay); delay = min(delay * 2, 60)
 
 
-def load_cdx(path):
-    if os.path.exists(path):
+def load_cdx(path, refresh=False):
+    if os.path.exists(path) and not refresh:
         with open(path) as f:
             return json.load(f)
+    base = {"url": DOMAIN, "matchType": "domain", "output": "json",
+            "fl": "timestamp,original,mimetype,statuscode,length", "filter": "statuscode:200"}
+    n = http("https://web.archive.org/cdx/search/cdx?" + urllib.parse.urlencode({**base, "showNumPages": "true"}))
+    pages = int(n.decode().strip() or 1) if n and n.decode().strip().isdigit() else 1
+    print(f"CDX: страниц {pages}", flush=True)
     rows = []
-    for host in (DOMAIN, "www." + DOMAIN):
-        q = urllib.parse.urlencode({"url": host, "matchType": "prefix" if host.startswith("www") else "domain",
-                                    "output": "json", "fl": "timestamp,original,mimetype,statuscode,length",
-                                    "filter": "statuscode:200"})
-        data = http("https://web.archive.org/cdx/search/cdx?" + q)
+    for i in range(pages):
+        data = http("https://web.archive.org/cdx/search/cdx?" + urllib.parse.urlencode({**base, "page": str(i)}))
         if data:
             part = json.loads(data.decode("utf-8", "replace") or "[]")
-            rows += part[1:]
-        if host == DOMAIN:
-            break  # matchType=domain уже включает www
+            rows += [r for r in part if r and r[0] != "timestamp"]
+        print(f"  страница {i + 1}/{pages}: всего {len(rows)}", flush=True)
+    old = []
+    if os.path.exists(path):
+        old = json.load(open(path))
+    seen = {tuple(r) for r in rows}
+    rows += [r for r in old if tuple(r) not in seen]
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w") as f:
         json.dump(rows, f)
@@ -87,9 +93,10 @@ def main():
     ap.add_argument("--include", default="", help="регулярка: брать только такие пути")
     ap.add_argument("--exclude", default="", help="регулярка: пропускать такие пути")
     ap.add_argument("--manifest", default="manifest.json")
+    ap.add_argument("--refresh-cdx", action="store_true")
     a = ap.parse_args()
 
-    rows = load_cdx("archive/cdx.json")
+    rows = load_cdx("archive/cdx.json", a.refresh_cdx)
     print(f"Снимков в CDX: {len(rows)}", flush=True)
 
     # статистика по годам

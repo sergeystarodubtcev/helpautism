@@ -14,7 +14,7 @@ lock = threading.Lock()
 
 def http(url):
     d = 5
-    for i in range(3):
+    for i in range(4):
         try:
             with urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": UA}), timeout=90) as r:
                 return r.read()
@@ -46,10 +46,11 @@ def main():
     ap.add_argument("--ts", default="20201020150025")
     ap.add_argument("--dir", default="archive/2020")
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--retry-failed", action="store_true")
     a = ap.parse_args()
     mpath = os.path.join(a.dir, "manifest-req.json")
     manifest = json.load(open(mpath)) if os.path.exists(mpath) else {}
-    failed = set(manifest.get("__failed__", []))
+    failed = set() if a.retry_failed else set(manifest.get("__failed__", []))
     scanned = set()
 
     def local(u):
