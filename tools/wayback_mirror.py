@@ -16,15 +16,15 @@ UA = "Mozilla/5.0 (helpautism.ru owner restore)"
 lock = threading.Lock()
 
 
-def http(url, tries=6, binary=True):
-    delay = 3
+def http(url, tries=3, binary=True):
+    delay = 5
     for i in range(tries):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=120) as r:
+            with urllib.request.urlopen(req, timeout=60) as r:
                 return r.read()
         except urllib.error.HTTPError as e:
-            if e.code == 404:
+            if e.code in (403, 404, 410):
                 return None
             if i == tries - 1:
                 print(f"  ! {e.code} {url}", flush=True); return None
@@ -84,6 +84,9 @@ def main():
     ap.add_argument("--html-only", action="store_true")
     ap.add_argument("--max-bytes", type=int, default=15_000_000)
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--include", default="", help="регулярка: брать только такие пути")
+    ap.add_argument("--exclude", default="", help="регулярка: пропускать такие пути")
+    ap.add_argument("--manifest", default="manifest.json")
     a = ap.parse_args()
 
     rows = load_cdx("archive/cdx.json")
@@ -108,6 +111,10 @@ def main():
             continue
         if re.search(r"/(wp-json|xmlrpc\.php|wp-login\.php|feed)(/|$)|/comment-page-|replytocom=", path + "?" + q):
             continue
+        if a.include and not re.search(a.include, path):
+            continue
+        if a.exclude and re.search(a.exclude, path):
+            continue
         key = (host, path, q)
         d = abs(int(ts) - target)
         if key not in best or d < best[key][0]:
@@ -116,7 +123,7 @@ def main():
     todo = sorted(best.items(), key=lambda kv: kv[0])
     print(f"К скачиванию: {len(todo)} адресов → {a.out}", flush=True)
     manifest, done = {}, [0]
-    mpath = os.path.join(a.out, "manifest.json")
+    mpath = os.path.join(a.out, a.manifest)
     if os.path.exists(mpath):
         manifest = json.load(open(mpath))
 
@@ -137,7 +144,7 @@ def main():
         with lock:
             manifest[rel] = {"url": orig, "timestamp": ts, "mime": mime}
             done[0] += 1
-            if done[0] % 50 == 0:
+            if done[0] % 25 == 0:
                 print(f"  {done[0]} файлов…", flush=True)
                 json.dump(manifest, open(mpath, "w"), ensure_ascii=False, indent=1)
 
