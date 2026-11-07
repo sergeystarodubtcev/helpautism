@@ -2123,5 +2123,130 @@
   "url": "http://helpautism.ru/campaign/na-xolodilnik/",
   "timestamp": "20200919162539",
   "mime": "text/html"
+ },
+ "campaign/donation/index__5ba8a550.html": {
+  "url": "https://helpautism.ru/campaign/donation/?embed_object=campaign_card&increase_counters=0",
+  "timestamp": "20210612202207",
+  "mime": "text/html"
+ },
+ "category/autism/page/2/index.html": {
+  "url": "http://helpautism.ru/category/autism/page/2/",
+  "timestamp": "20201020143929",
+  "mime": "text/html"
+ },
+ "category/autism/page/3/index.html": {
+  "url": "http://helpautism.ru:80/category/autism/page/3/",
+  "timestamp": "20181218162547",
+  "mime": "text/html"
+ },
+ "category/autism/page/3/index__6f4362d2.html": {
+  "url": "http://helpautism.ru:80/category/autism/page/3/?wc-ajax=%%Endpoint%%",
+  "timestamp": "20181220061348",
+  "mime": "text/html"
+ },
+ "campaign/na-ustavnuyu-deyatelnost-organizacii/index__a68f68bb.html": {
+  "url": "https://helpautism.ru/campaign/na-ustavnuyu-deyatelnost-organizacii/?_utl_t=tm",
+  "timestamp": "20250831230052",
+  "mime": "text/html"
+ },
+ "category/autism/index.html": {
+  "url": "http://helpautism.ru/category/autism/",
+  "timestamp": "20200924170942",
+  "mime": "text/html"
+ },
+ "category/autizm-realnaya-pomoshh/index.html": {
+  "url": "http://helpautism.ru/category/autizm-realnaya-pomoshh/",
+  "timestamp": "20220120072533",
+  "mime": "text/html"
+ },
+ "category/events/index.html": {
+  "url": "http://helpautism.ru/category/events/",
+  "timestamp": "20201020134424",
+  "mime": "text/html"
+ },
+ "category/autism/page/4/index.html": {
+  "url": "http://helpautism.ru:80/category/autism/page/4/",
+  "timestamp": "20181220181547",
+  "mime": "text/html"
+ },
+ "category/futbol-vo-imya-nadezhdy/index.html": {
+  "url": "http://helpautism.ru/category/futbol-vo-imya-nadezhdy/",
+  "timestamp": "20200924185303",
+  "mime": "text/html"
+ },
+ "category/inclusive/index.html": {
+  "url": "http://helpautism.ru/category/inclusive/",
+  "timestamp": "20200924190727",
+  "mime": "text/html"
+ },
+ "category/deyatelnost/autizm-realnaya-pomoshh/index.html": {
+  "url": "https://helpautism.ru/category/deyatelnost/autizm-realnaya-pomoshh/",
+  "timestamp": "20250716135231",
+  "mime": "text/html"
+ },
+ "category/inclusive/festival/index__6f4362d2.html": {
+  "url": "http://helpautism.ru:80/category/inclusive/festival/?wc-ajax=%%Endpoint%%",
+  "timestamp": "20180203205245",
+  "mime": "text/html"
+ },
+ "category/inclusive/inclus/index.html": {
+  "url": "http://helpautism.ru/category/inclusive/inclus/",
+  "timestamp": "20201020145526",
+  "mime": "text/html"
+ },
+ "category/inclusive/inclus/page/2/index.html": {
+  "url": "http://helpautism.ru/category/inclusive/inclus/page/2/",
+  "timestamp": "20190825122122",
+  "mime": "text/html"
+ },
+ "category/inclusive/dance/index.html": {
+  "url": "http://helpautism.ru/category/inclusive/dance/",
+  "timestamp": "20200924174924",
+  "mime": "text/html"
+ },
+ "category/lawyer/index.html": {
+  "url": "http://helpautism.ru:80/category/lawyer/",
+  "timestamp": "20200628000838",
+  "mime": "text/html"
+ },
+ "category/lawyer/index__6f4362d2.html": {
+  "url": "http://helpautism.ru:80/category/lawyer/?wc-ajax=%%Endpoint%%",
+  "timestamp": "20170708074453",
+  "mime": "text/html"
+ },
+ "category/inclusive/festival/index.html": {
+  "url": "http://helpautism.ru:80/category/inclusive/festival/",
+  "timestamp": "20200628000827",
+  "mime": "text/html"
+ },
+ "category/luchshie-druzya/page/2/index.html": {
+  "url": "http://helpautism.ru/category/luchshie-druzya/page/2/",
+  "timestamp": "20210305171313",
+  "mime": "text/html"
+ },
+ "category/mk/index.html": {
+  "url": "http://helpautism.ru:80/category/mk/",
+  "timestamp": "20171110115316",
+  "mime": "text/html"
+ },
+ "category/news/index.html": {
+  "url": "http://helpautism.ru/category/news/",
+  "timestamp": "20201020141000",
+  "mime": "text/html"
+ },
+ "category/news/index__6fd895e2.html": {
+  "url": "https://helpautism.ru/category/news/?source=helpmain",
+  "timestamp": "20230329133453",
+  "mime": "text/html"
+ },
+ "category/news/index__aaa579c8.html": {
+  "url": "https://helpautism.ru/category/news/?utm_campaign=givingtuesday2022&utm_source=yandex",
+  "timestamp": "20230329132353",
+  "mime": "text/html"
+ },
+ "category/news/index__6f4362d2.html": {
+  "url": "http://helpautism.ru:80/category/news/?wc-ajax=%%Endpoint%%",
+  "timestamp": "20171124080402",
+  "mime": "text/html"
  }
 }
