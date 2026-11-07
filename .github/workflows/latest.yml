@@ -1,0 +1,40 @@
+name: Fetch latest pages (2021-2026 posts)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/eager-curie-nnh11r]
+    paths:
+      - .github/workflows/latest.yml
+
+permissions:
+  contents: write
+
+jobs:
+  latest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cat > /tmp/save.sh <<'EOS'
+          #!/bin/bash
+          cd "$GITHUB_WORKSPACE"
+          git add -A archive
+          git commit -qm "Архив helpautism.ru (latest): $(find archive -type f | wc -l) файлов" || exit 0
+          for i in 1 2 3 4 5; do
+            git pull -q --rebase -X theirs origin "$GITHUB_REF_NAME" && git push -q origin "HEAD:$GITHUB_REF_NAME" && exit 0
+            sleep $((RANDOM % 20 + 5))
+          done
+          EOS
+          chmod +x /tmp/save.sh
+          ( while sleep 300; do /tmp/save.sh; done ) &
+          # сначала новые записи 2021-2026, затем все разделы/страницы верхнего уровня
+          python3 tools/wayback_mirror.py --target 20261011000000 --out archive/latest --html-only --manifest manifest-latest.json --include '^/202[1-6]/' --workers 3
+          python3 tools/wayback_mirror.py --target 20261011000000 --out archive/latest --html-only --manifest manifest-latest.json --include '^/([^/]+/?)?$' --workers 3
+      - name: Final save
+        if: always()
+        run: /tmp/save.sh
