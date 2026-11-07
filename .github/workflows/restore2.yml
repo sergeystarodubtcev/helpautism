@@ -21,9 +21,9 @@ jobs:
           - name: html
             args: --html-only --manifest manifest-html.json
           - name: assets
-            args: --include '^/wp-(content/(themes|plugins)|includes)/' --manifest manifest-assets.json --workers 6
+            args: --include '^/wp-(content/(themes|plugins)|includes)/' --manifest manifest-assets.json --workers 3
           - name: uploads
-            args: --include '^/wp-content/uploads/' --manifest manifest-uploads.json --workers 6
+            args: --include '^/wp-content/uploads/' --manifest manifest-uploads.json --workers 3
     steps:
       - uses: actions/checkout@v4
       - name: Setup git
@@ -33,8 +33,7 @@ jobs:
           cat > /tmp/save.sh <<'EOF'
           #!/bin/bash
           cd "$GITHUB_WORKSPACE"
-          git add archive/2020 archive/latest 2>/dev/null
-          [ "$1" = final ] && git add archive/cdx.json 2>/dev/null
+          git add -A archive
           git commit -qm "Архив helpautism.ru (${{ matrix.name }}): $(find archive -type f | wc -l) файлов" || exit 0
           for i in 1 2 3 4 5; do
             git pull -q --rebase -X theirs origin "$GITHUB_REF_NAME" && git push -q origin "HEAD:$GITHUB_REF_NAME" && exit 0
@@ -44,7 +43,7 @@ jobs:
           chmod +x /tmp/save.sh
       - name: Mirror (${{ matrix.name }})
         run: |
-          ( while sleep 600; do /tmp/save.sh; done ) &
+          ( while sleep 420; do /tmp/save.sh; done ) &
           python3 tools/wayback_mirror.py --target 20201020150025 --out archive/2020 ${{ matrix.args }}
           if [ "${{ matrix.name }}" = html ]; then
             python3 tools/wayback_mirror.py --target 20261011000000 --out archive/latest --html-only

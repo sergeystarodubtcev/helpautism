@@ -21,7 +21,7 @@ def http(url, tries=3, binary=True):
     for i in range(tries):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": UA})
-            with urllib.request.urlopen(req, timeout=60) as r:
+            with urllib.request.urlopen(req, timeout=90) as r:
                 return r.read()
         except urllib.error.HTTPError as e:
             if e.code in (403, 404, 410):
