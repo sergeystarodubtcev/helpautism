@@ -1,4 +1,4 @@
-name: Restore from Wayback (parallel, incremental)
+name: Restore from Wayback (parallel, incremental) v2
 
 on:
   workflow_dispatch:

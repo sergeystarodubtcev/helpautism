@@ -109,7 +109,7 @@ def main():
             continue
         if re.search(r"^(video|audio)/", mime):
             continue
-        if re.search(r"/(wp-json|xmlrpc\.php|wp-login\.php|feed)(/|$)|/comment-page-|replytocom=", path + "?" + q):
+        if re.search(r"^/index\.php/|/(wp-json|xmlrpc\.php|wp-login\.php|feed)(/|$)|/comment-page-|replytocom=", path + "?" + q):
             continue
         if a.include and not re.search(a.include, path):
             continue
@@ -148,9 +148,13 @@ def main():
             data = None
         if data is None:
             return
-        os.makedirs(os.path.dirname(dst), exist_ok=True)
-        with open(dst, "wb") as f:
-            f.write(data)
+        try:
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+            with open(dst, "wb") as f:
+                f.write(data)
+        except OSError as e:  # конфликт «файл/папка» с одинаковым именем — пропускаем
+            print(f"  ! {e}", flush=True)
+            return
         with lock:
             manifest[rel] = {"url": orig, "timestamp": ts, "mime": mime}
             done[0] += 1
