@@ -84,7 +84,11 @@ def clean_html(text, rel):
     # убрать скрипты, которым нужен сервер WordPress
     def scr(m):
         tag = m.group(0)
-        return "" if DROP_SCRIPTS.search(tag[:600]) else tag
+        open_tag = tag[:tag.find(">") + 1]
+        if "src=" in open_tag:
+            return "" if DROP_SCRIPTS.search(open_tag) else tag
+        # встроенные скрипты: убираем только счётчики и эмодзи WordPress
+        return "" if re.search(r"mc\.yandex|metrika|google-analytics|gtag\(|_wpemojiSettings", tag) else tag
     text = re.sub(r"(?is)<script\b[^>]*>.*?</script>", scr, text)
     text = re.sub(r"(?is)<link[^>]+(?:wlwmanifest|EditURI|pingback|shortlink|alternate[^>]+(?:rss|json|oembed))[^>]*>", "", text)
     text = re.sub(r"(?is)<link[^>]+rel=['\"]https://api\.w\.org/['\"][^>]*>", "", text)
@@ -146,6 +150,11 @@ def main():
             os.makedirs(os.path.dirname(dst), exist_ok=True)
             if f.endswith(".css"):
                 write(dst, localize(read(src), rel))
+            elif f.endswith(".js"):
+                # селекторы a[href*=#] ломаются в jQuery без migrate (WP 5.5+)
+                js = read(src)
+                js = re.sub(r"\[href(\*?)=#\]", r'[href\1="#"]', js)
+                write(dst, js)
             else:
                 shutil.copy2(src, dst)
             copied += 1
