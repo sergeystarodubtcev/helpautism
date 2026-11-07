@@ -2623,5 +2623,130 @@
   "url": "http://helpautism.ru:80/forum/?wc-ajax=%%Endpoint%%",
   "timestamp": "20181115015217",
   "mime": "text/html"
+ },
+ "events/prikladnoe-tvorchestvo-15/index__b81f1e30.html": {
+  "url": "http://helpautism.ru/events/prikladnoe-tvorchestvo-15/?ri=3",
+  "timestamp": "20210420040952",
+  "mime": "text/html"
+ },
+ "fotoproekt/index__6f4362d2.html": {
+  "url": "http://helpautism.ru:80/fotoproekt/?wc-ajax=%%Endpoint%%",
+  "timestamp": "20181211013038",
+  "mime": "text/html"
+ },
+ "gumanitarnaya-pomoshh/index.html": {
+  "url": "http://helpautism.ru/gumanitarnaya-pomoshh/",
+  "timestamp": "20201026213221",
+  "mime": "text/html"
+ },
+ "in-dex.php": {
+  "url": "https://www.helpautism.ru/in-dex.php",
+  "timestamp": "20240623025540",
+  "mime": "text/html"
+ },
+ "in-dex__7cb8237f.php": {
+  "url": "https://www.helpautism.ru/in-dex.php?option=com",
+  "timestamp": "20240622231034",
+  "mime": "text/html"
+ },
+ "index.php": {
+  "url": "http://helpautism.ru:80/index.php",
+  "timestamp": "20170223165857",
+  "mime": "text/html"
+ },
+ "index__7cb8237f.php": {
+  "url": "https://www.helpautism.ru/index.php?option=com",
+  "timestamp": "20240623041924",
+  "mime": "text/html"
+ },
+ "forum/index.html": {
+  "url": "http://helpautism.ru/forum/",
+  "timestamp": "20201020151459",
+  "mime": "text/html"
+ },
+ "feed.xml": {
+  "url": "https://helpautism.ru/feed.xml",
+  "timestamp": "20250121175348",
+  "mime": "text/html"
+ },
+ "fotoproekt/index.html": {
+  "url": "http://helpautism.ru/fotoproekt/",
+  "timestamp": "20201020150554",
+  "mime": "text/html"
+ },
+ "index__e182f7f5.php": {
+  "url": "http://helpautism.ru/index.php?option=com_aicontactsafe&view=message&layout=message&pf=1&Itemid=97",
+  "timestamp": "20150209182954",
+  "mime": "text/html"
+ },
+ "index__fc06a36f.php": {
+  "url": "http://helpautism.ru:80/index.php?option=com_content&task=view&id=33&Itemid=1",
+  "timestamp": "20100326174318",
+  "mime": "text/html"
+ },
+ "index__5ca23326.php": {
+  "url": "http://helpautism.ru:80/index.php?option=com_content&task=view&id=22&Itemid=1",
+  "timestamp": "20100327132013",
+  "mime": "text/html"
+ },
+ "index__311ab12c.php": {
+  "url": "http://helpautism.ru:80/index.php?option=com_content&task=view&id=35&Itemid=1",
+  "timestamp": "20100327131806",
+  "mime": "text/html"
+ },
+ "index__38e45370.php": {
+  "url": "http://helpautism.ru:80/index.php?option=com_content&task=view&id=36&Itemid=1",
+  "timestamp": "20100327131810",
+  "mime": "text/html"
+ },
+ "index__ca80b23c.php": {
+  "url": "http://helpautism.ru:80/index.php?option=com_content&task=view&id=37&Itemid=1",
+  "timestamp": "20100327131305",
+  "mime": "text/html"
+ },
+ "index__7e779fc9.php": {
+  "url": "http://helpautism.ru:80/index.php?option=com_content&task=view&id=38&Itemid=1",
+  "timestamp": "20100327131815",
+  "mime": "text/html"
+ },
+ "index__086eb2b9.php": {
+  "url": "http://helpautism.ru:80/index.php?option=com_content&task=view&id=39&Itemid=1",
+  "timestamp": "20100326050052",
+  "mime": "text/html"
+ },
+ "index__5c4e7c1e.php": {
+  "url": "http://helpautism.ru:80/index.php?option=com_content&task=view&id=41&Itemid=1",
+  "timestamp": "20100327132018",
+  "mime": "text/html"
+ },
+ "index__3bb50e13.php": {
+  "url": "http://helpautism.ru:80/index.php?option=com_content&task=view&id=42&Itemid=1",
+  "timestamp": "20100327131310",
+  "mime": "text/html"
+ },
+ "index__0853a9b7.php": {
+  "url": "http://helpautism.ru:80/index.php?option=com_content&task=view&id=51&Itemid=1",
+  "timestamp": "20100326174502",
+  "mime": "text/html"
+ },
+ "index__4c45548e.php": {
+  "url": "http://helpautism.ru:80/index.php?option=com_content&task=view&id=53&Itemid=1",
+  "timestamp": "20100326174507",
+  "mime": "text/html"
+ },
+ "index__0da174e6.php": {
+  "url": "http://helpautism.ru:80/index.php?option=com_content&task=view&id=55&Itemid=1",
+  "timestamp": "20100326174324",
+  "mime": "text/html"
+ },
+ "index__5c0efb00.php": {
+  "url": "http://helpautism.ru:80/index.php?option=com_content&task=view&id=54&Itemid=1",
+  "timestamp": "20100327132026",
+  "mime": "text/html"
+ },
+ "index__bf68eb5e.php": {
+  "url": "http://helpautism.ru:80/index.php?option=com_content&task=view&id=56&Itemid=1",
+  "timestamp": "20100326174334",
+  "mime": "text/html"
  }
 }
