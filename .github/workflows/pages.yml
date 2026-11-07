@@ -22,16 +22,11 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Validate JSON
-        run: for f in data/*.json; do python3 -m json.tool "$f" > /dev/null || exit 1; done
-      - name: Prepare site
-        run: |
-          mkdir -p _site
-          cp -r index.html 404.html .nojekyll assets data _site/
-          [ -f CNAME ] && cp CNAME _site/ || true
+      - name: Build site from archive
+        run: python3 tools/build_site.py
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: site
       - id: deployment
         uses: actions/deploy-pages@v4

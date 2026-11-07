@@ -1,0 +1,39 @@
+name: Fetch page requisites (design files first)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [claude/eager-curie-nnh11r]
+    paths:
+      - tools/fetch_requisites.py
+      - .github/workflows/requisites.yml
+
+permissions:
+  contents: write
+
+jobs:
+  req:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          cat > /tmp/save.sh <<'EOF'
+          #!/bin/bash
+          cd "$GITHUB_WORKSPACE"
+          git add -A archive
+          git commit -qm "Архив helpautism.ru (requisites): $(find archive -type f | wc -l) файлов" || exit 0
+          for i in 1 2 3 4 5; do
+            git pull -q --rebase -X theirs origin "$GITHUB_REF_NAME" && git push -q origin "HEAD:$GITHUB_REF_NAME" && exit 0
+            sleep $((RANDOM % 20 + 5))
+          done
+          EOF
+          chmod +x /tmp/save.sh
+          ( while sleep 240; do /tmp/save.sh; done ) &
+          python3 tools/fetch_requisites.py --ts 20201020150025 --dir archive/2020 --workers 4
+      - name: Final save
+        if: always()
+        run: /tmp/save.sh
