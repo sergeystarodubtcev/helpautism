@@ -366,7 +366,7 @@ VK.Widgets.Group("jlvkgroup44806409", {mode: 0, width: "240", height: "350", wal
 		<!-- block-content -->
 		
 		
-<iframe src="http://www.facebook.com/plugins/likebox.php?href=https%3A%2F%2Fwww.facebook.com%2Fhelpautism&amp;width=234&amp;colorscheme=light&amp;show_faces=true&amp;stream=false&amp;header=false&amp;height=400" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:234px; height:400px;" allowTransparency="true"></iframe>
+<iframe src="http://www.facebook.com/plugins/likebox.php?href=https%3A%2F%2Fwww.facebook.com%2Fhelpautism&amp;width=234&amp;colorscheme=light&amp;show_faces=true&amp;stream=false&amp;header=false&amp;height=350" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:234px; height:350px;" allowTransparency="true"></iframe>
 
 		<!-- /block-content -->
 		
@@ -404,32 +404,32 @@ VK.Widgets.Group("jlvkgroup44806409", {mode: 0, width: "240", height: "350", wal
 		
 		<ul class="latestnews">
 	<li class="latestnews">
-		<a href="/index.php?option=com_content&amp;view=article&amp;id=306:2014-03-24-10-09-37&amp;catid=3:newsflash&amp;Itemid=50" class="latestnews">
-			Информационное письмо</a>
-	</li>
-	<li class="latestnews">
-		<a href="/index.php?option=com_content&amp;view=article&amp;id=305:-l-r&amp;catid=3:newsflash&amp;Itemid=50" class="latestnews">
-			ПОЛОЖЕНИЕ о конкурсе пьес, написанных подростками с инвалидностью  «Театральная перспектива»</a>
-	</li>
-	<li class="latestnews">
-		<a href="/index.php?option=com_content&amp;view=article&amp;id=304:2014-03-24-08-39-32&amp;catid=3:newsflash&amp;Itemid=50" class="latestnews">
-			Сопровождаемое проживание: от понимания к действию</a>
-	</li>
-	<li class="latestnews">
-		<a href="/index.php?option=com_content&amp;view=article&amp;id=303:-l-r-&amp;catid=54:2012-01-30-06-25-59&amp;Itemid=56" class="latestnews">
-			Юридическая служба ВРООИ «Искра Надежды»  осуществляет следующие функции</a>
-	</li>
-	<li class="latestnews">
-		<a href="/index.php?option=com_content&amp;view=article&amp;id=302:-121212&amp;catid=3:newsflash&amp;Itemid=50" class="latestnews">
-			Межведомственное совещание по аутизму в Воронеже</a>
-	</li>
-	<li class="latestnews">
-		<a href="/index.php?option=com_content&amp;view=article&amp;id=301:-l-r&amp;catid=3:newsflash&amp;Itemid=50" class="latestnews">
-			Открытие Кинофестиваля «Кино без барьеров: Воронежское эхо»</a>
-	</li>
-	<li class="latestnews">
 		<a href="/index.php?option=com_content&amp;view=article&amp;id=300:2013-09-01-10-25-17&amp;catid=47:2011-12-01-06-30-44&amp;Itemid=55" class="latestnews">
 			Аня и мир. В Воронеже формируется культура инклюзивного образования</a>
+	</li>
+	<li class="latestnews">
+		<a href="/index.php?option=com_content&amp;view=article&amp;id=299:2013-09-01-09-57-38&amp;catid=51:2012-01-20-10-35-34&amp;Itemid=61" class="latestnews">
+			Доклад Секретариата</a>
+	</li>
+	<li class="latestnews">
+		<a href="/index.php?option=com_content&amp;view=article&amp;id=298:qq--20&amp;catid=47:2011-12-01-06-30-44&amp;Itemid=55" class="latestnews">
+			&quot;Здравствуй&quot; Выпуск №20</a>
+	</li>
+	<li class="latestnews">
+		<a href="/index.php?option=com_content&amp;view=article&amp;id=297:2013-05-27-15-43-32&amp;catid=3:newsflash&amp;Itemid=50" class="latestnews">
+			Учредительный съезд общероссийской общественной организации</a>
+	</li>
+	<li class="latestnews">
+		<a href="/index.php?option=com_content&amp;view=article&amp;id=296:d-&amp;catid=3:newsflash&amp;Itemid=50" class="latestnews">
+			Встреча национальной коалиции в Воронеже</a>
+	</li>
+	<li class="latestnews">
+		<a href="/index.php?option=com_content&amp;view=article&amp;id=295:2013-04-24-09-22-41&amp;catid=3:newsflash&amp;Itemid=50" class="latestnews">
+			Пресс релиз акция за мир равных возможностей</a>
+	</li>
+	<li class="latestnews">
+		<a href="/index.php?option=com_content&amp;view=article&amp;id=294:qq-15&amp;catid=52:--q--q&amp;Itemid=58" class="latestnews">
+			&quot;Здравствуй&quot; Выпуск №15</a>
 	</li>
 </ul>
 		<!-- /block-content -->
@@ -466,7 +466,7 @@ VK.Widgets.Group("jlvkgroup44806409", {mode: 0, width: "240", height: "350", wal
 		    <div class="art-blockcontent-body">
 		<!-- block-content -->
 		
-		﻿<div><div style="text-align: center;"><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/digit_counter/default/0.png" style="margin:0; border:0; " alt="mod_vvisit_counter" title="Vinaora Visitors Counter" /><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/digit_counter/default/1.png" style="margin:0; border:0; " alt="mod_vvisit_counter" title="Vinaora Visitors Counter" /><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/digit_counter/default/3.png" style="margin:0; border:0; " alt="mod_vvisit_counter" title="Vinaora Visitors Counter" /><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/digit_counter/default/6.png" style="margin:0; border:0; " alt="mod_vvisit_counter" title="Vinaora Visitors Counter" /><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/digit_counter/default/8.png" style="margin:0; border:0; " alt="mod_vvisit_counter" title="Vinaora Visitors Counter" /><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/digit_counter/default/8.png" style="margin:0; border:0; " alt="mod_vvisit_counter" title="Vinaora Visitors Counter" /><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/digit_counter/default/3.png" style="margin:0; border:0; " alt="mod_vvisit_counter" title="Vinaora Visitors Counter" /></div><div><table cellpadding="0" cellspacing="0" style="margin: 3px; text-align: center; align: center; width: 90%;" class="vinaora_counter"><tbody align="center"><tr align="left"><td><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/stats/default/vtoday.png" alt="mod_vvisit_counter" title="2014-11-03" /></td><td>Сегодня</td><td align="right">135</td></tr><tr align="left"><td><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/stats/default/vyesterday.png" alt="mod_vvisit_counter" title="2014-11-02" /></td><td>Вчера</td><td align="right">199</td></tr><tr align="left"><td><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/stats/default/vweek.png" alt="mod_vvisit_counter" title="2014-11-02 -> 2014-11-03" /></td><td>За неделе</td><td align="right">334</td></tr><tr align="left"><td><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/stats/default/vlweek.png" alt="mod_vvisit_counter" title="2014-10-26 -> 2014-11-02" /></td><td>Прошл. неделя</td><td align="right">1330</td></tr><tr align="left"><td><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/stats/default/vmonth.png" alt="mod_vvisit_counter" title="2014-11-01 -> 2014-11-03" /></td><td>Месяц</td><td align="right">539</td></tr><tr align="left"><td><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/stats/default/vlmonth.png" alt="mod_vvisit_counter" title="2014-10-01 -> 2014-11-01" /></td><td>Прошл. месяц</td><td align="right">5507</td></tr><tr align="left"><td><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/stats/default/vall.png" alt="mod_vvisit_counter" title="Visitors Counter" /></td><td>Всего</td><td align="right">136883</td></tr></tbody></table></div><hr style="width: 90%" /><div style="text-align: center;">Online: 4<br />Ваш IP: 207.241.237.105<br />MOZILLA 5.0, <br /> Дата: 2014-11-03 16:11</div><div style="text-align: center;"><a style="font-size:9px" href="http://www.polius-portal.ru/load/soft/schetchik_dlja_vashego_sajta/20-1-0-14200" target="_self" title="Счетчик посещений сайта">Счетчик посещений</a></div></div>
+		﻿<div><div style="text-align: center;"><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/digit_counter/default/0.png" style="margin:0; border:0; " alt="mod_vvisit_counter" title="Vinaora Visitors Counter" /><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/digit_counter/default/7.png" style="margin:0; border:0; " alt="mod_vvisit_counter" title="Vinaora Visitors Counter" /><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/digit_counter/default/4.png" style="margin:0; border:0; " alt="mod_vvisit_counter" title="Vinaora Visitors Counter" /><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/digit_counter/default/3.png" style="margin:0; border:0; " alt="mod_vvisit_counter" title="Vinaora Visitors Counter" /><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/digit_counter/default/1.png" style="margin:0; border:0; " alt="mod_vvisit_counter" title="Vinaora Visitors Counter" /><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/digit_counter/default/2.png" style="margin:0; border:0; " alt="mod_vvisit_counter" title="Vinaora Visitors Counter" /></div><div><table cellpadding="0" cellspacing="0" style="margin: 3px; text-align: center; align: center; width: 90%;" class="vinaora_counter"><tbody align="center"><tr align="left"><td><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/stats/default/vtoday.png" alt="mod_vvisit_counter" title="2013-09-18" /></td><td>Сегодня</td><td align="right">44</td></tr><tr align="left"><td><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/stats/default/vyesterday.png" alt="mod_vvisit_counter" title="2013-09-17" /></td><td>Вчера</td><td align="right">167</td></tr><tr align="left"><td><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/stats/default/vweek.png" alt="mod_vvisit_counter" title="2013-09-15 -> 2013-09-18" /></td><td>За неделе</td><td align="right">565</td></tr><tr align="left"><td><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/stats/default/vlweek.png" alt="mod_vvisit_counter" title="2013-09-08 -> 2013-09-15" /></td><td>Прошл. неделя</td><td align="right">1046</td></tr><tr align="left"><td><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/stats/default/vmonth.png" alt="mod_vvisit_counter" title="2013-09-01 -> 2013-09-18" /></td><td>Месяц</td><td align="right">2769</td></tr><tr align="left"><td><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/stats/default/vlmonth.png" alt="mod_vvisit_counter" title="2013-08-01 -> 2013-09-01" /></td><td>Прошл. месяц</td><td align="right">3300</td></tr><tr align="left"><td><img src="http://helpautism.ru/modules/mod_vvisit_counter/images/stats/default/vall.png" alt="mod_vvisit_counter" title="Visitors Counter" /></td><td>Всего</td><td align="right">74312</td></tr></tbody></table></div><hr style="width: 90%" /><div style="text-align: center;">Online: 3<br />Ваш IP: 207.241.237.103<br />MOZILLA 5.0, <br /> Дата: 2013-09-18 07:27</div><div style="text-align: center;"><a style="font-size:9px" href="http://www.polius-portal.ru/load/soft/schetchik_dlja_vashego_sajta/20-1-0-14200" target="_self" title="Счетчик посещений сайта">Счетчик посещений</a></div></div>
 		<!-- /block-content -->
 		
 				<div class="cleared"></div>
