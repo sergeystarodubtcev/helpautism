@@ -3373,5 +3373,130 @@
   "url": "https://helpautism.ru/mc-events/neizvestnoe-sobytie-3/",
   "timestamp": "20211022105501",
   "mime": "text/html"
+ },
+ "mc-events/neizvestnoe-sobytie-4/index.html": {
+  "url": "http://helpautism.ru/mc-events/neizvestnoe-sobytie-4/",
+  "timestamp": "20220119192640",
+  "mime": "text/html"
+ },
+ "mc-events/neizvestnoe-sobytie-5/index.html": {
+  "url": "http://helpautism.ru/mc-events/neizvestnoe-sobytie-5/",
+  "timestamp": "20220117221752",
+  "mime": "text/html"
+ },
+ "mc-events/neizvestnoe-sobytie-2/index.html": {
+  "url": "http://helpautism.ru/mc-events/neizvestnoe-sobytie-2/",
+  "timestamp": "20211202194435",
+  "mime": "text/html"
+ },
+ "mc-events/informacionnyj-seminar-3/index.html": {
+  "url": "https://helpautism.ru/mc-events/informacionnyj-seminar-3/",
+  "timestamp": "20211022104907",
+  "mime": "text/html"
+ },
+ "mc-events/pervaya-vstrecha-kluba/index.html": {
+  "url": "https://helpautism.ru/mc-events/pervaya-vstrecha-kluba/",
+  "timestamp": "20220119193605",
+  "mime": "text/html"
+ },
+ "mc-events/multfilm-slavnye-ptashki/index.html": {
+  "url": "http://helpautism.ru/mc-events/multfilm-slavnye-ptashki/",
+  "timestamp": "20220120075954",
+  "mime": "text/html"
+ },
+ "mc-events/neizvestnoe-sobytie/index.html": {
+  "url": "https://helpautism.ru/mc-events/neizvestnoe-sobytie/",
+  "timestamp": "20220119202658",
+  "mime": "text/html"
+ },
+ "mc-events/pravovoe-konsultirovanie-po-voprosam-zashhity-prav-detej-4/index.html": {
+  "url": "http://helpautism.ru/mc-events/pravovoe-konsultirovanie-po-voprosam-zashhity-prav-detej-4/",
+  "timestamp": "20220119194413",
+  "mime": "text/html"
+ },
+ "mc-events/pravovoe-konsultirovanie-po-voprosam-zashhity-prav-detej-2/index.html": {
+  "url": "http://helpautism.ru/mc-events/pravovoe-konsultirovanie-po-voprosam-zashhity-prav-detej-2/",
+  "timestamp": "20220119200326",
+  "mime": "text/html"
+ },
+ "mc-events/prichastie-2/index.html": {
+  "url": "http://helpautism.ru/mc-events/prichastie-2/",
+  "timestamp": "20220119191741",
+  "mime": "text/html"
+ },
+ "mc-events/prichastie-3/index.html": {
+  "url": "https://helpautism.ru/mc-events/prichastie-3/",
+  "timestamp": "20220119201000",
+  "mime": "text/html"
+ },
+ "mc-events/prichastie-4/index.html": {
+  "url": "http://helpautism.ru/mc-events/prichastie-4/",
+  "timestamp": "20220117232158",
+  "mime": "text/html"
+ },
+ "mc-events/pravovoe-konsultirovanie-po-voprosam-zashhity-prav-detej/index.html": {
+  "url": "http://helpautism.ru/mc-events/pravovoe-konsultirovanie-po-voprosam-zashhity-prav-detej/",
+  "timestamp": "20220117224652",
+  "mime": "text/html"
+ },
+ "mc-events/prichastie/index.html": {
+  "url": "http://helpautism.ru/mc-events/prichastie/",
+  "timestamp": "20220120085728",
+  "mime": "text/html"
+ },
+ "mc-events/prikladnoe-tvorchestvo-15-10/index.html": {
+  "url": "http://helpautism.ru/mc-events/prikladnoe-tvorchestvo-15-10/",
+  "timestamp": "20220117223539",
+  "mime": "text/html"
+ },
+ "mc-events/prikladnoe-tvorchestvo-15-11/index.html": {
+  "url": "https://helpautism.ru/mc-events/prikladnoe-tvorchestvo-15-11/",
+  "timestamp": "20220117224312",
+  "mime": "text/html"
+ },
+ "mc-events/prikladnoe-tvorchestvo-15-13/index.html": {
+  "url": "http://helpautism.ru/mc-events/prikladnoe-tvorchestvo-15-13/",
+  "timestamp": "20220119203218",
+  "mime": "text/html"
+ },
+ "mc-events/prikladnoe-tvorchestvo-15-14/index.html": {
+  "url": "http://helpautism.ru/mc-events/prikladnoe-tvorchestvo-15-14/",
+  "timestamp": "20211021060933",
+  "mime": "text/html"
+ },
+ "mc-events/prikladnoe-tvorchestvo-15-2/index.html": {
+  "url": "http://helpautism.ru/mc-events/prikladnoe-tvorchestvo-15-2/",
+  "timestamp": "20220117215802",
+  "mime": "text/html"
+ },
+ "mc-events/prikladnoe-tvorchestvo-15-3/index.html": {
+  "url": "http://helpautism.ru/mc-events/prikladnoe-tvorchestvo-15-3/",
+  "timestamp": "20220119203701",
+  "mime": "text/html"
+ },
+ "mc-events/prikladnoe-tvorchestvo-15-4/index.html": {
+  "url": "http://helpautism.ru/mc-events/prikladnoe-tvorchestvo-15-4/",
+  "timestamp": "20220117221056",
+  "mime": "text/html"
+ },
+ "mc-events/prikladnoe-tvorchestvo-15-5/index.html": {
+  "url": "http://helpautism.ru/mc-events/prikladnoe-tvorchestvo-15-5/",
+  "timestamp": "20220119204725",
+  "mime": "text/html"
+ },
+ "mc-events/prikladnoe-tvorchestvo-15-6/index.html": {
+  "url": "https://helpautism.ru/mc-events/prikladnoe-tvorchestvo-15-6/",
+  "timestamp": "20220117230743",
+  "mime": "text/html"
+ },
+ "mc-events/pravovoe-konsultirovanie-po-voprosam-zashhity-prav-detej-3/index.html": {
+  "url": "https://helpautism.ru/mc-events/pravovoe-konsultirovanie-po-voprosam-zashhity-prav-detej-3/",
+  "timestamp": "20211026125913",
+  "mime": "text/html"
+ },
+ "mc-events/prikladnoe-tvorchestvo-15-8/index.html": {
+  "url": "https://helpautism.ru/mc-events/prikladnoe-tvorchestvo-15-8/",
+  "timestamp": "20220119205600",
+  "mime": "text/html"
  }
 }
