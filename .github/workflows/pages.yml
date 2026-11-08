@@ -4,6 +4,14 @@ on:
   push:
     branches: [main, claude/eager-curie-nnh11r]
   workflow_dispatch:
+  # пересобрать сайт, когда закончилось скачивание архива
+  workflow_run:
+    workflows:
+      - "Restore from Wayback (parallel, incremental) v2"
+      - "Second pass (full CDX, retry missing files)"
+      - "Fetch page requisites (design files first)"
+      - "Fetch latest pages (2021-2026 posts)"
+    types: [completed]
 
 permissions:
   contents: read
