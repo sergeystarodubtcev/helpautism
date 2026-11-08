@@ -46,3 +46,6 @@ body.ha-scrolled #main-nav { box-shadow: 0 6px 24px rgba(0,0,0,.12); }
   .ha-reveal { opacity: 1; transform: none; }
   html { scroll-behavior: auto; }
 }
+
+/* заглушка вместо картинок, которых нет в архиве */
+img.ha-placeholder { object-fit: contain !important; background: #f4f6f8; padding: 18px; aspect-ratio: 4 / 3; width: 100%; height: auto; }

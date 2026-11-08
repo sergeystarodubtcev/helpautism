@@ -32,6 +32,21 @@
     };
     addEventListener("scroll", on, { passive: true }); on();
   }
-  function start() { reveal(); topButton(); }
+  // картинки, которых нет в веб-архиве: превью -> логотип организации, остальное скрываем
+  function brokenImages() {
+    var logo = document.querySelector(".navbar-brand img, .site-logo img, header img");
+    var logoSrc = logo ? logo.src : "";
+    function handle(img) {
+      if (img.dataset.haFixed) return; img.dataset.haFixed = "1";
+      var thumb = img.closest(".pt-cv-thumbnail, .pt-cv-href-thumbnail, .post-img-wrap, .wp-post-image, .pt-cv-ifield") || /thumbnail|wp-post-image/.test(img.className);
+      if (thumb && logoSrc && img.src !== logoSrc) { img.src = logoSrc; img.classList.add("ha-placeholder"); }
+      else img.style.display = "none";
+    }
+    document.querySelectorAll("img").forEach(function (img) {
+      if (img.complete && img.naturalWidth === 0 && img.getAttribute("src")) handle(img);
+    });
+    window.addEventListener("error", function (e) { if (e.target && e.target.tagName === "IMG") handle(e.target); }, true);
+  }
+  function start() { brokenImages(); reveal(); topButton(); }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
 })();
