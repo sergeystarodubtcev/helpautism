@@ -1998,5 +1998,130 @@
   "url": "http://helpautism.ru:80/category/mk/",
   "timestamp": "20171110115316",
   "mime": "text/html"
+ },
+ "category/news/index.html": {
+  "url": "http://helpautism.ru/category/news/",
+  "timestamp": "20220306235445",
+  "mime": "text/html"
+ },
+ "category/news/blog/index.html": {
+  "url": "https://helpautism.ru/category/news/blog/",
+  "timestamp": "20220117221716",
+  "mime": "text/html"
+ },
+ "category/inclusive/festival/index.html": {
+  "url": "http://helpautism.ru/category/inclusive/festival/",
+  "timestamp": "20220111221847",
+  "mime": "text/html"
+ },
+ "category/news/blog/page/3/index.html": {
+  "url": "https://helpautism.ru/category/news/blog/page/3/",
+  "timestamp": "20220120090159",
+  "mime": "text/html"
+ },
+ "category/news/events/index.html": {
+  "url": "http://helpautism.ru/category/news/events/",
+  "timestamp": "20220120075028",
+  "mime": "text/html"
+ },
+ "category/news/events/page/2/index.html": {
+  "url": "https://helpautism.ru/category/news/events/page/2/",
+  "timestamp": "20211202183001",
+  "mime": "text/html"
+ },
+ "category/news/mk/index.html": {
+  "url": "http://helpautism.ru/category/news/mk/",
+  "timestamp": "20220120072731",
+  "mime": "text/html"
+ },
+ "category/luchshie-druzya/page/2/index.html": {
+  "url": "https://helpautism.ru/category/luchshie-druzya/page/2/",
+  "timestamp": "20210918170812",
+  "mime": "text/html"
+ },
+ "category/inclusive/inclus/index.html": {
+  "url": "http://helpautism.ru/category/inclusive/inclus/",
+  "timestamp": "20220120083840",
+  "mime": "text/html"
+ },
+ "category/news/press/page/2/index.html": {
+  "url": "https://helpautism.ru/category/news/press/page/2/",
+  "timestamp": "20210612212659",
+  "mime": "text/html"
+ },
+ "category/news/press/press-reliz/index.html": {
+  "url": "http://helpautism.ru/category/news/press/press-reliz/",
+  "timestamp": "20220120084527",
+  "mime": "text/html"
+ },
+ "category/news/press/press-reliz/page/2/index.html": {
+  "url": "https://helpautism.ru/category/news/press/press-reliz/page/2/",
+  "timestamp": "20220120085136",
+  "mime": "text/html"
+ },
+ "category/news/press/pressa-o-nas/index.html": {
+  "url": "http://helpautism.ru/category/news/press/pressa-o-nas/",
+  "timestamp": "20220212210117",
+  "mime": "text/html"
+ },
+ "category/news/blog/page/2/index.html": {
+  "url": "https://helpautism.ru/category/news/blog/page/2/",
+  "timestamp": "20211202190834",
+  "mime": "text/html"
+ },
+ "category/news/preview/page/2/index.html": {
+  "url": "https://helpautism.ru/category/news/preview/page/2/",
+  "timestamp": "20210918174133",
+  "mime": "text/html"
+ },
+ "category/news/page/2/index.html": {
+  "url": "http://helpautism.ru/category/news/page/2/",
+  "timestamp": "20190825121946",
+  "mime": "text/html"
+ },
+ "category/pomoshh/index.html": {
+  "url": "http://helpautism.ru/category/pomoshh/",
+  "timestamp": "20220203204117",
+  "mime": "text/html"
+ },
+ "category/rannyaya-pomoshh/index.html": {
+  "url": "http://helpautism.ru/category/rannyaya-pomoshh/",
+  "timestamp": "20220120084727",
+  "mime": "text/html"
+ },
+ "category/social/index.html": {
+  "url": "http://helpautism.ru/category/social/",
+  "timestamp": "20220120075531",
+  "mime": "text/html"
+ },
+ "category/sport-vmeste-po-nastoyashhemu/index.html": {
+  "url": "http://helpautism.ru/category/sport-vmeste-po-nastoyashhemu/",
+  "timestamp": "20220306235448",
+  "mime": "text/html"
+ },
+ "category/sport-vmeste-po-nastoyashhemu/page/2/index.html": {
+  "url": "http://helpautism.ru/category/sport-vmeste-po-nastoyashhemu/page/2/",
+  "timestamp": "20210420033905",
+  "mime": "text/html"
+ },
+ "category/osobaya-sborka_voronezh/index.html": {
+  "url": "http://helpautism.ru/category/osobaya-sborka_voronezh/",
+  "timestamp": "20220120080911",
+  "mime": "text/html"
+ },
+ "category/news/press/index.html": {
+  "url": "http://helpautism.ru/category/news/press/",
+  "timestamp": "20220305023132",
+  "mime": "text/html"
+ },
+ "category/news/preview/index.html": {
+  "url": "http://helpautism.ru/category/news/preview/",
+  "timestamp": "20220120090306",
+  "mime": "text/html"
+ },
+ "category/stop-diskriminaciya/index.html": {
+  "url": "http://helpautism.ru/category/stop-diskriminaciya/",
+  "timestamp": "20220128081346",
+  "mime": "text/html"
  }
 }
