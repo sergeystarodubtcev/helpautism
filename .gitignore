@@ -1,2 +1,6 @@
 site
 archive/missing.txt
+# экспорты WordPress содержат личные данные (пожертвования) — не хранить в репозитории
+*.xml
+!site/**
+__pycache__/

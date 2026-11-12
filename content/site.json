@@ -1,0 +1,412 @@
+{
+ "title": "Искра надежды",
+ "menu": [
+  {
+   "title": "Новости",
+   "url": "/category/news/",
+   "children": [
+    {
+     "title": "СМИ о нас",
+     "url": "/category/news/smi-o-nas/",
+     "children": []
+    },
+    {
+     "title": "Для СМИ",
+     "url": "/mass_media/",
+     "children": []
+    }
+   ]
+  },
+  {
+   "title": "Деятельность",
+   "url": "/category/deyatelnost/",
+   "children": [
+    {
+     "title": "Аутизм. Реальная помощь",
+     "url": "/category/deyatelnost/autizm-realnaya-pomoshh/",
+     "children": [
+      {
+       "title": "Наши таланты",
+       "url": "/talents/",
+       "children": []
+      },
+      {
+       "title": "Наши дети",
+       "url": "/our-kids/",
+       "children": []
+      },
+      {
+       "title": "Спорт вместе. По-настоящему",
+       "url": "/category/deyatelnost/sport-vmeste-po-nastoyashhemu/",
+       "children": []
+      }
+     ]
+    },
+    {
+     "title": "Инклюзивный фестиваль",
+     "url": "/category/news/inklyuzivnyj-festival/",
+     "children": []
+    },
+    {
+     "title": "Арт-студия Сокровенный человек",
+     "url": "/category/deyatelnost/art-studiya-sokrovennyj-chelovek/",
+     "children": []
+    },
+    {
+     "title": "SP. МАНУФАКТУРА",
+     "url": "/category/deyatelnost/sp-manufactory/",
+     "children": [
+      {
+       "title": "Посиделки",
+       "url": "/posidelki/",
+       "children": []
+      }
+     ]
+    },
+    {
+     "title": "Лучшие друзья Воронеж (Best buddies Voronezh)",
+     "url": "/category/deyatelnost/luchshie-druzya-voronezh-best-buddies-voronezh/",
+     "children": [
+      {
+       "title": "О проекте",
+       "url": "/luchshie-druzya-voronezh-best-buddies-voronezh/",
+       "children": []
+      }
+     ]
+    },
+    {
+     "title": "Сопровождаемое трудоустройство",
+     "url": "/category/deyatelnost/soprovozhdaemoe-trudoustrojstvo/",
+     "children": []
+    },
+    {
+     "title": "Сопровождаемое проживание",
+     "url": "/category/deyatelnost/soprovozhdaemoe-prozhivanie/",
+     "children": []
+    }
+   ]
+  },
+  {
+   "title": "Информирование",
+   "url": "/my-informiruem/",
+   "children": [
+    {
+     "title": "Гуманитарная помощь",
+     "url": "/category/informirovanie/gumanitarnaya-pomoshh/",
+     "children": []
+    },
+    {
+     "title": "Вопрос юристу",
+     "url": "/vopros-yuristu/",
+     "children": []
+    },
+    {
+     "title": "Юрист информирует",
+     "url": "/category/informirovanie/yurist-informiruet/",
+     "children": []
+    },
+    {
+     "title": "Полезные документы",
+     "url": "/my-informiruem/yurid-zashhita/",
+     "children": []
+    }
+   ]
+  },
+  {
+   "title": "О нас",
+   "url": "/deyatelnost/",
+   "children": [
+    {
+     "title": "Публичные отчеты организации",
+     "url": "/publichnye-otchety-organizacii/",
+     "children": []
+    },
+    {
+     "title": "Основные сведения об организации",
+     "url": "/osnovnye-svedeniya/",
+     "children": []
+    },
+    {
+     "title": "Сведения об образовательной организации",
+     "url": "/dokumenty/",
+     "children": []
+    },
+    {
+     "title": "Поставщик социальных услуг",
+     "url": "/obrazovanie/",
+     "children": []
+    },
+    {
+     "title": "Контакты и реквизиты",
+     "url": "/kontakty/",
+     "children": []
+    }
+   ]
+  }
+ ],
+ "categories": {
+  "deyatelnost": {
+   "name": "Деятельность",
+   "parent": "",
+   "path": "/category/deyatelnost/"
+  },
+  "informirovanie": {
+   "name": "Информирование",
+   "parent": "",
+   "path": "/category/informirovanie/"
+  },
+  "klub-mama-lounge": {
+   "name": "Клуб Mama.Lounge",
+   "parent": "deyatelnost",
+   "path": "/category/deyatelnost/klub-mama-lounge/"
+  },
+  "kontakty": {
+   "name": "Контакты",
+   "parent": "informirovanie",
+   "path": "/category/informirovanie/kontakty/"
+  },
+  "luchshie-druzya-voronezh-best-buddies-voronezh": {
+   "name": "Лучшие друзья Воронеж (Best buddies Voronezh)",
+   "parent": "deyatelnost",
+   "path": "/category/deyatelnost/luchshie-druzya-voronezh-best-buddies-voronezh/"
+  },
+  "nashi-deti": {
+   "name": "Наши дети",
+   "parent": "deyatelnost",
+   "path": "/category/deyatelnost/nashi-deti/"
+  },
+  "news": {
+   "name": "Новости",
+   "parent": "",
+   "path": "/category/news/"
+  },
+  "posidelki": {
+   "name": "Посиделки",
+   "parent": "deyatelnost",
+   "path": "/category/deyatelnost/posidelki/"
+  },
+  "prostymi-slovami": {
+   "name": "Простыми словами",
+   "parent": "",
+   "path": "/category/prostymi-slovami/"
+  },
+  "puteshestvuj-s-nami": {
+   "name": "Путешествуй с нами",
+   "parent": "deyatelnost",
+   "path": "/category/deyatelnost/puteshestvuj-s-nami/"
+  },
+  "smi-o-nas": {
+   "name": "СМИ о нас",
+   "parent": "news",
+   "path": "/category/news/smi-o-nas/"
+  },
+  "soprovozhdaemoe-prozhivanie": {
+   "name": "Сопровождаемое проживание",
+   "parent": "deyatelnost",
+   "path": "/category/deyatelnost/soprovozhdaemoe-prozhivanie/"
+  },
+  "soprovozhdaemoe-trudoustrojstvo": {
+   "name": "Сопровождаемое трудоустройство",
+   "parent": "deyatelnost",
+   "path": "/category/deyatelnost/soprovozhdaemoe-trudoustrojstvo/"
+  },
+  "sport-vmeste-po-nastoyashhemu": {
+   "name": "Спорт вместе. По-настоящему",
+   "parent": "deyatelnost",
+   "path": "/category/deyatelnost/sport-vmeste-po-nastoyashhemu/"
+  },
+  "yurid-zashhita": {
+   "name": "Юрид. защита",
+   "parent": "informirovanie",
+   "path": "/category/informirovanie/yurid-zashhita/"
+  },
+  "yurist-informiruet": {
+   "name": "Юрист информирует",
+   "parent": "informirovanie",
+   "path": "/category/informirovanie/yurist-informiruet/"
+  },
+  "sp-manufactory": {
+   "name": "SP. МАНУФАКТУРА",
+   "parent": "deyatelnost",
+   "path": "/category/deyatelnost/sp-manufactory/"
+  },
+  "art-studiya-sokrovennyj-chelovek": {
+   "name": "Арт-студия Сокровенный человек",
+   "parent": "deyatelnost",
+   "path": "/category/deyatelnost/art-studiya-sokrovennyj-chelovek/"
+  },
+  "autizm-realnaya-pomoshh": {
+   "name": "Аутизм. Реальная помощь",
+   "parent": "deyatelnost",
+   "path": "/category/deyatelnost/autizm-realnaya-pomoshh/"
+  },
+  "vopros-yuristu": {
+   "name": "Вопрос юристу",
+   "parent": "informirovanie",
+   "path": "/category/informirovanie/vopros-yuristu/"
+  },
+  "gumanitarnaya-pomoshh": {
+   "name": "Гуманитарная помощь",
+   "parent": "informirovanie",
+   "path": "/category/informirovanie/gumanitarnaya-pomoshh/"
+  },
+  "dlya-smi": {
+   "name": "Для СМИ",
+   "parent": "news",
+   "path": "/category/news/dlya-smi/"
+  },
+  "inklyuzivnyj-festival": {
+   "name": "Инклюзивный фестиваль",
+   "parent": "news",
+   "path": "/category/news/inklyuzivnyj-festival/"
+  },
+  "nashi-talanty": {
+   "name": "Наши таланты",
+   "parent": "news",
+   "path": "/category/news/nashi-talanty/"
+  },
+  "nelzha-ru": {
+   "name": "Нелжа.ру",
+   "parent": "puteshestvuj-s-nami",
+   "path": "/category/deyatelnost/puteshestvuj-s-nami/nelzha-ru/"
+  }
+ },
+ "tables": {
+  "2315": [
+   [
+    "Школа №",
+    "ФИО учителей",
+    "Дата",
+    "Пресс-релиз",
+    "Пост-релиз"
+   ],
+   [
+    "СОШ № 92",
+    "Щеголев Алексей Викторович",
+    "16 марта",
+    "",
+    "<a href=\"http://helpautism.ru/2017/03/19/den-parasporta-v-sosh-92/\">Пост-релиз «День параспорта в СОШ № 92»</a>"
+   ],
+   [
+    "СОШ № 6",
+    "Себелева Анастасия Сергеевна",
+    "6 апреля",
+    "",
+    "<a href=\"http://helpautism.ru/2017/04/08/post-reliz-den-parasporta-v-voronezhskoj-shkole-6/\">Пост-релиз «День параспорта в воронежской школе №6»</a>"
+   ],
+   [
+    "Новоусманская СОШ № 3",
+    "Вязников Владимир Васильевич",
+    "19 апреля",
+    "",
+    ""
+   ],
+   [
+    "СОШ № 90",
+    "Бортников Сергей Иванович\n",
+    "11 мая",
+    "",
+    ""
+   ],
+   [
+    "СОШ№ 67",
+    "Читова Ирина Ивановна",
+    "17 мая",
+    "",
+    "<a href=\"http://helpautism.ru/2017/05/18/post-reliz-den-parasporta-v-voronezhskoj-shkole-67/\">Пост-релиз «День параспорта в воронежской школе №67»</a>"
+   ],
+   [
+    "СОШ № 92",
+    "Щеголев Алексей Викторович",
+    "14 сентября ",
+    "",
+    ""
+   ],
+   [
+    "СОШ№ 67",
+    "Читова Ирина Ивановна",
+    "12 октября",
+    "",
+    ""
+   ],
+   [
+    "СОШ № 6",
+    "Себелева Анастасия Сергеевна",
+    "26 октября ",
+    "",
+    ""
+   ],
+   [
+    "СОШ № 90",
+    "Бортников Сергей Иванович\n",
+    "2 ноября",
+    "",
+    ""
+   ],
+   [
+    "Новоусманская СОШ № 3",
+    "Вязников Владимир Васильевич",
+    "16 ноября",
+    "",
+    ""
+   ]
+  ],
+  "2319": [
+   [
+    "Мероприятие",
+    "Дата",
+    "Место проведения",
+    "Пресс-релиз",
+    "Пост-релиз"
+   ],
+   [
+    "Летний спортивный лагерь",
+    "29 мая – 3 июня",
+    "Выездной лагерь на территории детского лагеря «Кировец»",
+    "",
+    ""
+   ],
+   [
+    "Фестиваль параспорта",
+    "декабрь",
+    "ФОК ДТДиМ",
+    "",
+    ""
+   ]
+  ],
+  "2328": [
+   [
+    "Описание",
+    "Сроки"
+   ],
+   [
+    "Проведение одного Фестиваля параспорта. Спортсмены с инвалидностью и без проводят мастер-классы по разным видам спорта и рассказывают ребятам о важности физической активности в жизни. Также на парафестивалях детям предоставляется возможность не только узнать о паралимпийских видах спорта, таких как волейбол сидя, бочча, баскетбол на колясках, или, например, голбол, но и попробовать поиграть в них.",
+    "1 раз на протяжении всего проекта"
+   ],
+   [
+    "Проведение одного городского инклюзивного 5-дневного лагеря для детей и подростков с инвалидностью и без. В ходе проведения лагерей планируются: мастер-классы по видам спорта; игры и спортивные активности, эстафеты, викторины и пр.; просмотры фильмов-участников Международного кинофестиваля о жизни людей с инвалидностью «Кино без барьеров», мини-футбольный турнир.",
+    "1 раз на протяжении всего проекта"
+   ],
+   [
+    "Проведение в школах по 10 инклюзивных спортивных мероприятий - дней параспортов. Спортсмены с инвалидностью и без проводят мастер-классы по разным видам спорта и рассказывают ребятам о важности физической активности в жизни.",
+    "На протяжении всего периода реализации проекта"
+   ],
+   [
+    "Проведение в 5 школах 2 раза в неделю регулярных инклюзивных спортивных занятий для детей с инвалидностью и без. Как минимум 20 детей с инвалидностью в каждой школе проекта занимаются вместе со сверстниками без инвалидности (порядка 10 детей на каждое занятие в каждой школе).",
+    "На протяжении всего периода реализации проекта"
+   ],
+   [
+    "Проведение 10 обучающих вебинаров для команды и педагогов физкультуры .Вебинары направлены на развитие детских видов адаптивного спорта.",
+    "Ежемесячно"
+   ],
+   [
+    "Подготовка и обучение педагогов и учителей физкультуры к проведению занятий по адаптивной физической культуры. Проведение обучающие тренингов с экспертами в области инклюзивного спорта.",
+    "На протяжении всего периода реализации проекта"
+   ],
+   [
+    "Отбор 5 инклюзивных школ в регионе: Воронежская область, г. Воронеж.",
+    "На протяжении всего периода реализации проекта"
+   ]
+  ]
+ }
+}
