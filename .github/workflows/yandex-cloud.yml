@@ -1,0 +1,60 @@
+name: Deploy to Yandex Cloud (Object Storage)
+
+# Сборка сайта и выкладка в бакет Yandex Object Storage.
+# Нужно один раз добавить в репозитории (Settings → Secrets and variables → Actions):
+#   секреты   YC_S3_KEY_ID, YC_S3_SECRET — статический ключ доступа сервисного аккаунта
+#   переменная YC_BUCKET (необязательно) — имя бакета, по умолчанию helpautism.ru
+# Пока секретов нет, задача просто пропускается.
+
+on:
+  push:
+    branches: [main, claude/eager-curie-nnh11r]
+  workflow_dispatch:
+
+concurrency:
+  group: yandex-cloud
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.YC_S3_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.YC_S3_SECRET }}
+      AWS_DEFAULT_REGION: ru-central1
+      BUCKET: ${{ vars.YC_BUCKET || 'helpautism.ru' }}
+      S3: aws --endpoint-url=https://storage.yandexcloud.net s3
+    steps:
+      - name: Check secrets
+        id: check
+        run: |
+          if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
+            echo "::notice::Секреты YC_S3_KEY_ID / YC_S3_SECRET не заданы — выкладка в Яндекс Облако пропущена."
+            echo "skip=1" >> "$GITHUB_OUTPUT"
+          fi
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.skip != '1'
+      - name: Build site
+        if: steps.check.outputs.skip != '1'
+        run: python3 tools/build_site.py
+      - name: Upload media and assets (only changed by size)
+        if: steps.check.outputs.skip != '1'
+        run: |
+          $S3 sync site/ "s3://$BUCKET/" --size-only --no-progress \
+            --exclude "*.html" --exclude "*.json" --exclude "*.xml" --exclude "*.txt" --exclude "*.css" --exclude "*.js" \
+            --cache-control "public, max-age=2592000"
+      - name: Upload styles and scripts
+        if: steps.check.outputs.skip != '1'
+        run: |
+          $S3 sync site/ "s3://$BUCKET/" --no-progress --exclude "*" --include "*.css" --include "*.js" \
+            --cache-control "public, max-age=3600"
+      - name: Upload pages
+        if: steps.check.outputs.skip != '1'
+        run: |
+          $S3 sync site/ "s3://$BUCKET/" --no-progress --exclude "*" --include "*.html" --include "*.json" --include "*.xml" --include "*.txt" \
+            --cache-control "no-cache" --delete
+      - name: Website settings
+        if: steps.check.outputs.skip != '1'
+        run: |
+          $S3 website "s3://$BUCKET/" --index-document index.html --error-document 404.html
+          echo "Готово: https://$BUCKET.website.yandexcloud.net/"
