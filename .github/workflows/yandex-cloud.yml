@@ -1,10 +1,17 @@
-name: Deploy to Yandex Cloud (Object Storage)
+name: Deploy to Yandex Cloud
 
-# Сборка сайта и выкладка в бакет Yandex Object Storage.
-# Нужно один раз добавить в репозитории (Settings → Secrets and variables → Actions):
-#   секреты   YC_S3_KEY_ID, YC_S3_SECRET — статический ключ доступа сервисного аккаунта
-#   переменная YC_BUCKET (необязательно) — имя бакета, по умолчанию helpautism.ru
-# Пока секретов нет, задача просто пропускается.
+# 1) облачная функция (админка + формы) -> Yandex Cloud Functions
+# 2) сборка сайта с адресом функции
+# 3) выкладка в бакет Yandex Object Storage
+#
+# Settings → Secrets and variables → Actions:
+#   секреты:    YC_S3_KEY_ID, YC_S3_SECRET  — статический ключ сервисного аккаунта (бакет)
+#               YC_SA_KEY                   — авторизованный ключ того же аккаунта (JSON целиком)
+#               GH_CONTENT_TOKEN            — fine-grained токен GitHub (Contents: read/write) — для сохранения из админки
+#               ADMIN_PASSWORD              — пароль входа в админку
+#               SMTP_PASSWORD               — пароль приложения Яндекс 360 для helpautismvrn@yandex.ru
+#   переменные: YC_FOLDER_ID (обязательно для функции), YC_BUCKET (по умолчанию helpautism.ru)
+# Без ключей шаги пропускаются.
 
 on:
   push:
@@ -24,16 +31,57 @@ jobs:
       AWS_DEFAULT_REGION: ru-central1
       BUCKET: ${{ vars.YC_BUCKET || 'helpautism.ru' }}
       S3: aws --endpoint-url=https://storage.yandexcloud.net s3
+      YC_SA_KEY: ${{ secrets.YC_SA_KEY }}
+      YC_FOLDER_ID: ${{ vars.YC_FOLDER_ID }}
+      FUNC: helpautism-api
+      MAIL: helpautismvrn@yandex.ru
     steps:
       - name: Check secrets
         id: check
         run: |
           if [ -z "$AWS_ACCESS_KEY_ID" ] || [ -z "$AWS_SECRET_ACCESS_KEY" ]; then
-            echo "::notice::Секреты YC_S3_KEY_ID / YC_S3_SECRET не заданы — выкладка в Яндекс Облако пропущена."
-            echo "skip=1" >> "$GITHUB_OUTPUT"
+            echo "::notice::Нет YC_S3_KEY_ID / YC_S3_SECRET — выкладка в Яндекс Облако пропущена."; echo "skip=1" >> "$GITHUB_OUTPUT"
           fi
+          if [ -n "$YC_SA_KEY" ] && [ -n "$YC_FOLDER_ID" ]; then echo "func=1" >> "$GITHUB_OUTPUT"
+          else echo "::notice::Нет YC_SA_KEY / YC_FOLDER_ID — облачная функция (админка, формы) не обновляется."; fi
       - uses: actions/checkout@v4
         if: steps.check.outputs.skip != '1'
+
+      # ---------- облачная функция ----------
+      - name: Install yc CLI
+        if: steps.check.outputs.skip != '1' && steps.check.outputs.func == '1'
+        run: |
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash -s -- -i "$HOME/yc" -n
+          echo "$HOME/yc/bin" >> "$GITHUB_PATH"
+      - name: Deploy function
+        if: steps.check.outputs.skip != '1' && steps.check.outputs.func == '1'
+        env:
+          ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          GH_CONTENT_TOKEN: ${{ secrets.GH_CONTENT_TOKEN }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+        run: |
+          set -e
+          printf '%s' "$YC_SA_KEY" > "$RUNNER_TEMP/key.json"
+          yc config profile create ci >/dev/null 2>&1 || true
+          yc config set service-account-key "$RUNNER_TEMP/key.json"
+          yc config set folder-id "$YC_FOLDER_ID"
+          yc serverless function get --name "$FUNC" >/dev/null 2>&1 || yc serverless function create --name "$FUNC" --description "helpautism.ru: админка и формы"
+          yc serverless function allow-unauthenticated-invoke --name "$FUNC" >/dev/null
+          SECRETS=$(python3 -c 'import base64,json,os; print(base64.urlsafe_b64encode(json.dumps({
+            "ADMIN_PASSWORD": os.environ["ADMIN_PASSWORD"], "GH_TOKEN": os.environ["GH_CONTENT_TOKEN"],
+            "GH_REPO": os.environ["GITHUB_REPOSITORY"], "GH_BRANCH": os.environ["GITHUB_REF_NAME"],
+            "SMTP_USER": os.environ["MAIL"], "SMTP_PASSWORD": os.environ["SMTP_PASSWORD"], "FORMS_TO": os.environ["MAIL"]}).encode()).decode().rstrip("="))')
+          echo "::add-mask::$SECRETS"
+          (cd functions/api && zip -qr "$RUNNER_TEMP/api.zip" .)
+          yc serverless function version create --function-name "$FUNC" --runtime python312 --entrypoint index.handler \
+            --memory 128m --execution-timeout 30s --source-path "$RUNNER_TEMP/api.zip" \
+            --environment "HA_SECRETS=$SECRETS" >/dev/null
+          ID=$(yc serverless function get --name "$FUNC" --format json | python3 -c 'import json,sys; print(json.load(sys.stdin)["id"])')
+          echo "HA_API_URL=https://functions.yandexcloud.net/$ID" >> "$GITHUB_ENV"
+          echo "Функция: https://functions.yandexcloud.net/$ID"
+          rm -f "$RUNNER_TEMP/key.json"
+
+      # ---------- сайт ----------
       - name: Build site
         if: steps.check.outputs.skip != '1'
         run: python3 tools/build_site.py
@@ -46,8 +94,8 @@ jobs:
       - name: Upload styles and scripts
         if: steps.check.outputs.skip != '1'
         run: |
-          $S3 sync site/ "s3://$BUCKET/" --no-progress --exclude "*" --include "*.css" --include "*.js" \
-            --cache-control "public, max-age=3600"
+          $S3 sync site/ "s3://$BUCKET/" --no-progress --exclude "*" --include "*.css" --include "*.js" --cache-control "public, max-age=3600"
+          $S3 cp site/assets/config.js "s3://$BUCKET/assets/config.js" --cache-control "no-cache"
       - name: Upload pages
         if: steps.check.outputs.skip != '1'
         run: |
@@ -57,4 +105,4 @@ jobs:
         if: steps.check.outputs.skip != '1'
         run: |
           $S3 website "s3://$BUCKET/" --index-document index.html --error-document 404.html
-          echo "Готово: https://$BUCKET.website.yandexcloud.net/"
+          echo "Готово: https://$BUCKET.website.yandexcloud.net/  (админка: /admin/)"

@@ -256,10 +256,14 @@ def load_content():
     for d, _, files in os.walk(os.path.join(CONTENT, "posts")):
         for f in files:
             if f.endswith(".json"):
-                posts.append(json.load(open(os.path.join(d, f), encoding="utf-8")))
+                doc = json.load(open(os.path.join(d, f), encoding="utf-8"))
+                doc["_file"] = os.path.relpath(os.path.join(d, f), ROOT).replace(os.sep, "/")
+                posts.append(doc)
     for f in os.listdir(os.path.join(CONTENT, "pages")):
         if f.endswith(".json"):
-            pages.append(json.load(open(os.path.join(CONTENT, "pages", f), encoding="utf-8")))
+            doc = json.load(open(os.path.join(CONTENT, "pages", f), encoding="utf-8"))
+            doc["_file"] = "content/pages/" + f
+            pages.append(doc)
     posts.sort(key=lambda p: (p["date"], p["id"]), reverse=True)
     site = json.load(open(os.path.join(CONTENT, "site.json"), encoding="utf-8"))
     forms = json.load(open(os.path.join(CONTENT, "forms.json"), encoding="utf-8"))
@@ -621,7 +625,18 @@ def main():
     urls = ["/"] + [p["path"] for p in posts] + [p["path"] for p in pages] + [c["path"] for c in site["categories"].values()]
     write(os.path.join(OUT, "sitemap.xml"), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
           + "".join(f"<url><loc>{SITE_URL}{esc(u)}</loc></url>\n" for u in urls) + "</urlset>\n")
-    write(os.path.join(OUT, "robots.txt"), f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n")
+    write(os.path.join(OUT, "robots.txt"), f"User-agent: *\nDisallow: /admin/\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n")
+
+    # админка: страница + список записей для неё
+    shutil.copytree(os.path.join(ROOT, "admin"), os.path.join(OUT, "admin"), dirs_exist_ok=True)
+    row = lambda p: {"file": p["_file"], "title": p["title"], "date": p.get("date", ""), "path": p["path"], "categories": p.get("categories", [])}
+    json.dump({"posts": [row(p) for p in posts], "pages": [row(p) for p in pages], "categories": site["categories"]},
+              open(os.path.join(OUT, "data", "admin.json"), "w", encoding="utf-8"), ensure_ascii=False)
+    # адрес облачной функции (подставляется при выкладке в Яндекс Облако)
+    api = os.environ.get("HA_API_URL", "").strip()
+    if api:
+        write(os.path.join(OUT, "assets", "config.js"),
+              "window.HA_CONFIG = " + json.dumps({"API_URL": api, "FORMS_ENDPOINT": api + "?a=form"}) + ";\n")
 
     # 7. отчёт о недостающих файлах
     missing = set()
