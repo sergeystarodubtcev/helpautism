@@ -61,7 +61,25 @@ jobs:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
         run: |
           set -e
-          printf '%s' "$YC_SA_KEY" > "$RUNNER_TEMP/key.json"
+          # ключ мог вставиться без фигурных скобок или с лишними пробелами — чиним и проверяем поля (значения не печатаются)
+          python3 - "$RUNNER_TEMP/key.json" <<'PY'
+          import json, os, sys
+          s = os.environ["YC_SA_KEY"].strip().lstrip("﻿")
+          doc = None
+          for cand in (s, "{" + s + "}", "{" + s.rstrip(",") + "}", "{" + s.strip("{}").strip().rstrip(",") + "}"):
+              try:
+                  doc = json.loads(cand); break
+              except Exception:
+                  pass
+          if not isinstance(doc, dict):
+              sys.exit("::error::Секрет YC_SA_KEY — не JSON. Вставьте содержимое файла authorized_key.json целиком, от { до }.")
+          need = ["id", "service_account_id", "private_key"]
+          miss = [k for k in need if not doc.get(k)]
+          print("Поля ключа:", ", ".join(sorted(doc)))
+          if miss:
+              sys.exit("::error::В ключе YC_SA_KEY не хватает полей: " + ", ".join(miss) + ". Скопируйте файл authorized_key.json целиком.")
+          json.dump(doc, open(sys.argv[1], "w"))
+          PY
           yc config profile create ci >/dev/null 2>&1 || true
           yc config set service-account-key "$RUNNER_TEMP/key.json"
           yc config set folder-id "$YC_FOLDER_ID"
