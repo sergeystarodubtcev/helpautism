@@ -98,6 +98,14 @@ jobs:
           echo "HA_API_URL=https://functions.yandexcloud.net/$ID" >> "$GITHUB_ENV"
           echo "Функция: https://functions.yandexcloud.net/$ID"
           rm -f "$RUNNER_TEMP/key.json"
+      - name: Check function
+        if: steps.check.outputs.skip != '1' && steps.check.outputs.func == '1'
+        run: |
+          sleep 5
+          A=$(curl -s -o /tmp/a.json -w "%{http_code}" -X POST "$HA_API_URL?a=login" -H 'Content-Type: application/json' -d '{"password":"__wrong__"}'); echo "login с неверным паролем: $A $(cat /tmp/a.json)"
+          B=$(curl -s -o /tmp/b.json -w "%{http_code}" "$HA_API_URL?a=ping"); echo "ping без токена: $B $(cat /tmp/b.json)"
+          [ "$A" = 403 ] && [ "$B" = 401 ] || { echo "::error::Функция отвечает не так, как ожидалось"; exit 1; }
+          echo "Функция работает"
 
       # ---------- сайт ----------
       - name: Build site
