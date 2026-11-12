@@ -1,52 +1,219 @@
-/* Анимации поверх оригинального дизайна helpautism.ru */
+/* «Искра надежды» — анимации и интерактив поверх оригинального сайта */
 (function () {
+  "use strict";
   var reduced = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var sel = [
-    "section .section-header", ".pt-cv-content-item", ".one-client", ".focus-box", ".team-member",
-    ".our-job .col-md-4", ".our-job .col-lg-4", "#footer .col-md-4", "#footer .col-md-3",
-    ".site-main article", ".widget", ".master-slider-parent"
-  ].join(",");
-  function reveal() {
-    var els = document.querySelectorAll(sel);
-    if (reduced || !("IntersectionObserver" in window)) return;
-    var io = new IntersectionObserver(function (es) {
-      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("ha-in"); io.unobserve(e.target); } });
-    }, { threshold: 0.1, rootMargin: "0px 0px -30px 0px" });
-    var groups = new Map();
-    els.forEach(function (el) {
-      var r = el.getBoundingClientRect();
-      if (r.top < innerHeight) return;                // уже видимое не прячем
-      var p = el.parentNode, i = groups.get(p) || 0; groups.set(p, i + 1);
-      el.style.setProperty("--ha-d", Math.min(i, 6) * 0.08 + "s");
-      el.classList.add("ha-reveal"); io.observe(el);
-    });
-  }
-  function topButton() {
-    var b = document.createElement("button");
-    b.className = "ha-top"; b.setAttribute("aria-label", "Наверх"); b.innerHTML = "&#8593;";
-    b.onclick = function () { window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" }); };
-    document.body.appendChild(b);
-    var on = function () {
-      document.body.classList.toggle("ha-scrolled", scrollY > 20);
-      b.classList.toggle("ha-show", scrollY > 600);
-    };
-    addEventListener("scroll", on, { passive: true }); on();
-  }
-  // картинки, которых нет в веб-архиве: превью -> логотип организации, остальное скрываем
+  var finePointer = window.matchMedia && matchMedia("(hover: hover) and (pointer: fine)").matches;
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+
+  /* ---------- картинки, которых нет в веб-архиве ---------- */
   function brokenImages() {
-    var logo = document.querySelector(".navbar-brand img, .site-logo img, header img");
+    var logo = $(".navbar-brand img");
     var logoSrc = logo ? logo.src : "";
     function handle(img) {
       if (img.dataset.haFixed) return; img.dataset.haFixed = "1";
-      var thumb = img.closest(".pt-cv-thumbnail, .pt-cv-href-thumbnail, .post-img-wrap, .wp-post-image, .pt-cv-ifield") || /thumbnail|wp-post-image/.test(img.className);
+      var thumb = img.closest(".pt-cv-ifield, .post-img-wrap") || /thumbnail|wp-post-image/.test(img.className);
       if (thumb && logoSrc && img.src !== logoSrc) { img.src = logoSrc; img.classList.add("ha-placeholder"); }
-      else img.style.display = "none";
+      else {
+        var g = img.closest(".ha-gallery__item");
+        (g || img).style.display = "none";
+      }
     }
-    document.querySelectorAll("img").forEach(function (img) {
-      if (img.complete && img.naturalWidth === 0 && img.getAttribute("src")) handle(img);
-    });
+    $$("img").forEach(function (img) { if (img.complete && img.naturalWidth === 0 && img.getAttribute("src")) handle(img); });
     window.addEventListener("error", function (e) { if (e.target && e.target.tagName === "IMG") handle(e.target); }, true);
   }
-  function start() { brokenImages(); reveal(); topButton(); }
+
+  /* ---------- шапка, прогресс, «наверх» ---------- */
+  function chrome() {
+    var bar = document.createElement("div"); bar.className = "ha-progress"; document.body.appendChild(bar);
+    var top = document.createElement("button"); top.className = "ha-top"; top.setAttribute("aria-label", "Наверх"); top.innerHTML = "&#8593;";
+    top.onclick = function () { window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" }); };
+    document.body.appendChild(top);
+    var ticking = false;
+    var nav = $("#main-nav");
+    function navH() { if (nav) document.documentElement.style.setProperty("--ha-nav-h", nav.offsetHeight + "px"); }
+    navH(); addEventListener("resize", navH, { passive: true }); addEventListener("load", navH);
+    function update() {
+      ticking = false;
+      var y = window.scrollY || window.pageYOffset, h = document.documentElement.scrollHeight - innerHeight;
+      document.body.classList.toggle("ha-scrolled", y > 30);
+      top.classList.toggle("ha-show", y > 700);
+      bar.style.transform = "scaleX(" + (h > 0 ? y / h : 0) + ")";
+    }
+    addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+    update();
+  }
+
+  /* ---------- мобильное меню: раскрывающиеся подменю ---------- */
+  function mobileMenu() {
+    $$("#site-navigation li.menu-item-has-children").forEach(function (li) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "ha-sub-toggle"; b.setAttribute("aria-label", "Открыть подменю"); b.innerHTML = "&#9662;";
+      b.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); li.classList.toggle("ha-open"); });
+      var a = li.querySelector(":scope > a"); if (a) a.after(b);
+    });
+    // закрывать меню после перехода по ссылке
+    $$("#site-navigation a").forEach(function (a) {
+      a.addEventListener("click", function () {
+        var t = $(".navbar-toggle"); var c = $("#site-navigation");
+        if (t && c && c.classList.contains("in") && a.getAttribute("href") && a.getAttribute("href").charAt(0) === "#") t.click();
+      });
+    });
+  }
+
+  /* ---------- партнёры: бегущая лента ---------- */
+  function marquee() {
+    var list = $(".client-list"); if (!list) return;
+    var items = $$(".client-list > *, .client-list .one-client").filter(function (el) { return el.tagName === "A" || el.tagName === "IMG" || el.querySelector("img"); });
+    var top = $$(":scope > *", list); if (!top.length) return;
+    var track = document.createElement("div"); track.className = "ha-marquee";
+    top.forEach(function (el) { track.appendChild(el); });
+    if (!reduced) top.forEach(function (el) { var c = el.cloneNode(true); c.setAttribute("aria-hidden", "true"); track.appendChild(c); });
+    list.appendChild(track);
+    var n = top.length; track.style.animationDuration = Math.max(20, n * 3) + "s";
+    void items;
+  }
+
+  /* ---------- плавное появление блоков ---------- */
+  function reveal() {
+    if (reduced || !("IntersectionObserver" in window)) return;
+    var sel = [
+      "section .section-header", ".pt-cv-ifield", ".focus-box", ".team-member", ".our-job .mk > div",
+      ".purchase-now .btn", "#footer .container.hundred > div", ".site-main article", ".ha-gallery__item",
+      ".nav-links > div", ".ha-notice", ".our-clients"
+    ].join(",");
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("ha-in"); io.unobserve(e.target); } });
+    }, { threshold: 0.08, rootMargin: "0px 0px -40px 0px" });
+    var groups = new Map();
+    $$(sel).forEach(function (el) {
+      var r = el.getBoundingClientRect();
+      if (r.top < innerHeight * 0.95) return;          // то, что уже на экране, не прячем
+      var p = el.parentNode, i = groups.get(p) || 0; groups.set(p, i + 1);
+      el.style.setProperty("--ha-d", Math.min(i, 5) * 0.09 + "s");
+      el.classList.add("ha-reveal"); io.observe(el);
+    });
+    // страховка: если что-то не сработало, через 4 секунды после прокрутки до блока он всё равно появится
+    setTimeout(function () {
+      $$(".ha-reveal:not(.ha-in)").forEach(function (el) { if (el.getBoundingClientRect().top < innerHeight) el.classList.add("ha-in"); });
+    }, 4000);
+  }
+
+  /* ---------- искры на первом экране ---------- */
+  function sparks() {
+    var header = $(".ha-home .header"); if (!header || reduced) return;
+    var cv = document.createElement("canvas"); cv.className = "ha-sparks"; header.insertBefore(cv, header.firstChild);
+    var ctx = cv.getContext("2d"), dpr = Math.min(2, window.devicePixelRatio || 1), W, H, pts = [], running = true;
+    var colors = ["255,194,61", "255,138,92", "236,90,76", "79,179,246", "255,255,255"];
+    function spawn(p, initial) {
+      p.x = Math.random() * W; p.y = initial ? Math.random() * H : H + 10;
+      p.r = Math.random() * 2.2 + .6; p.vy = -(Math.random() * .6 + .25); p.vx = (Math.random() - .5) * .3;
+      p.life = 0; p.max = 260 + Math.random() * 320; p.c = colors[(Math.random() * colors.length) | 0]; p.tw = Math.random() * 6.28;
+      return p;
+    }
+    function resize() {
+      W = header.clientWidth; H = header.clientHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      var n = Math.round(Math.min(90, W * H / 14000)); pts = []; for (var i = 0; i < n; i++) pts.push(spawn({}, true));
+    }
+    resize(); addEventListener("resize", resize, { passive: true });
+    new IntersectionObserver(function (e) { running = e[0].isIntersecting; if (running) requestAnimationFrame(tick); }).observe(header);
+    function tick() {
+      if (!running) return;
+      ctx.clearRect(0, 0, W, H);
+      ctx.globalCompositeOperation = "lighter";
+      for (var i = 0; i < pts.length; i++) {
+        var p = pts[i]; p.life++; p.x += p.vx + Math.sin((p.life + p.tw * 50) / 60) * .15; p.y += p.vy; p.tw += .05;
+        var a = Math.sin(Math.PI * p.life / p.max) * (.55 + .45 * Math.sin(p.tw));
+        if (p.life > p.max || p.y < -10) spawn(p, false);
+        var g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 5);
+        g.addColorStop(0, "rgba(" + p.c + "," + (a * .9) + ")"); g.addColorStop(1, "rgba(" + p.c + ",0)");
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 5, 0, 6.283); ctx.fill();
+      }
+      ctx.globalCompositeOperation = "source-over";
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    // лёгкий параллакс фона при прокрутке
+    addEventListener("scroll", function () {
+      var y = Math.min(window.scrollY, H); header.style.setProperty("--ha-par", y * .25 + "px");
+    }, { passive: true });
+  }
+
+  /* ---------- наклон карточек за курсором (компьютер) ---------- */
+  function tilt() {
+    if (reduced || !finePointer) return;
+    $$(".pt-cv-ifield, .focus-box, .team-member, .our-job .mk > div").forEach(function (el) {
+      el.addEventListener("pointermove", function (e) {
+        var r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+        el.style.transform = "perspective(900px) rotateX(" + (-y * 5) + "deg) rotateY(" + (x * 6) + "deg) translateY(-8px)";
+      });
+      el.addEventListener("pointerleave", function () { el.style.transform = ""; });
+    });
+    // «магнитные» кнопки
+    $$(".header-content-wrap .btn, .purchase-now .btn").forEach(function (b) {
+      b.addEventListener("pointermove", function (e) {
+        var r = b.getBoundingClientRect();
+        b.style.transform = "translate(" + ((e.clientX - r.left - r.width / 2) * .15) + "px," + ((e.clientY - r.top - r.height / 2) * .25 - 3) + "px)";
+      });
+      b.addEventListener("pointerleave", function () { b.style.transform = ""; });
+    });
+  }
+
+  /* ---------- просмотр фото на весь экран ---------- */
+  function lightbox() {
+    var links = $$(".ha-gallery__item, .entry-content a[href$='.jpg'], .entry-content a[href$='.jpeg'], .entry-content a[href$='.png'], .entry-content a[href$='.JPG']");
+    if (!links.length) return;
+    var box = document.createElement("div"); box.className = "ha-lightbox";
+    box.innerHTML = '<img alt=""><button class="ha-lb-close" aria-label="Закрыть">&times;</button><button class="ha-lb-prev" aria-label="Назад">&#8249;</button><button class="ha-lb-next" aria-label="Вперёд">&#8250;</button>';
+    document.body.appendChild(box);
+    var img = box.querySelector("img"), idx = 0;
+    var visible = function () { return links.filter(function (a) { return a.offsetParent !== null; }); };
+    function show(i) { var v = visible(); if (!v.length) return; idx = (i + v.length) % v.length; img.src = v[idx].getAttribute("href"); box.classList.add("is-open"); }
+    function close() { box.classList.remove("is-open"); }
+    links.forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); show(visible().indexOf(a)); }); });
+    box.querySelector(".ha-lb-close").onclick = close;
+    box.querySelector(".ha-lb-prev").onclick = function (e) { e.stopPropagation(); show(idx - 1); };
+    box.querySelector(".ha-lb-next").onclick = function (e) { e.stopPropagation(); show(idx + 1); };
+    box.addEventListener("click", function (e) { if (e.target === box) close(); });
+    addEventListener("keydown", function (e) {
+      if (!box.classList.contains("is-open")) return;
+      if (e.key === "Escape") close(); if (e.key === "ArrowLeft") show(idx - 1); if (e.key === "ArrowRight") show(idx + 1);
+    });
+    var sx = 0; box.addEventListener("touchstart", function (e) { sx = e.touches[0].clientX; }, { passive: true });
+    box.addEventListener("touchend", function (e) { var d = e.changedTouches[0].clientX - sx; if (Math.abs(d) > 50) show(idx + (d < 0 ? 1 : -1)); });
+  }
+
+  /* ---------- кнопки «Поделиться» ---------- */
+  function share() {
+    var content = $(".single .entry-content, .page .entry-content"); if (!content || $(".ha-share")) return;
+    var url = encodeURIComponent(location.href), title = encodeURIComponent(document.title);
+    var el = document.createElement("div"); el.className = "ha-share";
+    el.innerHTML = "<span>Поделиться</span>" +
+      '<a class="vk" target="_blank" rel="noopener" href="https://vk.com/share.php?url=' + url + '&title=' + title + '">ВКонтакте</a>' +
+      '<a class="tg" target="_blank" rel="noopener" href="https://t.me/share/url?url=' + url + '&text=' + title + '">Telegram</a>' +
+      '<a class="wa" target="_blank" rel="noopener" href="https://wa.me/?text=' + title + '%20' + url + '">WhatsApp</a>' +
+      '<a class="ok" target="_blank" rel="noopener" href="https://connect.ok.ru/offer?url=' + url + '&title=' + title + '">Одноклассники</a>';
+    content.appendChild(el);
+  }
+
+  /* ---------- плавный переход между страницами ---------- */
+  function transitions() {
+    if (reduced) return;
+    document.addEventListener("click", function (e) {
+      var a = e.target.closest && e.target.closest("a"); if (!a) return;
+      var href = a.getAttribute("href") || "";
+      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || a.target === "_blank" || a.hasAttribute("download")) return;
+      if (!href || href.charAt(0) === "#" || /^(mailto:|tel:|javascript:)/.test(href) || a.closest(".ha-lightbox, .ha-gallery")) return;
+      if (a.host && a.host !== location.host) return;
+      if (/\.(jpe?g|png|gif|pdf|docx?|xlsx?)$/i.test(href)) return;
+      e.preventDefault(); document.body.classList.add("ha-page-out");
+      setTimeout(function () { location.href = a.href; }, 220);
+    });
+    addEventListener("pageshow", function () { document.body.classList.remove("ha-page-out"); });
+  }
+
+  function start() {
+    brokenImages(); chrome(); mobileMenu(); marquee(); sparks(); share(); lightbox(); reveal(); tilt(); transitions();
+  }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
 })();

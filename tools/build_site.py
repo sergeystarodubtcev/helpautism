@@ -114,8 +114,10 @@ def inject_enhance(text, rel):
     text = text.replace("</head>", f'<link rel="stylesheet" href="{fonts}">\n</head>', 1)
     text = re.sub(r"(?:https?:)?//ajax\.googleapis\.com/ajax/libs/jquery/3\.1\.0/jquery\.min\.js", relurl(rel, "/assets/vendor/jquery-3.1.0.min.js"), text)
     css = relurl(rel, "/assets/enhance.css")
+    modern = relurl(rel, "/assets/modern.css")
     js = relurl(rel, "/assets/enhance.js")
-    text = text.replace("</head>", f'<link rel="stylesheet" href="{css}">\n</head>', 1)
+    text = text.replace("</head>", f'<link rel="stylesheet" href="{css}">\n<link rel="stylesheet" href="{modern}">\n'
+                                   '<meta name="theme-color" content="#1f7fd1">\n</head>', 1)
     text = re.sub(r"</body>", f'<script src="{js}" defer></script>\n</body>', text, count=1, flags=re.I)
     return text
 
@@ -139,6 +141,61 @@ def fix_thumbs(text, rel):
         return m.group(0)
     text = THUMB_RE.sub(fix, text)
     return re.sub(r"""\s+srcset=["'][^"']*["']""", "", text)  # srcset ссылается на отсутствующие размеры
+
+
+MS_BLOCK_RE = re.compile(r"(?is)<!--\s*MasterSlider\s*-->.*?<!--\s*END MasterSlider\s*-->")
+
+
+def _exists(base_dir, url):
+    return os.path.exists(os.path.normpath(os.path.join(base_dir, urllib.parse.unquote(url))))
+
+
+def modernize(text, rel):
+    """Чистка тяжёлых/сломанных частей WordPress и подготовка к новому оформлению."""
+    base_dir = os.path.dirname(os.path.join(OUT, rel))
+    # 1. прелоадер с крутящимся кругом
+    text = re.sub(r'(?is)<div class="preloader">\s*<div class="status">.*?</div>\s*</div>', "", text)
+    # 2. анимация темы, прятавшая блоки (scrollReveal) — заменена своей
+    text = re.sub(r"(?is)<script[^>]+scrollReveal\.js[^>]*>\s*</script>", "", text)
+    text = re.sub(r'\sdata-scrollreveal="[^"]*"', "", text)
+    # 3. виджет UpToLike (на телефоне растягивался на весь экран) — свои кнопки «Поделиться» в enhance.js
+    text = re.sub(r"(?is)<script[^>]*>\s*\(function\(w,doc\)\s*\{\s*if \(!w\.__utlWdgt.*?</script>", "", text)
+    text = re.sub(r'(?is)<div[^>]*class="[^"]*uptolike-buttons[^"]*"[^>]*>\s*</div>', "", text)
+    # 4. всплывающее окно EventON (кнопка «X» внизу страницы)
+    text = re.sub(r'(?is)<div class=[\'"]evo_lightbox.*?</div>\s*</div>\s*</div>\s*</div>', "", text)
+
+    # 5. слайдеры MasterSlider -> сетка фото / карточка с текстом
+    def ms(m):
+        block = m.group(0)
+        imgs = []
+        for src in re.findall(r'data-src="([^"]+)"', block):
+            for cand in (src, re.sub(r"-scaled(\.\w+)$", r"\1", src), re.sub(r"-\d+x\d+(\.\w+)$", r"\1", src)):
+                if _exists(base_dir, cand):
+                    imgs.append(cand)
+                    break
+        infos = [re.sub(r"<[^>]+>", "", x).strip() for x in re.findall(r'(?is)<div class="ms-info">(.*?)</div>', block)]
+        out = ""
+        if imgs:
+            out += '<div class="ha-gallery">' + "".join(f'<a href="{u}" class="ha-gallery__item"><img src="{u}" alt="" loading="lazy"></a>' for u in imgs) + "</div>"
+        infos = [x for x in infos if x]
+        if infos:
+            out += "".join(f'<div class="ha-notice"><p>{x}</p></div>' for x in infos)
+        return out
+    text = MS_BLOCK_RE.sub(ms, text)
+    text = re.sub(r"(?is)<script>\s*\(function\s*\(\s*\$\s*\)\s*\{[^<]*?new MasterSlider\(\).*?</script>", "", text)
+    text = re.sub(r"(?is)<script[^>]+master-slider[^>]*>\s*</script>", "", text)
+    text = re.sub(r"(?is)<link[^>]+(?:master-slider|msl-)[^>]*>", "", text)
+
+    # 6. главная: заголовок первого экрана
+    if rel == "index.html":
+        hero = ('<div class="ha-hero">'
+                '<span class="ha-hero__eyebrow">ВРООИ · Воронеж</span>'
+                '<h1 class="ha-hero__title"><span>Искра</span> <span>надежды</span></h1>'
+                '<p class="ha-hero__lead">Помогаем детям и взрослым с аутизмом и их семьям: занятия, поддержка родителей, '
+                'правовая помощь, инклюзивные проекты.</p></div>')
+        text = re.sub(r'(<div class="header-content-wrap"><div class="container">)', r"\1" + hero.replace("\\", "\\\\"), text, count=1)
+        text = text.replace('<body class="home', '<body class="ha-home home', 1)
+    return text
 
 
 def extract_article(text):
@@ -220,6 +277,7 @@ def main():
         txt = localize(txt, rel)
         txt = inject_enhance(txt, rel)
         txt = fix_thumbs(txt, rel)
+        txt = modernize(txt, rel)
         write(os.path.join(OUT, rel), txt)
         m = re.match(r"(\d{4})/(\d\d)/(\d\d)/([^/]+)/index\.html$", rel)
         if m:
@@ -229,7 +287,7 @@ def main():
     # 2. своё: анимации, 404, служебное
     for sub in ("fonts", "vendor"):
         shutil.copytree(os.path.join(ROOT, "assets", sub), os.path.join(OUT, "assets", sub), dirs_exist_ok=True)
-    for f in ("enhance.css", "enhance.js"):
+    for f in ("enhance.css", "enhance.js", "modern.css"):
         shutil.copy2(os.path.join(ROOT, "assets", f), os.path.join(OUT, "assets", f))
     if os.path.exists(os.path.join(ROOT, "CNAME")):
         shutil.copy2(os.path.join(ROOT, "CNAME"), OUT)

@@ -1,51 +1,8 @@
-/* Анимации поверх оригинального дизайна helpautism.ru (тема Zerif Lite). Цвета и вёрстку не меняем. */
+/* Базовые служебные стили (основное оформление — modern.css) */
 html { scroll-behavior: smooth; }
-body { animation: ha-page-in .6s ease both; }
-@keyframes ha-page-in { from { opacity: 0; } to { opacity: 1; } }
-
-/* появление блоков при прокрутке */
-.ha-reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1); transition-delay: var(--ha-d, 0s); }
-.ha-reveal.ha-in { opacity: 1; transform: none; }
-
-/* шапка: мягкая тень при прокрутке */
-#main-nav { transition: box-shadow .3s ease, background-color .3s ease; }
-body.ha-scrolled #main-nav { box-shadow: 0 6px 24px rgba(0,0,0,.12); }
-
-/* пункты меню: подчёркивание */
-#site-navigation .nav > li > a { position: relative; }
-#site-navigation .nav > li > a::after { content: ""; position: absolute; left: 15px; right: 15px; bottom: 8px; height: 2px; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform .3s ease; opacity: .7; }
-#site-navigation .nav > li > a:hover::after { transform: scaleX(1); }
-#site-navigation .sub-menu, #site-navigation .dropdown-menu { animation: ha-drop .25s ease both; }
-@keyframes ha-drop { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
-
-/* карточки новостей */
-.pt-cv-content-item, .pt-cv-ifield { transition: transform .35s ease, box-shadow .35s ease; }
-.pt-cv-content-item:hover { transform: translateY(-6px); box-shadow: 0 14px 30px rgba(0,0,0,.15); }
-.pt-cv-thumbnail, .entry-content img, .our-team img, .team-member img { transition: transform .5s ease, filter .5s ease; }
-.pt-cv-content-item:hover .pt-cv-thumbnail { transform: scale(1.04); }
-
-/* логотипы партнёров */
-.one-client { transition: transform .35s ease, filter .35s ease; filter: grayscale(.35); }
-.one-client:hover { transform: scale(1.08); filter: none; }
-
-/* кнопки */
-.btn, .pt-cv-readmore, input[type=submit], .button { transition: transform .25s ease, box-shadow .25s ease, background-color .25s ease !important; }
-.btn:hover, .pt-cv-readmore:hover, input[type=submit]:hover, .button:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(0,0,0,.18); }
-
-/* иконки «Занятия для детей» / «Родительский час» */
-.focus-box .service-icon, .team-member .profile-pic, .our-job img { transition: transform .5s cubic-bezier(.2,.7,.2,1); }
-.focus-box:hover .service-icon, .team-member:hover .profile-pic { transform: translateY(-6px) rotate(-3deg) scale(1.05); }
-
-/* кнопка «наверх» */
-.ha-top { padding: 0 !important; min-width: 0 !important; margin: 0 !important; position: fixed; right: 20px; bottom: 20px; z-index: 999; width: 46px !important; height: 46px !important; border-radius: 50% !important; border: 0; background: #e96656; color: #fff; font-size: 22px; line-height: 46px; text-align: center; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.25); opacity: 0; transform: translateY(20px); pointer-events: none; transition: opacity .3s, transform .3s; }
+.ha-top { padding: 0 !important; min-width: 0 !important; margin: 0 !important; position: fixed; right: 18px; bottom: 18px; z-index: 999;
+  width: 48px !important; height: 48px !important; border-radius: 50% !important; border: 0; color: #fff; font-size: 22px; line-height: 48px; text-align: center; cursor: pointer;
+  box-shadow: 0 10px 24px -8px rgba(0,0,0,.4); opacity: 0; transform: translateY(20px) scale(.8); pointer-events: none; transition: opacity .3s, transform .3s; }
 .ha-top.ha-show { opacity: 1; transform: none; pointer-events: auto; }
-.ha-top:hover { background: #cb4332; }
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation: none !important; transition: none !important; }
-  .ha-reveal { opacity: 1; transform: none; }
-  html { scroll-behavior: auto; }
-}
-
-/* заглушка вместо картинок, которых нет в архиве */
-img.ha-placeholder { object-fit: contain !important; background: #f4f6f8; padding: 18px; aspect-ratio: 4 / 3; width: 100%; height: auto; }
+img.ha-placeholder { object-fit: contain !important; padding: 18px; aspect-ratio: 4 / 3; width: 100%; height: auto; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
