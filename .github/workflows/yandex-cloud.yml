@@ -110,6 +110,8 @@ jobs:
       # ---------- сайт ----------
       - name: Build site
         if: steps.check.outputs.skip != '1'
+        env:
+          HA_FORCE_HTTPS: "1"   # сертификат на helpautism.ru выпущен — http перенаправляется на https
         run: python3 tools/build_site.py
       - name: Upload media and assets (only changed by size)
         if: steps.check.outputs.skip != '1'
