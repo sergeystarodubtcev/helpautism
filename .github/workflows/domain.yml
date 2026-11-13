@@ -59,6 +59,9 @@ jobs:
           import json, sys
           c = json.load(open(sys.argv[1]))
           print("STATUS", c.get("status", "?"), c.get("id", ""), file=sys.stderr)
+          print("Поля сертификата:", sorted(c.keys()), file=sys.stderr)
+          for ch in c.get("challenges", []):
+              print("  проверка:", json.dumps(ch, ensure_ascii=False)[:400], file=sys.stderr)
           for ch in c.get("challenges", []):
               d = ch.get("dns_challenge") or {}
               if d.get("name") and d.get("value"):

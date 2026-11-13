@@ -637,7 +637,7 @@ def main():
     if api:
         # на домене helpautism.ru — через api.helpautism.ru (адрес functions.yandexcloud.net режут мобильные операторы)
         write(os.path.join(OUT, "assets", "config.js"),
-              "(function () {\n  var api = /(^|\\.)helpautism\\.ru$/.test(location.hostname) ? \"https://api.helpautism.ru/\" : " + json.dumps(api) + ";\n"
+              "(function () {\n  if (location.protocol === \"http:\" && /(^|\\.)helpautism\\.ru$/.test(location.hostname)) { location.replace(\"https://\" + location.host + location.pathname + location.search + location.hash); }\n  var api = /(^|\\.)helpautism\\.ru$/.test(location.hostname) ? \"https://api.helpautism.ru/\" : " + json.dumps(api) + ";\n"
               "  window.HA_CONFIG = { API_URL: api, FORMS_ENDPOINT: api + \"?a=form\" };\n})();\n")
 
     # 7. отчёт о недостающих файлах
