@@ -45,6 +45,8 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
 .tabs button { border: 0; background: none; padding: 8px 16px; border-radius: 999px; font: 600 14px var(--head); cursor: pointer; color: var(--muted); }
 .tabs button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .toolbar input[type=search] { max-width: 320px; flex: 1; min-width: 180px; }
+.toolbar select.flt { width: auto; max-width: 220px; padding: 10px 12px; }
+.count { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
 .list { border-top: 1px solid var(--line); }
 .row { display: grid; grid-template-columns: 110px 1fr auto; gap: 14px; align-items: center; padding: 14px 4px; border-bottom: 1px solid var(--line); }
 .row .d { font-size: 13px; color: var(--muted); }
@@ -116,9 +118,12 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
     <div class="toolbar">
       <div class="tabs"><button data-t="post" class="on">Новости</button><button data-t="page">Страницы</button></div>
       <input type="search" id="q" placeholder="Поиск по заголовку">
+      <select id="f-cat" class="flt"><option value="">Все рубрики</option></select>
+      <select id="f-year" class="flt"><option value="">Все годы</option></select>
       <span class="spacer"></span>
       <button class="btn" id="b-new">+ Новая запись</button>
     </div>
+    <p class="count" id="count"></p>
     <div id="pending" class="pending hidden"></div>
     <div class="list" id="list"></div>
     <div class="pager" id="pager"></div>
@@ -186,7 +191,7 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
   var token = sessionStorage.getItem("ha_token") || "";
   var DATA = { posts: [], pages: [], categories: {} };
-  var state = { tab: "post", q: "", page: 1, file: "", doc: null, cover: "", gallery: [] };
+  var state = { tab: "post", q: "", cat: "", year: "", page: 1, file: "", doc: null, cover: "", gallery: [] };
   var pending = JSON.parse(localStorage.getItem("ha_pending") || "{}");
   var PER = 30;
 
@@ -231,7 +236,7 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
   }
   function start() {
     $("#v-login").classList.add("hidden"); $("#v-app").classList.remove("hidden");
-    loadData().then(function () { renderCats(); route(); }).catch(function () { toast("Не удалось загрузить список записей", true); });
+    loadData().then(function () { renderCats(); fillFilters(); route(); }).catch(function () { toast("Не удалось загрузить список записей", true); });
   }
 
   /* ---------- список ---------- */
@@ -246,6 +251,11 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
     });
     var q = state.q.trim().toLowerCase();
     if (q) arr = arr.filter(function (x) { return (x.title || "").toLowerCase().indexOf(q) >= 0; });
+    if (state.tab === "post" && state.cat) {
+      var group = [state.cat].concat(Object.keys(DATA.categories).filter(function (c) { return DATA.categories[c].parent === state.cat; }));
+      arr = arr.filter(function (x) { return (x.categories || []).some(function (c) { return group.indexOf(c) >= 0; }); });
+    }
+    if (state.tab === "post" && state.year) arr = arr.filter(function (x) { return (x.date || "").slice(0, 4) === state.year; });
     if (state.tab === "post") arr.sort(function (a, b) { return (b.date || "").localeCompare(a.date || ""); });
     else arr.sort(function (a, b) { return (a.title || "").localeCompare(b.title || "", "ru"); });
     return arr;
@@ -254,14 +264,22 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
     var arr = items(), pages = Math.max(1, Math.ceil(arr.length / PER));
     if (state.page > pages) state.page = pages;
     var chunk = arr.slice((state.page - 1) * PER, state.page * PER);
+    var total = (state.tab === "post" ? DATA.posts : DATA.pages).length;
+    $("#count").textContent = (state.tab === "post" ? "Новостей: " : "Страниц: ") + total +
+      (arr.length !== total ? " · найдено: " + arr.length : "") + (pages > 1 ? " · страница " + state.page + " из " + pages : "");
+    $$(".flt").forEach(function (el) { el.classList.toggle("hidden", state.tab !== "post"); });
     $("#list").innerHTML = chunk.map(function (x) {
       var cats = (x.categories || []).map(function (c) { return (DATA.categories[c] || {}).name || c; }).join(", ");
       return '<div class="row"><span class="d">' + esc(x.date ? x.date.split("-").reverse().join(".") : "") + (x.fresh ? " · сохранено" : "") + '</span>' +
         '<span class="t" data-f="' + esc(x.file) + '">' + esc(x.title) + (cats ? '<span class="c">' + esc(cats) + "</span>" : "") + "</span>" +
         '<span class="acts"><a class="btn ghost small" target="_blank" href="..' + esc(x.path) + '">Открыть</a><button class="btn small" data-f="' + esc(x.file) + '">Изменить</button></span></div>';
     }).join("") || '<p style="padding:30px 0;color:var(--muted)">Ничего не найдено</p>';
-    $("#pager").innerHTML = pages > 1 ? Array.from({ length: pages }, function (_, i) {
-      return '<button class="btn small ' + (i + 1 === state.page ? "" : "ghost") + '" data-p="' + (i + 1) + '">' + (i + 1) + "</button>"; }).join("") : "";
+    var btns = [];
+    for (var k = 1; k <= pages; k++) {
+      if (k === 1 || k === pages || Math.abs(k - state.page) <= 2) btns.push('<button class="btn small ' + (k === state.page ? "" : "ghost") + '" data-p="' + k + '">' + k + "</button>");
+      else if (btns[btns.length - 1] !== "…") btns.push("…");
+    }
+    $("#pager").innerHTML = pages > 1 ? btns.map(function (b) { return b === "…" ? '<span style="align-self:center">…</span>' : b; }).join("") : "";
     var n = Object.keys(pending).length;
     $("#pending").classList.toggle("hidden", !n);
     $("#pending").textContent = n ? "Недавние изменения (" + n + ") публикуются — сайт обновится через 2–3 минуты." : "";
@@ -270,6 +288,16 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
   $("#pager").addEventListener("click", function (e) { var b = e.target.closest("[data-p]"); if (b) { state.page = +b.dataset.p; renderList(); scrollTo(0, 0); } });
   $$(".tabs button").forEach(function (b) { b.onclick = function () { $$(".tabs button").forEach(function (x) { x.classList.toggle("on", x === b); }); state.tab = b.dataset.t; state.page = 1; renderList(); }; });
   $("#q").addEventListener("input", function () { state.q = this.value; state.page = 1; renderList(); });
+  $("#f-cat").addEventListener("change", function () { state.cat = this.value; state.page = 1; renderList(); });
+  $("#f-year").addEventListener("change", function () { state.year = this.value; state.page = 1; renderList(); });
+  function fillFilters() {
+    var cats = DATA.categories;
+    $("#f-cat").innerHTML = '<option value="">Все рубрики</option>' + Object.keys(cats).filter(function (c) { return !cats[c].parent; }).map(function (c) {
+      return '<option value="' + esc(c) + '">' + esc(cats[c].name) + "</option>" + Object.keys(cats).filter(function (x) { return cats[x].parent === c; })
+        .map(function (x) { return '<option value="' + esc(x) + '">— ' + esc(cats[x].name) + "</option>"; }).join(""); }).join("");
+    var years = {}; DATA.posts.forEach(function (p) { if (p.date) years[p.date.slice(0, 4)] = 1; });
+    $("#f-year").innerHTML = '<option value="">Все годы</option>' + Object.keys(years).sort().reverse().map(function (y) { return "<option>" + y + "</option>"; }).join("");
+  }
   $("#b-new").onclick = function () { location.hash = "#new-" + state.tab; };
 
   /* ---------- рубрики ---------- */
