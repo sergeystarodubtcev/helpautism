@@ -1,0 +1,141 @@
+name: Domain helpautism.ru (Yandex Cloud)
+
+# Настраивает домен в Яндекс Облаке. Можно запускать много раз — каждый запуск доделывает то, что ещё не готово:
+#  1. зона Cloud DNS helpautism.ru. и записи: почта (MX, SPF, DKIM — как были на Бегете), сайт, www, api
+#  2. сертификат Let's Encrypt (helpautism.ru, www, api) + записи для его проверки
+#  3. бакет www.helpautism.ru с перенаправлением на https://helpautism.ru
+#  4. API Gateway для админки и форм (api.helpautism.ru) — чтобы не зависеть от адреса functions.yandexcloud.net
+#  5. когда сертификат выпущен: HTTPS на бакетах и домен api.helpautism.ru на шлюзе
+# Нужно: секреты YC_SA_KEY, YC_S3_KEY_ID, YC_S3_SECRET; переменная YC_FOLDER_ID; у сервисного аккаунта роль editor (+ functions.admin).
+
+on:
+  workflow_dispatch:
+
+env:
+  ZONE: helpautism
+  DOMAIN: helpautism.ru
+  CERT: helpautism
+  GW: helpautism-api
+  FUNC: helpautism-api
+  AWS_ACCESS_KEY_ID: ${{ secrets.YC_S3_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.YC_S3_SECRET }}
+  AWS_DEFAULT_REGION: ru-central1
+  S3API: aws --endpoint-url=https://storage.yandexcloud.net s3api
+
+jobs:
+  domain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install and configure yc
+        env:
+          YC_SA_KEY: ${{ secrets.YC_SA_KEY }}
+          YC_FOLDER_ID: ${{ vars.YC_FOLDER_ID }}
+        run: |
+          curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash -s -- -i "$HOME/yc" -n
+          echo "$HOME/yc/bin" >> "$GITHUB_PATH"
+          export PATH="$HOME/yc/bin:$PATH"
+          python3 - "$RUNNER_TEMP/key.json" <<'PY'
+          import json, os, sys
+          s = os.environ["YC_SA_KEY"].strip().lstrip("﻿")
+          for cand in (s, "{" + s + "}", "{" + s.strip("{}").strip().rstrip(",") + "}"):
+              try:
+                  json.dump(json.loads(cand), open(sys.argv[1], "w")); break
+              except Exception:
+                  pass
+          PY
+          yc config profile create ci >/dev/null 2>&1 || true
+          yc config set service-account-key "$RUNNER_TEMP/key.json"
+          yc config set folder-id "$YC_FOLDER_ID"
+
+      - name: 1. DNS zone and records
+        run: |
+          set -e
+          yc dns zone get --name "$ZONE" >/dev/null 2>&1 || yc dns zone create --name "$ZONE" --zone "$DOMAIN." --public-visibility
+          rr() { yc dns zone replace-records --name "$ZONE" --record "$1" >/dev/null && echo "  ✓ $1" | cut -c1-110; }
+          echo "Почта (как на Бегете):"
+          rr "@ 3600 MX 10 mx.yandex.net."
+          rr '@ 3600 TXT "v=spf1 include:_spf.yandex.ru include:beget.com ~all"'
+          rr 'mail._domainkey 3600 TXT "v=DKIM1; k=rsa; t=s; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCTN9wPyDBvnRqqEEcN2AunDEuVyNQqhodzQIqHXATKDgKpstm3OMFB8fqAoIzlBucZVyCMZ6XkCOWARXtilY336iYb6SXZb7MAiClkyrUTUpW7eI/jTmqF6mu071CBJ+vNy+Gh+bRj4/42ipDm1i7vwhWPFePKoroPyG5KnLjNMQIDAQAB"'
+          echo "Сайт:"
+          rr "@ 600 ANAME $DOMAIN.website.yandexcloud.net."
+          rr "www 600 CNAME www.$DOMAIN.website.yandexcloud.net."
+
+      - name: 2. Certificate (Let's Encrypt)
+        id: cert
+        run: |
+          set -e
+          yc certificate-manager certificate get --name "$CERT" >/dev/null 2>&1 || \
+            yc certificate-manager certificate request --name "$CERT" --domains "$DOMAIN,www.$DOMAIN,api.$DOMAIN" --challenge dns >/dev/null
+          yc certificate-manager certificate get --name "$CERT" --full --format json > "$RUNNER_TEMP/cert.json" 2>/dev/null || \
+            yc certificate-manager certificate get --name "$CERT" --format json > "$RUNNER_TEMP/cert.json"
+          python3 - "$RUNNER_TEMP/cert.json" > "$RUNNER_TEMP/challenges.txt" <<'PY'
+          import json, sys
+          c = json.load(open(sys.argv[1]))
+          print("STATUS", c.get("status", "?"), c.get("id", ""), file=sys.stderr)
+          for ch in c.get("challenges", []):
+              d = ch.get("dns_challenge") or {}
+              if d.get("name") and d.get("value"):
+                  print(d.get("type", "CNAME"), d["name"], d["value"])
+          PY
+          STATUS=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("status",""))' "$RUNNER_TEMP/cert.json")
+          ID=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("id",""))' "$RUNNER_TEMP/cert.json")
+          echo "Сертификат $ID: $STATUS"
+          echo "status=$STATUS" >> "$GITHUB_OUTPUT"; echo "id=$ID" >> "$GITHUB_OUTPUT"
+          while read -r TYPE NAME VALUE; do
+            [ -z "$NAME" ] && continue
+            REL=${NAME%.$DOMAIN.}; REL=${REL%.$DOMAIN}
+            if [ "$TYPE" = "TXT" ]; then REC="$REL 600 TXT \"$VALUE\""; else REC="$REL 600 $TYPE $VALUE"; fi
+            yc dns zone replace-records --name "$ZONE" --record "$REC" >/dev/null && echo "  ✓ проверка: $REL $TYPE"
+          done < "$RUNNER_TEMP/challenges.txt"
+
+      - name: 3. www bucket -> redirect to https://helpautism.ru
+        run: |
+          $S3API head-bucket --bucket "www.$DOMAIN" 2>/dev/null || $S3API create-bucket --bucket "www.$DOMAIN"
+          $S3API put-bucket-website --bucket "www.$DOMAIN" --website-configuration "{\"RedirectAllRequestsTo\":{\"HostName\":\"$DOMAIN\",\"Protocol\":\"https\"}}"
+          echo "www.$DOMAIN -> https://$DOMAIN"
+
+      - name: 4. API Gateway (api.helpautism.ru)
+        id: gw
+        run: |
+          set -e
+          FID=$(yc serverless function get --name "$FUNC" --format json | python3 -c 'import json,sys;print(json.load(sys.stdin)["id"])')
+          cat > "$RUNNER_TEMP/spec.yaml" <<EOF
+          openapi: 3.0.0
+          info:
+            title: helpautism-api
+            version: 1.0.0
+          paths:
+            /:
+              x-yc-apigateway-any-method:
+                x-yc-apigateway-integration:
+                  type: cloud_functions
+                  function_id: $FID
+          EOF
+          if yc serverless api-gateway get --name "$GW" >/dev/null 2>&1; then
+            yc serverless api-gateway update --name "$GW" --spec "$RUNNER_TEMP/spec.yaml" >/dev/null
+          else
+            yc serverless api-gateway create --name "$GW" --spec "$RUNNER_TEMP/spec.yaml" >/dev/null
+          fi
+          GWDOM=$(yc serverless api-gateway get --name "$GW" --format json | python3 -c 'import json,sys;print(json.load(sys.stdin)["domain"])')
+          echo "Шлюз: https://$GWDOM/  (проверка: https://$GWDOM/?a=ping)"
+          echo "domain=$GWDOM" >> "$GITHUB_OUTPUT"
+          yc dns zone replace-records --name "$ZONE" --record "api 600 CNAME $GWDOM." >/dev/null && echo "  ✓ api CNAME $GWDOM"
+          curl -s -m 20 -o /tmp/p.json -w "  ping через шлюз: %{http_code}\n" "https://$GWDOM/?a=ping"; cat /tmp/p.json; echo
+
+      - name: 5. HTTPS (when certificate is issued)
+        if: steps.cert.outputs.status == 'ISSUED'
+        run: |
+          set -x
+          yc storage bucket set-https --name "$DOMAIN" --certificate-id "${{ steps.cert.outputs.id }}" || true
+          yc storage bucket set-https --name "www.$DOMAIN" --certificate-id "${{ steps.cert.outputs.id }}" || true
+          yc serverless api-gateway add-domain --name "$GW" --domain "api.$DOMAIN" --certificate-id "${{ steps.cert.outputs.id }}" || \
+            yc serverless api-gateway add-domain --name "$GW" --domain-id "${{ steps.cert.outputs.id }}" || true
+
+      - name: Summary
+        run: |
+          echo "NS сейчас у домена:"
+          curl -s "https://dns.google/resolve?name=$DOMAIN&type=NS" | python3 -c 'import json,sys;[print("  ",a["data"]) for a in json.load(sys.stdin).get("Answer",[])]'
+          echo "Сертификат: ${{ steps.cert.outputs.status }}"
+          echo "Если NS ещё бегетовские — у регистратора укажите ns1.yandexcloud.net и ns2.yandexcloud.net."
+          echo "Если сертификат не ISSUED — запустите этот workflow ещё раз через 30–60 минут после смены NS."
+          rm -f "$RUNNER_TEMP/key.json"

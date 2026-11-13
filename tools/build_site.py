@@ -635,8 +635,10 @@ def main():
     # адрес облачной функции (подставляется при выкладке в Яндекс Облако)
     api = os.environ.get("HA_API_URL", "").strip()
     if api:
+        # на домене helpautism.ru — через api.helpautism.ru (адрес functions.yandexcloud.net режут мобильные операторы)
         write(os.path.join(OUT, "assets", "config.js"),
-              "window.HA_CONFIG = " + json.dumps({"API_URL": api, "FORMS_ENDPOINT": api + "?a=form"}) + ";\n")
+              "(function () {\n  var api = /(^|\\.)helpautism\\.ru$/.test(location.hostname) ? \"https://api.helpautism.ru/\" : " + json.dumps(api) + ";\n"
+              "  window.HA_CONFIG = { API_URL: api, FORMS_ENDPOINT: api + \"?a=form\" };\n})();\n")
 
     # 7. отчёт о недостающих файлах
     missing = set()
