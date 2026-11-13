@@ -198,7 +198,7 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
     var url = API + "?a=" + action + (query || "");
     var ctrl = window.AbortController ? new AbortController() : null;
     var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 25000);
-    return fetch(url, { method: body ? "POST" : "GET", headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+    return fetch(url, { method: body ? "POST" : "GET", headers: token ? { "Content-Type": "application/json", "X-Admin-Token": token } : { "Content-Type": "application/json" },
       body: body ? JSON.stringify(body) : undefined, signal: ctrl ? ctrl.signal : undefined })
       .catch(function (err) {
         clearTimeout(timer);

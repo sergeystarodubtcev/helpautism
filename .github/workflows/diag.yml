@@ -15,14 +15,14 @@ jobs:
           echo "API: $API"
           echo "--- preflight (как делает браузер)"
           curl -s -o /dev/null -w "OPTIONS: %{http_code} за %{time_total}s\n" -X OPTIONS "$API?a=login" \
-            -H "Origin: http://helpautism.ru.website.yandexcloud.net" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: content-type,authorization" -D /tmp/h.txt
+            -H "Origin: http://helpautism.ru.website.yandexcloud.net" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: content-type,x-admin-token" -D /tmp/h.txt
           grep -i "access-control" /tmp/h.txt || echo "нет заголовков CORS"
           echo "--- вход с настоящим паролем"
           BODY=$(python3 -c 'import json,os;print(json.dumps({"password":os.environ["ADMIN_PASSWORD"]}))')
           curl -s -o /tmp/l.json -w "login: %{http_code} за %{time_total}s\n" -X POST "$API?a=login" -H "Content-Type: application/json" -H "Origin: http://helpautism.ru.website.yandexcloud.net" --data "$BODY"
           python3 -c 'import json;d=json.load(open("/tmp/l.json"));print("ответ:", "токен получен" if d.get("token") else d)'
           TOKEN=$(python3 -c 'import json;print(json.load(open("/tmp/l.json")).get("token",""))')
-          curl -s -o /tmp/p.json -w "ping с токеном: %{http_code} за %{time_total}s\n" "$API?a=ping" -H "Authorization: Bearer $TOKEN"
+          curl -s -o /tmp/p.json -w "ping с токеном: %{http_code} за %{time_total}s\n" "$API?a=ping" -H "X-Admin-Token: $TOKEN"
           cat /tmp/p.json; echo
           curl -s -o /dev/null -w "admin.json: %{http_code}\n" http://helpautism.ru.website.yandexcloud.net/data/admin.json
           echo "--- длина пароля в секрете: ${#ADMIN_PASSWORD} символов"

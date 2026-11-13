@@ -32,7 +32,7 @@ def cfg():
     return _cfg
 
 
-CORS = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type, Authorization",
+CORS = {"Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "Content-Type, X-Admin-Token",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Content-Type": "application/json; charset=utf-8"}
 
 
@@ -60,7 +60,8 @@ def make_token():
 
 def check_token(event):
     h = {k.lower(): v for k, v in (event.get("headers") or {}).items()}
-    tok = (h.get("authorization") or "").replace("Bearer ", "").strip()
+    # свой заголовок: «Authorization» Яндекс Облако принимает за IAM-токен и отклоняет запрос
+    tok = (h.get("x-admin-token") or "").strip()
     try:
         exp, sig = tok.split(".", 1)
         good = hmac.new(_key(), exp.encode(), hashlib.sha256).hexdigest()
