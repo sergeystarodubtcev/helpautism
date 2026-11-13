@@ -1,7 +1,7 @@
 name: Domain helpautism.ru (Yandex Cloud)
 
-# Настраивает домен в Яндекс Облаке. Можно запускать много раз — каждый запуск доделывает то, что ещё не готово:
-#  1. зона Cloud DNS helpautism.ru. и записи: почта (MX, SPF, DKIM — как были на Бегете), сайт, www, api
+# Настраивает домен в Яндекс Облаке. DNS остаётся на Бегете (NS не меняем) — в конце печатается,
+# какие записи добавить в DNS на Бегете. Можно запускать много раз — каждый запуск доделывает то, что ещё не готово:
 #  2. сертификат Let's Encrypt (helpautism.ru, www, api) + записи для его проверки
 #  3. бакет www.helpautism.ru с перенаправлением на https://helpautism.ru
 #  4. API Gateway для админки и форм (api.helpautism.ru) — чтобы не зависеть от адреса functions.yandexcloud.net
@@ -47,19 +47,6 @@ jobs:
           yc config set service-account-key "$RUNNER_TEMP/key.json"
           yc config set folder-id "$YC_FOLDER_ID"
 
-      - name: 1. DNS zone and records
-        run: |
-          set -e
-          yc dns zone get --name "$ZONE" >/dev/null 2>&1 || yc dns zone create --name "$ZONE" --zone "$DOMAIN." --public-visibility
-          rr() { yc dns zone replace-records --name "$ZONE" --record "$1" >/dev/null && echo "  ✓ $1" | cut -c1-110; }
-          echo "Почта (как на Бегете):"
-          rr "@ 3600 MX 10 mx.yandex.net."
-          rr '@ 3600 TXT "v=spf1 include:_spf.yandex.ru include:beget.com ~all"'
-          rr 'mail._domainkey 3600 TXT "v=DKIM1; k=rsa; t=s; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCTN9wPyDBvnRqqEEcN2AunDEuVyNQqhodzQIqHXATKDgKpstm3OMFB8fqAoIzlBucZVyCMZ6XkCOWARXtilY336iYb6SXZb7MAiClkyrUTUpW7eI/jTmqF6mu071CBJ+vNy+Gh+bRj4/42ipDm1i7vwhWPFePKoroPyG5KnLjNMQIDAQAB"'
-          echo "Сайт:"
-          rr "@ 600 ANAME $DOMAIN.website.yandexcloud.net."
-          rr "www 600 CNAME www.$DOMAIN.website.yandexcloud.net."
-
       - name: 2. Certificate (Let's Encrypt)
         id: cert
         run: |
@@ -81,13 +68,7 @@ jobs:
           ID=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("id",""))' "$RUNNER_TEMP/cert.json")
           echo "Сертификат $ID: $STATUS"
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"; echo "id=$ID" >> "$GITHUB_OUTPUT"
-          while read -r TYPE NAME VALUE; do
-            [ -z "$NAME" ] && continue
-            REL=${NAME%.$DOMAIN.}; REL=${REL%.$DOMAIN}
-            if [ "$TYPE" = "TXT" ]; then REC="$REL 600 TXT \"$VALUE\""; else REC="$REL 600 $TYPE $VALUE"; fi
-            yc dns zone replace-records --name "$ZONE" --record "$REC" >/dev/null && echo "  ✓ проверка: $REL $TYPE"
-          done < "$RUNNER_TEMP/challenges.txt"
-
+          cp "$RUNNER_TEMP/challenges.txt" "$RUNNER_TEMP/beget.txt"
       - name: 3. www bucket -> redirect to https://helpautism.ru
         run: |
           $S3API head-bucket --bucket "www.$DOMAIN" 2>/dev/null || $S3API create-bucket --bucket "www.$DOMAIN"
@@ -119,7 +100,6 @@ jobs:
           GWDOM=$(yc serverless api-gateway get --name "$GW" --format json | python3 -c 'import json,sys;print(json.load(sys.stdin)["domain"])')
           echo "Шлюз: https://$GWDOM/  (проверка: https://$GWDOM/?a=ping)"
           echo "domain=$GWDOM" >> "$GITHUB_OUTPUT"
-          yc dns zone replace-records --name "$ZONE" --record "api 600 CNAME $GWDOM." >/dev/null && echo "  ✓ api CNAME $GWDOM"
           curl -s -m 20 -o /tmp/p.json -w "  ping через шлюз: %{http_code}\n" "https://$GWDOM/?a=ping"; cat /tmp/p.json; echo
 
       - name: 5. HTTPS (when certificate is issued)
@@ -131,11 +111,19 @@ jobs:
           yc serverless api-gateway add-domain --name "$GW" --domain "api.$DOMAIN" --certificate-id "${{ steps.cert.outputs.id }}" || \
             yc serverless api-gateway add-domain --name "$GW" --domain-id "${{ steps.cert.outputs.id }}" || true
 
-      - name: Summary
+      - name: Summary — что добавить в DNS на Бегете
         run: |
-          echo "NS сейчас у домена:"
-          curl -s "https://dns.google/resolve?name=$DOMAIN&type=NS" | python3 -c 'import json,sys;[print("  ",a["data"]) for a in json.load(sys.stdin).get("Answer",[])]'
-          echo "Сертификат: ${{ steps.cert.outputs.status }}"
-          echo "Если NS ещё бегетовские — у регистратора укажите ns1.yandexcloud.net и ns2.yandexcloud.net."
-          echo "Если сертификат не ISSUED — запустите этот workflow ещё раз через 30–60 минут после смены NS."
+          echo "================ ДОБАВИТЬ / ИЗМЕНИТЬ В DNS НА БЕГЕТЕ ================"
+          echo "helpautism.ru (корень)   A      213.180.193.247   (заменить старую A-запись 45.130.41.125)"
+          echo "www                      A      213.180.193.247   (заменить старую)"
+          echo "api                      CNAME  ${{ steps.gw.outputs.domain }}"
+          while read -r TYPE NAME VALUE; do
+            [ -z "$NAME" ] && continue
+            REL=${NAME%.$DOMAIN.}; REL=${REL%.$DOMAIN}
+            echo "$REL   $TYPE   $VALUE"
+          done < "$RUNNER_TEMP/beget.txt"
+          echo "MX / TXT (почта) — НЕ ТРОГАТЬ"
+          echo "====================================================================="
+          echo "Сертификат: ${{ steps.cert.outputs.status }}  (после добавления записей запустите workflow ещё раз через 15–60 минут)"
+          echo "Шлюз (проверка с телефона): https://${{ steps.gw.outputs.domain }}/?a=ping"
           rm -f "$RUNNER_TEMP/key.json"
