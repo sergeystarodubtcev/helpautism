@@ -6,11 +6,12 @@
   "cta": "#e8590c"
  },
  "social": {
-  "vk": "https://vk.com/of_helpautism",
-  "telegram": "",
+  "vk": "https://vk.com/helpautism",
   "max": "",
   "ok": "https://ok.ru/vrooiiskra",
-  "youtube": "https://www.youtube.com/channel/UCiYLxgt4UmXd1ZVvcqPHoMg"
+  "dzen": "https://dzen.ru/helpautism",
+  "telegram": "",
+  "youtube": ""
  },
  "programs": [
   {
@@ -42,7 +43,6 @@
  "donate": {
   "title": "Помочь «Искре Надежды»",
   "text": "Ваше пожертвование идёт на занятия с детьми и взрослыми с аутизмом, работу мастерской и поддержку семей.",
-  "amounts": [300, 500, 1000, 3000],
-  "purpose": "Пожертвование на уставную деятельность ВРООИ «Искра Надежды»"
+  "url": "https://pay.paygine.com/webapi/UniPayForm?sector=18785&code=643&description=Пожертвование&mtd_ref=19290"
  }
 }

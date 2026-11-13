@@ -153,11 +153,12 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
         <label class="clr"><input type="color" id="c-ink"> Текст и основные кнопки</label>
         <button class="btn ghost small" id="b-colors-reset">Вернуть как было</button></section>
       <section class="box"><h3>Соцсети</h3>
-        <p class="hint">Пустое поле — значок показывается бледным, без ссылки.</p>
+        <p class="hint">Пустое поле — значок скрыт (у MAX — бледная заглушка «скоро»).</p>
         <div class="field"><label>ВКонтакте</label><input type="text" id="s-vk" placeholder="https://vk.com/..."></div>
-        <div class="field"><label>Telegram</label><input type="text" id="s-telegram" placeholder="https://t.me/..."></div>
-        <div class="field"><label>Max</label><input type="text" id="s-max" placeholder="https://max.ru/..."></div>
+        <div class="field"><label>MAX</label><input type="text" id="s-max" placeholder="https://max.ru/..."></div>
         <div class="field"><label>Одноклассники</label><input type="text" id="s-ok" placeholder="https://ok.ru/..."></div>
+        <div class="field"><label>Дзен</label><input type="text" id="s-dzen" placeholder="https://dzen.ru/..."></div>
+        <div class="field"><label>Telegram</label><input type="text" id="s-telegram" placeholder="https://t.me/..."></div>
         <div class="field"><label>YouTube</label><input type="text" id="s-youtube" placeholder="https://www.youtube.com/..."></div></section>
       <section class="box set-wide"><h3>Программы в форме записи на занятия</h3>
         <p class="hint">Каждая программа — с новой строки. Группы можно добавлять и удалять.</p>
@@ -165,7 +166,7 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
       <section class="box set-wide"><h3>Пожертвования</h3>
         <div class="field"><label>Заголовок страницы</label><input type="text" id="s-don-title"></div>
         <div class="field"><label>Текст</label><textarea id="s-don-text" rows="3"></textarea></div>
-        <div class="field"><label>Суммы на кнопках, ₽ (через запятую)</label><input type="text" id="s-don-amounts" placeholder="300, 500, 1000, 3000"></div></section>
+        <div class="field"><label>Ссылка на оплату (кнопка «Помочь»)</label><input type="text" id="s-don-url" placeholder="https://pay.paygine.com/..."></div></section>
     </div>
   </main>
 
@@ -352,10 +353,10 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
     var c = Object.assign({}, DEF_COLORS, SET.colors || {});
     $("#c-cta").value = c.cta; $("#c-accent").value = c.accent; $("#c-ink").value = c.ink;
     var soc = SET.social || {};
-    ["vk", "telegram", "max", "ok", "youtube"].forEach(function (k) { $("#s-" + k).value = soc[k] || ""; });
+    ["vk", "max", "ok", "dzen", "telegram", "youtube"].forEach(function (k) { $("#s-" + k).value = soc[k] || ""; });
     renderHero(); renderProgs();
     var d = SET.donate || {};
-    $("#s-don-title").value = d.title || ""; $("#s-don-text").value = d.text || ""; $("#s-don-amounts").value = (d.amounts || []).join(", ");
+    $("#s-don-title").value = d.title || ""; $("#s-don-text").value = d.text || ""; $("#s-don-url").value = d.url || "";
   }
   function renderHero() { var el = $("#s-hero"); el.style.backgroundImage = SET.hero_image ? 'url("' + pv(SET.hero_image) + '")' : ""; el.textContent = SET.hero_image ? "" : "нет картинки"; }
   function renderProgs() {
@@ -374,13 +375,13 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
   $("#b-colors-reset").onclick = function () { $("#c-cta").value = DEF_COLORS.cta; $("#c-accent").value = DEF_COLORS.accent; $("#c-ink").value = DEF_COLORS.ink; };
   $("#b-hero").onclick = function () { pick("#file-img", function (f) { uploadImages([f[0]], function (u) { SET.hero_image = u[0]; renderHero(); toast("Картинка загружена — нажмите «Сохранить настройки»"); }); }); };
   $("#b-set-save").onclick = function () {
-    var soc = {}; ["vk", "telegram", "max", "ok", "youtube"].forEach(function (k) { soc[k] = $("#s-" + k).value.trim(); });
+    var soc = {}; ["vk", "max", "ok", "dzen", "telegram", "youtube"].forEach(function (k) { soc[k] = $("#s-" + k).value.trim(); });
     var bad = Object.keys(soc).filter(function (k) { return soc[k] && !/^https:\/\//.test(soc[k]); });
     if (bad.length) { toast("Ссылки на соцсети должны начинаться с https://", true); return; }
     var payload = { hero_image: SET.hero_image || "", colors: { cta: $("#c-cta").value, accent: $("#c-accent").value, ink: $("#c-ink").value },
       social: soc, programs: readProgs(),
-      donate: { title: $("#s-don-title").value, text: $("#s-don-text").value,
-        amounts: $("#s-don-amounts").value.split(/[,\s;]+/).map(function (x) { return x.replace(/\D/g, ""); }).filter(Boolean).map(Number) } };
+      donate: { title: $("#s-don-title").value, text: $("#s-don-text").value, url: $("#s-don-url").value.trim() } };
+    if (payload.donate.url && !/^https:\/\//.test(payload.donate.url)) { toast("Ссылка на оплату должна начинаться с https://", true); return; }
     busy(true);
     api("settings", { settings: payload }).then(function (j) { SET = j.settings; fillSettings(); toast("Настройки сохранены. На сайте обновятся через 2–3 минуты."); })
       .catch(function (e) { toast(e.message, true); }).then(function () { busy(false); });

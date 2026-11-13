@@ -462,3 +462,5 @@ details.ha-acc[open] summary::after { transform: rotate(45deg); }
   .ha-home .header-content-wrap .buttons .btn { width: 100% !important; max-width: 340px !important; align-self: center !important; }
   .ha-hero__facts { justify-content: center; }
 }
+
+.ha-btn--big { padding: 18px 34px !important; font-size: 17px !important; text-decoration: none !important; }

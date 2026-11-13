@@ -27,8 +27,7 @@ def cfg():
     if _cfg is None:
         raw = os.environ.get("HA_SECRETS", "")
         _cfg = json.loads(base64.urlsafe_b64decode(raw + "=" * (-len(raw) % 4)).decode()) if raw else {}
-        for k in ("ADMIN_PASSWORD", "GH_TOKEN", "GH_REPO", "GH_BRANCH", "SMTP_USER", "SMTP_PASSWORD", "FORMS_TO",
-                  "YOOKASSA_SHOP_ID", "YOOKASSA_SECRET_KEY", "YOOKASSA_RECEIPT"):
+        for k in ("ADMIN_PASSWORD", "GH_TOKEN", "GH_REPO", "GH_BRANCH", "SMTP_USER", "SMTP_PASSWORD", "FORMS_TO"):
             _cfg.setdefault(k, os.environ.get(k, ""))
     return _cfg
 
@@ -253,7 +252,7 @@ def save_settings(body):
         soc = {}
         for k, v in (new["social"] or {}).items():
             v = str(v or "").strip()
-            if k in ("vk", "telegram", "max", "ok", "youtube") and (not v or re.match(r"^https://[^\s\"'<>]+$", v)):
+            if k in ("vk", "max", "ok", "dzen", "telegram", "youtube") and (not v or re.match(r"^https://[^\s\"'<>]+$", v)):
                 soc[k] = v
         out["social"] = {**cur.get("social", {}), **soc}
     if "programs" in new:
@@ -267,55 +266,17 @@ def save_settings(body):
     if "donate" in new:
         d = new["donate"] or {}
         dd = dict(cur.get("donate", {}))
-        for k in ("title", "text", "purpose"):
+        for k in ("title", "text"):
             if k in d:
                 dd[k] = str(d[k]).strip()[:500]
-        if "amounts" in d:
-            dd["amounts"] = [int(a) for a in d["amounts"] if str(a).isdigit() and 10 <= int(a) <= 1000000][:6]
+        if "url" in d:
+            u = str(d["url"] or "").strip()
+            if u and not re.match(r"^https://[^\s\"'<>]+$", u):
+                raise HttpErr(400, "Ссылка на оплату должна начинаться с https://")
+            dd["url"] = u
         out["donate"] = dd
     gh_put(SETTINGS_FILE, json.dumps(out, ensure_ascii=False, indent=1).encode(), "Админка: настройки сайта", r["sha"] if r else None)
     return {"ok": True, "settings": out}
-
-
-# ---------- пожертвование: платёж ЮKassa ----------
-def donate(body):
-    c = cfg()
-    if not c.get("YOOKASSA_SHOP_ID") or not c.get("YOOKASSA_SECRET_KEY"):
-        raise HttpErr(503, "Онлайн-оплата пока не подключена.")
-    try:
-        amount = int(round(float(body.get("amount", 0))))
-    except Exception:
-        amount = 0
-    if not 10 <= amount <= 1000000:
-        raise HttpErr(400, "Сумма должна быть от 10 до 1 000 000 ₽.")
-    email = str(body.get("email", "")).strip()
-    if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
-        raise HttpErr(400, "Неверный e-mail.")
-    ret = str(body.get("return_url") or "https://helpautism.ru/spasibo/")
-    if not re.match(r"^https://(www\.)?helpautism\.ru/", ret):
-        ret = "https://helpautism.ru/spasibo/"
-    purpose = "Пожертвование на уставную деятельность ВРООИ «Искра Надежды»"
-    pay = {"amount": {"value": f"{amount}.00", "currency": "RUB"}, "capture": True,
-           "confirmation": {"type": "redirect", "return_url": ret}, "description": purpose[:128],
-           "metadata": {"source": "helpautism.ru", "name": str(body.get("name", ""))[:100]}}
-    if c.get("YOOKASSA_RECEIPT") == "1":  # если в ЮKassa включены чеки 54-ФЗ
-        pay["receipt"] = {"customer": {"email": email}, "items": [{"description": purpose[:128], "quantity": "1.00",
-                          "amount": {"value": f"{amount}.00", "currency": "RUB"}, "vat_code": 1,
-                          "payment_mode": "full_payment", "payment_subject": "payment"}]}
-    auth = base64.b64encode(f'{c["YOOKASSA_SHOP_ID"]}:{c["YOOKASSA_SECRET_KEY"]}'.encode()).decode()
-    req = urllib.request.Request("https://api.yookassa.ru/v3/payments", method="POST", data=json.dumps(pay).encode(),
-                                 headers={"Authorization": "Basic " + auth, "Content-Type": "application/json",
-                                          "Idempotence-Key": hashlib.sha256(f"{email}{amount}{time.time()}".encode()).hexdigest()[:40]})
-    try:
-        with urllib.request.urlopen(req, timeout=25) as r:
-            res = json.loads(r.read())
-    except urllib.error.HTTPError as e:
-        print("YOOKASSA", e.code, e.read()[:300])
-        raise HttpErr(502, "Платёжная система не приняла запрос. Попробуйте позже.")
-    url = (res.get("confirmation") or {}).get("confirmation_url")
-    if not url:
-        raise HttpErr(502, "Платёжная система не вернула ссылку на оплату.")
-    return {"url": url}
 
 
 # ---------- формы сайта -> почта ----------
@@ -361,8 +322,6 @@ def handler(event, context):
             return resp(200, login(body, ip))
         if a == "form":
             return resp(200, send_form(body))
-        if a == "donate":
-            return resp(200, donate(body))
         check_token(event)
         if a == "get":
             return resp(200, get_doc(q))

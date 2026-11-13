@@ -273,35 +273,6 @@
     });
   }
 
-  /* ---------- пожертвование (ЮKassa через облачную функцию) ---------- */
-  function donate() {
-    var form = $(".ha-donate-form"); if (!form) return;
-    var cfg = window.HA_CONFIG || {}, status = $(".ha-form__status", form), other = $(".ha-other", form);
-    $$('input[name="amount"]', form).forEach(function (r) {
-      r.addEventListener("change", function () { other.classList.toggle("hidden", r.value !== "other" || !r.checked); if (r.value === "other") $("#don-other").focus(); });
-    });
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      var r = $('input[name="amount"]:checked', form), amount = r ? r.value : "";
-      if (amount === "other") amount = $("#don-other").value;
-      amount = Math.round(Number(amount));
-      var email = $("#don-email").value.trim(), agree = $(".ha-consent input", form).checked;
-      if (!(amount >= 10)) { status.className = "ha-form__status is-err"; status.textContent = "Укажите сумму от 10 ₽."; return; }
-      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { status.className = "ha-form__status is-err"; status.textContent = "Укажите e-mail — на него придёт чек."; return; }
-      if (!agree) { status.className = "ha-form__status is-err"; status.textContent = "Отметьте согласие с условиями."; return; }
-      if (!cfg.API_URL) { status.className = "ha-form__status is-err"; status.innerHTML = 'Онлайн-оплата временно недоступна. Можно перевести <a href="/kontakty/">по реквизитам</a>.'; return; }
-      var btn = $("button[type=submit]", form); btn.disabled = true; status.className = "ha-form__status"; status.textContent = "Переходим к оплате…";
-      fetch(cfg.API_URL + "?a=donate", { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ amount: amount, email: email, name: $("#don-name").value.trim(), return_url: location.origin + "/spasibo/" }) })
-        .then(function (res) { return res.json().then(function (j) { if (!res.ok || !j.url) throw new Error(j.error || "Ошибка"); return j; }); })
-        .then(function (j) { location.href = j.url; })
-        .catch(function (err) {
-          status.className = "ha-form__status is-err";
-          status.innerHTML = esc(err.message) + ' Можно перевести <a href="/kontakty/">по реквизитам</a>.';
-          btn.disabled = false;
-        });
-    });
-  }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 
   /* ---------- плавный переход между страницами ---------- */
@@ -330,7 +301,7 @@
   }
 
   function start() {
-    brokenImages(); chrome(); mobileMenu(); currentNav(); teamLinks(); marquee(); heroMedia(); share(); donate(); lightbox(); forms(); reveal(); transitions();
+    brokenImages(); chrome(); mobileMenu(); currentNav(); teamLinks(); marquee(); heroMedia(); share(); lightbox(); forms(); reveal(); transitions();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
 })();

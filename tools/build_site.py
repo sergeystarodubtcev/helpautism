@@ -24,11 +24,13 @@ SETTINGS = {}  # content/settings.json — меняется в админке (�
 
 SOCIAL_ICONS = {
     "vk": ("ВКонтакте", '<path d="M3 7.5h3.6c.2 4 2 5.8 3.4 6.1V7.5h3.3v3.4c1.4-.1 2.9-1.8 3.4-3.4h3.3c-.5 2.5-2.4 4.2-3.7 5 1.3.6 3.4 2.2 4.2 5h-3.6c-.7-1.9-2.2-3.3-4.1-3.5v3.5h-.4C6.3 17.5 3.2 13.6 3 7.5z"/>'),
-    "telegram": ("Telegram", '<path d="M20.7 4.3 2.9 11.2c-1.2.5-1.2 1.2-.2 1.5l4.6 1.4 1.8 5.4c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.2-2.1 4.6 3.4c.8.5 1.4.2 1.6-.8l3-14.1c.3-1.3-.5-1.8-1.5-1.4zM8.6 13.6l9.1-5.7c.4-.3.8-.1.5.2l-7.6 6.9-.3 3.2-1.7-4.6z"/>'),
-    "max": ("Max", '<path d="M12 2.5a9.5 9.5 0 0 0-8.3 14.1L2.5 21.5l5-1.2A9.5 9.5 0 1 0 12 2.5zm4.6 13.2h-2.1v-4.6l-2.5 3.1-2.5-3.1v4.6H7.4V8.3h2l2.6 3.3 2.6-3.3h2z"/>'),
+    "max": ("MAX", '<path d="M12 2.5a9.5 9.5 0 0 0-8.3 14.1L2.5 21.5l5-1.2A9.5 9.5 0 1 0 12 2.5zm4.6 13.2h-2.1v-4.6l-2.5 3.1-2.5-3.1v4.6H7.4V8.3h2l2.6 3.3 2.6-3.3h2z"/>'),
     "ok": ("Одноклассники", '<path d="M12 12.3a4.2 4.2 0 1 0 0-8.4 4.2 4.2 0 0 0 0 8.4zm0-6a1.8 1.8 0 1 1 0 3.6 1.8 1.8 0 0 1 0-3.6zm4.3 7.6a1.2 1.2 0 0 0-1.7-.2 4.6 4.6 0 0 1-5.2 0 1.2 1.2 0 1 0-1.5 1.9c.9.7 2 1.1 3.1 1.3l-2.9 2.9a1.2 1.2 0 1 0 1.7 1.7l2.2-2.2 2.2 2.2a1.2 1.2 0 1 0 1.7-1.7l-2.9-2.9c1.1-.2 2.2-.6 3.1-1.3.5-.4.6-1.2.2-1.7z"/>'),
+    "dzen": ("Дзен", '<path d="M12 2c.2 5.6 4.4 9.8 10 10-5.6.2-9.8 4.4-10 10-.2-5.6-4.4-9.8-10-10 5.6-.2 9.8-4.4 10-10z"/>'),
+    "telegram": ("Telegram", '<path d="M20.7 4.3 2.9 11.2c-1.2.5-1.2 1.2-.2 1.5l4.6 1.4 1.8 5.4c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.2-2.1 4.6 3.4c.8.5 1.4.2 1.6-.8l3-14.1c.3-1.3-.5-1.8-1.5-1.4zM8.6 13.6l9.1-5.7c.4-.3.8-.1.5.2l-7.6 6.9-.3 3.2-1.7-4.6z"/>'),
     "youtube": ("YouTube", '<path d="M21.6 7.2a2.6 2.6 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.6 2.6 0 0 0 2.4 7.2 27 27 0 0 0 2 12c0 1.6.1 3.2.4 4.8a2.6 2.6 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.6 2.6 0 0 0 1.8-1.8c.3-1.6.4-3.2.4-4.8s-.1-3.2-.4-4.8zM10 15V9l5.2 3L10 15z"/>'),
 }
+SOCIAL_PLACEHOLDER = {"max"}  # без ссылки — бледная заглушка; остальные без ссылки скрываются
 
 
 def social_items():
@@ -43,7 +45,7 @@ def social_icons_html(cls="ha-soc"):
         icon = f'<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">{svg}</svg>'
         if url:
             out.append(f'<a class="{cls} {cls}--{k}" href="{esc(url)}" target="_blank" rel="noopener" title="{t}" aria-label="{t}">{icon}</a>')
-        else:
+        elif k in SOCIAL_PLACEHOLDER:
             out.append(f'<span class="{cls} {cls}--{k} is-soon" title="{t}: ссылка скоро появится" aria-label="{t} (скоро)">{icon}</span>')
     return "".join(out)
 
@@ -235,7 +237,7 @@ def modernize(text, rel):
                  f'<div><b>{HOME_FACTS.get("posts", 600)}+</b><span>новостей и статей</span></div>'
                  '<div><b>4</b><span>площадки в Воронеже</span></div></div>')
         text = re.sub(r'(<div class="header-content-wrap"><div class="container">)', lambda m: m.group(1) + hero + media, text, count=1)
-        buttons = (f'<div class="buttons"><a href="{relurl(rel, "/pomoch/")}" class="btn ha-btn--cta">Помочь</a>'
+        buttons = (f'<div class="buttons"><a href="{esc(pay_url())}" class="btn ha-btn--cta" target="_blank" rel="noopener">Помочь</a>'
                    f'<a href="{relurl(rel, "/zapis/")}" class="btn ha-btn--ghost">Записаться на занятия</a></div>')
         text = re.sub(r'(?s)<div class="buttons">.*?</div>', lambda m: buttons + facts, text, count=1)
         text = text.replace('<body class="home', '<body class="ha-home home', 1)
@@ -336,7 +338,7 @@ def replace_menu(head, site):
             k = i + m.end()
             k = head.find(">", k) + 1
             break
-    cta = f'<li class="menu-item ha-nav-cta"><a href="{absu("/pomoch/")}">Помочь</a></li>'
+    cta = f'<li class="menu-item ha-nav-cta"><a href="{esc(pay_url())}" target="_blank" rel="noopener">Помочь</a></li>'
     new = '<ul id="menu-verxnee-menyu" class="nav navbar-nav navbar-right responsive-nav main-nav-list">' + menu_html(site["menu"]) + cta + "</ul>"
     return head[:i] + new + head[k:]
 
@@ -406,7 +408,12 @@ def render_table(tid, site):
 
 DONATE_HTML = ('<div class="ha-donate"><h3>Поддержать «Искру Надежды»</h3>'
                '<p>Пожертвовать можно онлайн картой или через СБП, а также переводом по реквизитам.</p>'
-               f'<a class="ha-btn ha-btn--cta" href="{SITE_URL}/pomoch/">Помочь</a></div>')
+               '<a class="ha-btn ha-btn--cta" href="%%PAY%%" target="_blank" rel="noopener">Помочь</a></div>')
+
+
+def pay_url():
+    u = (SETTINGS.get("donate", {}) or {}).get("url", "").strip()
+    return u if re.match(r"^https://", u) else absu("/kontakty/")
 
 
 def donate_form_html():
@@ -441,7 +448,7 @@ def render_body(doc, site, forms):
     c = doc["content"]
     c = re.sub(r'<div class="ha-form" data-form="(\d+)"></div>', lambda m: render_form(m.group(1), forms), c)
     c = re.sub(r'<div class="ha-table" data-table="(\d+)"></div>', lambda m: render_table(m.group(1), site), c)
-    c = c.replace('<div class="ha-donate-slot"></div>', DONATE_HTML)
+    c = c.replace('<div class="ha-donate-slot"></div>', DONATE_HTML.replace("%%PAY%%", esc(pay_url())))
     gal = [u for u in doc.get("gallery", []) if media_exists(u)]
     gal_html = ('<div class="ha-gallery">' + "".join(f'<a href="{absu(mapu(u))}" class="ha-gallery__item"><img src="{absu(mapu(u))}" alt="" loading="lazy"></a>' for u in gal) + "</div>") if gal else ""
     if '<div class="ha-gallery-slot"></div>' in c:
@@ -607,8 +614,8 @@ def main():
     d = SETTINGS.get("donate", {})
     donate = (f'<article class="page hentry ha-post"><header class="entry-header"><h1 class="entry-title">{esc(d.get("title", "Помочь"))}</h1></header>'
               f'<div class="entry-content"><p class="ha-lead">{esc(d.get("text", ""))}</p>'
-              f'<div class="ha-donate-box">{donate_form_html()}<p class="ha-hint">Оплата картой или через СБП на защищённой странице ЮKassa. '
-              'Платёж поступает на счёт ВРООИ «Искра Надежды».</p></div>'
+              f'<div class="ha-donate-box"><a class="ha-btn ha-btn--cta ha-btn--big" href="{esc(pay_url())}" target="_blank" rel="noopener">Пожертвовать онлайн</a>'
+              '<p class="ha-hint">Оплата картой на защищённой странице банка-эквайера (Совкомбанк). Платёж поступает на счёт ВРООИ «Искра Надежды».</p></div>'
               '<h2>Другие способы помочь</h2><ul>'
               f'<li>Перевод по реквизитам — <a href="{absu("/kontakty/")}">реквизиты организации</a>, назначение платежа: «Благотворительное пожертвование».</li>'
               f'<li>Стать волонтёром — <a href="{absu("/anketa-volontera/")}">анкета волонтёра</a>.</li>'
@@ -616,7 +623,7 @@ def main():
     emit("/pomoch/", "Помочь | Искра Надежды", "page ha-donate-page", main_wrap(donate, "ha-narrow"), d.get("text", ""))
     thanks = ('<article class="page hentry ha-post"><header class="entry-header"><h1 class="entry-title">Спасибо за помощь!</h1></header>'
               '<div class="entry-content"><p>Ваше пожертвование очень важно для детей и взрослых с аутизмом и их семей. '
-              'Если оплата прошла, чек придёт на указанную почту.</p>'
+              'Спасибо, что вы с нами.</p>'
               f'<p><a class="ha-btn" href="{absu("/")}">На главную</a></p></div></article>')
     emit("/spasibo/", "Спасибо | Искра Надежды", "page", main_wrap(thanks, "ha-narrow"))
     zapis = ('<article class="page hentry ha-post"><header class="entry-header"><h1 class="entry-title">Запись на занятия</h1></header>'
