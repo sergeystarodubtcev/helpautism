@@ -20,6 +20,40 @@ ALATEST = os.path.join(ROOT, "archive", "latest")
 OUT = os.path.join(ROOT, "site")
 DOMAIN_RE = r"(?:https?:)?//(?:www\.)?helpautism\.ru"
 CONTACT_EMAIL = "helpautismvrn@yandex.ru"
+SETTINGS = {}  # content/settings.json — меняется в админке (Настройки)
+
+SOCIAL_ICONS = {
+    "vk": ("ВКонтакте", '<path d="M3 7.5h3.6c.2 4 2 5.8 3.4 6.1V7.5h3.3v3.4c1.4-.1 2.9-1.8 3.4-3.4h3.3c-.5 2.5-2.4 4.2-3.7 5 1.3.6 3.4 2.2 4.2 5h-3.6c-.7-1.9-2.2-3.3-4.1-3.5v3.5h-.4C6.3 17.5 3.2 13.6 3 7.5z"/>'),
+    "telegram": ("Telegram", '<path d="M20.7 4.3 2.9 11.2c-1.2.5-1.2 1.2-.2 1.5l4.6 1.4 1.8 5.4c.2.6.4.8.8.8.4 0 .6-.2.9-.5l2.2-2.1 4.6 3.4c.8.5 1.4.2 1.6-.8l3-14.1c.3-1.3-.5-1.8-1.5-1.4zM8.6 13.6l9.1-5.7c.4-.3.8-.1.5.2l-7.6 6.9-.3 3.2-1.7-4.6z"/>'),
+    "max": ("Max", '<path d="M12 2.5a9.5 9.5 0 0 0-8.3 14.1L2.5 21.5l5-1.2A9.5 9.5 0 1 0 12 2.5zm4.6 13.2h-2.1v-4.6l-2.5 3.1-2.5-3.1v4.6H7.4V8.3h2l2.6 3.3 2.6-3.3h2z"/>'),
+    "ok": ("Одноклассники", '<path d="M12 12.3a4.2 4.2 0 1 0 0-8.4 4.2 4.2 0 0 0 0 8.4zm0-6a1.8 1.8 0 1 1 0 3.6 1.8 1.8 0 0 1 0-3.6zm4.3 7.6a1.2 1.2 0 0 0-1.7-.2 4.6 4.6 0 0 1-5.2 0 1.2 1.2 0 1 0-1.5 1.9c.9.7 2 1.1 3.1 1.3l-2.9 2.9a1.2 1.2 0 1 0 1.7 1.7l2.2-2.2 2.2 2.2a1.2 1.2 0 1 0 1.7-1.7l-2.9-2.9c1.1-.2 2.2-.6 3.1-1.3.5-.4.6-1.2.2-1.7z"/>'),
+    "youtube": ("YouTube", '<path d="M21.6 7.2a2.6 2.6 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4A2.6 2.6 0 0 0 2.4 7.2 27 27 0 0 0 2 12c0 1.6.1 3.2.4 4.8a2.6 2.6 0 0 0 1.8 1.8C5.8 19 12 19 12 19s6.2 0 7.8-.4a2.6 2.6 0 0 0 1.8-1.8c.3-1.6.4-3.2.4-4.8s-.1-3.2-.4-4.8zM10 15V9l5.2 3L10 15z"/>'),
+}
+
+
+def social_items():
+    """[(ключ, название, ссылка или '', svg)] — пустая ссылка = заглушка «скоро»."""
+    soc = SETTINGS.get("social", {})
+    return [(k, t, (soc.get(k) or "").strip(), svg) for k, (t, svg) in SOCIAL_ICONS.items()]
+
+
+def social_icons_html(cls="ha-soc"):
+    out = []
+    for k, t, url, svg in social_items():
+        icon = f'<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">{svg}</svg>'
+        if url:
+            out.append(f'<a class="{cls} {cls}--{k}" href="{esc(url)}" target="_blank" rel="noopener" title="{t}" aria-label="{t}">{icon}</a>')
+        else:
+            out.append(f'<span class="{cls} {cls}--{k} is-soon" title="{t}: ссылка скоро появится" aria-label="{t} (скоро)">{icon}</span>')
+    return "".join(out)
+
+
+def theme_style():
+    c = SETTINGS.get("colors", {})
+    ok = lambda v: bool(re.match(r"^#[0-9a-fA-F]{6}$", str(v or "")))
+    vars_ = "".join(f"--{k}:{c[k]};" for k in ("ink", "accent", "cta") if ok(c.get(k)))
+    return f'<style id="ha-theme">:root{{{vars_}}}</style>' if vars_ else ""
+
 HOME_FACTS = {}
 
 # скрипты, которые без WordPress-сервера не работают или не нужны
@@ -190,7 +224,7 @@ def modernize(text, rel):
 
     # 6. главная: первый экран
     if rel == "index.html":
-        img = relurl(rel, "/wp-content/uploads/2020/03/3248611.jpg")
+        img = relurl(rel, mapu(SETTINGS.get("hero_image") or "/wp-content/uploads/2020/03/3248611.jpg"))
         hero = ('<div class="ha-hero">'
                 '<span class="ha-hero__eyebrow">ВРООИ · Воронеж</span>'
                 '<h1 class="ha-hero__title"><span>Искра</span> <span>Надежды</span></h1>'
@@ -201,7 +235,9 @@ def modernize(text, rel):
                  f'<div><b>{HOME_FACTS.get("posts", 600)}+</b><span>новостей и статей</span></div>'
                  '<div><b>4</b><span>площадки в Воронеже</span></div></div>')
         text = re.sub(r'(<div class="header-content-wrap"><div class="container">)', lambda m: m.group(1) + hero + media, text, count=1)
-        text = re.sub(r'(<div class="header-content-wrap"><div class="container">.*?<div class="buttons">.*?</div>)', lambda m: m.group(1) + facts, text, count=1, flags=re.S)
+        buttons = (f'<div class="buttons"><a href="{relurl(rel, "/pomoch/")}" class="btn ha-btn--cta">Помочь</a>'
+                   f'<a href="{relurl(rel, "/zapis/")}" class="btn ha-btn--ghost">Записаться на занятия</a></div>')
+        text = re.sub(r'(?s)<div class="buttons">.*?</div>', lambda m: buttons + facts, text, count=1)
         text = text.replace('<body class="home', '<body class="ha-home home', 1)
     return text
 
@@ -300,7 +336,8 @@ def replace_menu(head, site):
             k = i + m.end()
             k = head.find(">", k) + 1
             break
-    new = '<ul id="menu-verxnee-menyu" class="nav navbar-nav navbar-right responsive-nav main-nav-list">' + menu_html(site["menu"]) + "</ul>"
+    cta = f'<li class="menu-item ha-nav-cta"><a href="{absu("/pomoch/")}">Помочь</a></li>'
+    new = '<ul id="menu-verxnee-menyu" class="nav navbar-nav navbar-right responsive-nav main-nav-list">' + menu_html(site["menu"]) + cta + "</ul>"
     return head[:i] + new + head[k:]
 
 
@@ -316,6 +353,8 @@ def set_title_and_body(head, title, body_class, description=""):
 
 def render_form(fid, forms):
     f = forms["forms"].get(str(fid))
+    if f and f.get("alias"):
+        fid, f = f["alias"], forms["forms"].get(f["alias"])
     if not f:
         return ""
     rows = []
@@ -329,6 +368,13 @@ def render_form(fid, forms):
             ctl = f'<textarea id="{nid}" name="{esc(fld["name"])}" rows="5"{req}></textarea>'
         elif t == "select":
             ctl = f'<select id="{nid}" name="{esc(fld["name"])}"{req}>' + "".join(f"<option>{esc(o)}</option>" for o in fld["options"]) + "</select>"
+        elif t == "programs":
+            lab = f'<span class="ha-field__label">{esc(fld["label"])}</span>'
+            ctl = "".join(
+                f'<div class="ha-progs"><span class="ha-progs__group">{esc(g.get("group", ""))}</span><div class="ha-checks">' + "".join(
+                    f'<label class="ha-check"><input type="checkbox" name="{esc(fld["name"])}" value="{esc(g.get("group", "") + ": " + o)}"><span>{esc(o)}</span></label>'
+                    for o in g.get("items", [])) + "</div></div>"
+                for g in SETTINGS.get("programs", []) if g.get("items"))
         elif t == "checkbox":
             lab = f'<span class="ha-field__label">{esc(fld["label"])}</span>'
             ctl = '<div class="ha-checks">' + "".join(
@@ -359,8 +405,23 @@ def render_table(tid, site):
 
 
 DONATE_HTML = ('<div class="ha-donate"><h3>Поддержать «Искру Надежды»</h3>'
-               '<p>Пожертвование можно перевести по реквизитам организации. Назначение платежа: «Благотворительное пожертвование».</p>'
-               f'<a class="ha-btn" href="{SITE_URL}/kontakty/">Реквизиты для перевода</a></div>')
+               '<p>Пожертвовать можно онлайн картой или через СБП, а также переводом по реквизитам.</p>'
+               f'<a class="ha-btn ha-btn--cta" href="{SITE_URL}/pomoch/">Помочь</a></div>')
+
+
+def donate_form_html():
+    d = SETTINGS.get("donate", {})
+    amounts = [int(a) for a in d.get("amounts", [300, 500, 1000, 3000]) if str(a).isdigit()]
+    chips = "".join(f'<label class="ha-amount"><input type="radio" name="amount" value="{a}"{" checked" if i == 1 else ""}><span>{a:,} ₽</span></label>'.replace(",", " ")
+                    for i, a in enumerate(amounts))
+    return ('<form class="ha-donate-form" novalidate>'
+            f'<div class="ha-amounts">{chips}<label class="ha-amount ha-amount--other"><input type="radio" name="amount" value="other"><span>Другая сумма</span></label></div>'
+            '<div class="ha-field ha-other hidden"><label for="don-other">Сумма, ₽</label><input id="don-other" type="number" min="10" max="1000000" step="1" inputmode="numeric"></div>'
+            '<div class="ha-field"><label for="don-email">E-mail для чека <span class="ha-req">*</span></label><input id="don-email" type="email" required autocomplete="email"></div>'
+            '<div class="ha-field"><label for="don-name">Имя (необязательно)</label><input id="don-name" type="text" autocomplete="name"></div>'
+            '<label class="ha-check ha-consent"><input type="checkbox" required><span>Я принимаю '
+            f'<a href="{absu("/donation-service-terms/")}" target="_blank">условия пожертвования</a> и даю согласие на обработку персональных данных</span></label>'
+            '<button type="submit" class="ha-btn ha-btn--cta">Пожертвовать</button><p class="ha-form__status" role="status"></p></form>')
 
 
 RENAMES = {}
@@ -437,9 +498,7 @@ FOOTER = (
     '<li><a href="https://helpautism.ru/my-informiruem/">Информирование</a></li>'
     '<li><a href="https://helpautism.ru/deyatelnost/">О нас</a></li>'
     '<li><a href="https://helpautism.ru/question/">Задать вопрос</a></li></ul>'
-    '<div class="ha-footer__social"><a href="https://vk.com/of_helpautism" target="_blank" rel="noopener">ВКонтакте</a>'
-    '<a href="https://ok.ru/vrooiiskra" target="_blank" rel="noopener">Одноклассники</a>'
-    '<a href="https://www.youtube.com/channel/UCiYLxgt4UmXd1ZVvcqPHoMg" target="_blank" rel="noopener">YouTube</a></div></div>'
+    '<div class="ha-footer__social">%%SOCIAL%%</div></div>'
     '</div><div class="container ha-footer__bottom"><span>© 2008–' + __import__("datetime").date.today().strftime("%Y") + ' ВРООИ «Искра Надежды»</span>'
     '<span><a href="https://helpautism.ru/kontakty/">Реквизиты</a> · <a href="https://helpautism.ru/personal-data-usage-terms/">Персональные данные</a> · '
     '<a href="https://helpautism.ru/osnovnye-svedeniya/">Сведения об организации</a></span></div></footer>')
@@ -450,13 +509,18 @@ def pipeline(text, rel):
     i = text.find('<footer id="footer"')
     j = text.find("</footer>", i)
     if i >= 0 and j > i:
-        text = text[:i] + FOOTER + text[j + len("</footer>"):]
+        text = text[:i] + FOOTER.replace("%%SOCIAL%%", social_icons_html("ha-fsoc")) + text[j + len("</footer>"):]
+    # верхняя полоса: почта + ВКонтакте, Telegram, Max, Одноклассники, YouTube (без Instagram/Facebook)
+    text = re.sub(r'(?is)<div class="social-block">.*?</div>',
+                  lambda m: '<div class="social-block"><a href="mailto:helpautismvrn@yandex.ru" class="ha-topmail">helpautismvrn@yandex.ru</a>'
+                            + social_icons_html("ha-soc") + "</div>", text, count=1)
     text = text.replace("helpautismvrn@gmail.com", "helpautismvrn@yandex.ru")  # актуальная почта со страницы «Контакты»
     text = clean_html(text, rel)
     text = localize(text, rel)
     text = inject_enhance(text, rel)
     text = fix_thumbs(text, rel)
     text = modernize(text, rel)
+    text = text.replace("</head>", theme_style() + "</head>", 1)  # цвета из админки — после остальных стилей
     return text
 
 
@@ -469,6 +533,9 @@ def main():
     if not os.path.exists(os.path.join(A2020, "index.html")):
         sys.exit("Нет archive/2020/index.html — сначала скачайте архив")
     site, posts, pages, forms = load_content()
+    sp = os.path.join(CONTENT, "settings.json")
+    SETTINGS.clear()
+    SETTINGS.update(json.load(open(sp, encoding="utf-8")) if os.path.exists(sp) else {})
     rn = os.path.join(MEDIA, "renames.json")
     if os.path.exists(rn):
         RENAMES.update(json.load(open(rn)))
@@ -535,6 +602,30 @@ def main():
                f'<div class="entry-content">{render_body(pg, site, forms)}</div></article>')
         emit(pg["path"], f'{pg["title"]} | Искра Надежды', "page", main_wrap(art, "ha-narrow"), pg["excerpt"])
         n += 1
+
+    # 3а. свои страницы: пожертвование, спасибо, запись на занятия
+    d = SETTINGS.get("donate", {})
+    donate = (f'<article class="page hentry ha-post"><header class="entry-header"><h1 class="entry-title">{esc(d.get("title", "Помочь"))}</h1></header>'
+              f'<div class="entry-content"><p class="ha-lead">{esc(d.get("text", ""))}</p>'
+              f'<div class="ha-donate-box">{donate_form_html()}<p class="ha-hint">Оплата картой или через СБП на защищённой странице ЮKassa. '
+              'Платёж поступает на счёт ВРООИ «Искра Надежды».</p></div>'
+              '<h2>Другие способы помочь</h2><ul>'
+              f'<li>Перевод по реквизитам — <a href="{absu("/kontakty/")}">реквизиты организации</a>, назначение платежа: «Благотворительное пожертвование».</li>'
+              f'<li>Стать волонтёром — <a href="{absu("/anketa-volontera/")}">анкета волонтёра</a>.</li>'
+              f'<li>Рассказать о нас друзьям — поделитесь ссылкой на сайт.</li></ul></div></article>')
+    emit("/pomoch/", "Помочь | Искра Надежды", "page ha-donate-page", main_wrap(donate, "ha-narrow"), d.get("text", ""))
+    thanks = ('<article class="page hentry ha-post"><header class="entry-header"><h1 class="entry-title">Спасибо за помощь!</h1></header>'
+              '<div class="entry-content"><p>Ваше пожертвование очень важно для детей и взрослых с аутизмом и их семей. '
+              'Если оплата прошла, чек придёт на указанную почту.</p>'
+              f'<p><a class="ha-btn" href="{absu("/")}">На главную</a></p></div></article>')
+    emit("/spasibo/", "Спасибо | Искра Надежды", "page", main_wrap(thanks, "ha-narrow"))
+    zapis = ('<article class="page hentry ha-post"><header class="entry-header"><h1 class="entry-title">Запись на занятия</h1></header>'
+             '<div class="entry-content"><p>Заполните форму — мы свяжемся с вами, расскажем о занятиях и пригласим. '
+             'Можно записать ребёнка, подростка или взрослого.</p>'
+             + render_form("zapis", forms) +
+             '<p>Или позвоните: <a href="tel:+79202111202">8 920 211-12-02</a> (администратор).</p></div></article>')
+    emit("/zapis/", "Запись на занятия | Искра Надежды", "page", main_wrap(zapis, "ha-narrow"), "Запись на занятия в ВРООИ «Искра Надежды»")
+    n += 3
 
     # 4. рубрики (с подрубриками) с постраничной навигацией
     children = {}

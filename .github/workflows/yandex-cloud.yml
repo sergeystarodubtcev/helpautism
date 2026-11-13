@@ -10,6 +10,7 @@ name: Deploy to Yandex Cloud
 #               GH_CONTENT_TOKEN            — fine-grained токен GitHub (Contents: read/write) — для сохранения из админки
 #               ADMIN_PASSWORD              — пароль входа в админку
 #               SMTP_PASSWORD               — пароль приложения Яндекс 360 для helpautismvrn@yandex.ru
+#               YOOKASSA_SHOP_ID, YOOKASSA_SECRET_KEY — онлайн-пожертвования (ЮKassa), необязательно
 #   переменные: YC_FOLDER_ID (обязательно для функции), YC_BUCKET (по умолчанию helpautism.ru)
 # Без ключей шаги пропускаются.
 
@@ -59,6 +60,9 @@ jobs:
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
           GH_CONTENT_TOKEN: ${{ secrets.GH_CONTENT_TOKEN }}
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          YOOKASSA_SHOP_ID: ${{ secrets.YOOKASSA_SHOP_ID }}
+          YOOKASSA_SECRET_KEY: ${{ secrets.YOOKASSA_SECRET_KEY }}
+          YOOKASSA_RECEIPT: ${{ vars.YOOKASSA_RECEIPT }}
         run: |
           set -e
           # ключ мог вставиться без фигурных скобок или с лишними пробелами — чиним и проверяем поля (значения не печатаются)
@@ -88,7 +92,9 @@ jobs:
           SECRETS=$(python3 -c 'import base64,json,os; print(base64.urlsafe_b64encode(json.dumps({
             "ADMIN_PASSWORD": os.environ["ADMIN_PASSWORD"], "GH_TOKEN": os.environ["GH_CONTENT_TOKEN"],
             "GH_REPO": os.environ["GITHUB_REPOSITORY"], "GH_BRANCH": os.environ["GITHUB_REF_NAME"],
-            "SMTP_USER": os.environ["MAIL"], "SMTP_PASSWORD": os.environ["SMTP_PASSWORD"], "FORMS_TO": os.environ["MAIL"]}).encode()).decode().rstrip("="))')
+            "SMTP_USER": os.environ["MAIL"], "SMTP_PASSWORD": os.environ["SMTP_PASSWORD"], "FORMS_TO": os.environ["MAIL"],
+            "YOOKASSA_SHOP_ID": os.environ.get("YOOKASSA_SHOP_ID", ""), "YOOKASSA_SECRET_KEY": os.environ.get("YOOKASSA_SECRET_KEY", ""),
+            "YOOKASSA_RECEIPT": os.environ.get("YOOKASSA_RECEIPT", "")}).encode()).decode().rstrip("="))')
           echo "::add-mask::$SECRETS"
           (cd functions/api && zip -qr "$RUNNER_TEMP/api.zip" .)
           yc serverless function version create --function-name "$FUNC" --runtime python312 --entrypoint index.handler \

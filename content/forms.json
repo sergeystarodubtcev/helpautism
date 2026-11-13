@@ -1,65 +1,231 @@
 {
- "_info": "Формы сайта. Поля 1168, 1618, 1722 — как на старом сайте (из веб-архива). Поля 3195, 6078, 6651 в архиве не сохранились — составлены заново, проверьте. Отправка: если в assets/config.js задан FORMS_ENDPOINT — на сервер (Яндекс Облако), иначе — письмом.",
+ "_info": "Формы сайта. Поля 1168, 1618, 1722 — как на старом сайте (из веб-архива). Поля 3195, 6078, 6651 в архиве не сохранились — составлены заново, проверьте. Отправка: если в assets/config.js задан FORMS_ENDPOINT — на сервер (Яндекс Облако), иначе — письмом. Форма записи на занятия — «zapis»; список программ в ней редактируется в админке (Настройки → Программы).",
  "email": "helpautismvrn@yandex.ru",
  "forms": {
   "1168": {
    "title": "Вопрос специалисту",
    "fields": [
-    {"name": "Имя", "type": "text", "label": "Ваше имя", "required": true},
-    {"name": "E-mail", "type": "email", "label": "Ваш e-mail", "required": true},
-    {"name": "Кому вопрос", "type": "select", "label": "Вопрос", "options": ["юристу", "священнику", "психологу", "по аутизму", "другое"]},
-    {"name": "Сообщение", "type": "textarea", "label": "Сообщение", "required": true}
+    {
+     "name": "Имя",
+     "type": "text",
+     "label": "Ваше имя",
+     "required": true
+    },
+    {
+     "name": "E-mail",
+     "type": "email",
+     "label": "Ваш e-mail",
+     "required": true
+    },
+    {
+     "name": "Кому вопрос",
+     "type": "select",
+     "label": "Вопрос",
+     "options": [
+      "юристу",
+      "священнику",
+      "психологу",
+      "по аутизму",
+      "другое"
+     ]
+    },
+    {
+     "name": "Сообщение",
+     "type": "textarea",
+     "label": "Сообщение",
+     "required": true
+    }
    ]
   },
   "1618": {
-   "title": "Записаться на занятия",
-   "fields": [
-    {"name": "Имя и фамилия", "type": "text", "label": "Ваше имя и фамилия", "required": true},
-    {"name": "E-mail", "type": "email", "label": "Ваш e-mail", "required": true},
-    {"name": "Телефон", "type": "tel", "label": "Ваш номер телефона", "required": true},
-    {"name": "Занятия для детей", "type": "checkbox", "label": "Занятия для детей", "options": ["Индивидуальные занятия (ABA)", "Сенсорная интеграция", "Логопед", "Творческие занятия", "Спорт"]},
-    {"name": "Занятия для родителей", "type": "checkbox", "label": "Занятия для родителей", "options": ["Консультация специалиста", "Клуб Mama.Lounge", "Группа поддержки"]},
-    {"name": "Комментарий", "type": "textarea", "label": "Комментарий"}
-   ]
+   "alias": "zapis"
   },
   "1722": {
    "title": "Связаться с администрацией",
    "fields": [
-    {"name": "Имя", "type": "text", "label": "Ваше имя", "required": true},
-    {"name": "E-mail", "type": "email", "label": "Ваш e-mail", "required": true},
-    {"name": "Сообщение", "type": "textarea", "label": "Сообщение", "required": true}
+    {
+     "name": "Имя",
+     "type": "text",
+     "label": "Ваше имя",
+     "required": true
+    },
+    {
+     "name": "E-mail",
+     "type": "email",
+     "label": "Ваш e-mail",
+     "required": true
+    },
+    {
+     "name": "Сообщение",
+     "type": "textarea",
+     "label": "Сообщение",
+     "required": true
+    }
    ]
   },
   "3195": {
    "title": "Анкета предварительной записи в ресурсный класс",
    "fields": [
-    {"name": "ФИО родителя", "type": "text", "label": "ФИО родителя (законного представителя)", "required": true},
-    {"name": "Телефон", "type": "tel", "label": "Телефон", "required": true},
-    {"name": "E-mail", "type": "email", "label": "E-mail"},
-    {"name": "Имя ребёнка", "type": "text", "label": "Имя ребёнка", "required": true},
-    {"name": "Дата рождения ребёнка", "type": "date", "label": "Дата рождения ребёнка", "required": true},
-    {"name": "Район / школа", "type": "text", "label": "Желаемая школа или район"},
-    {"name": "Комментарий", "type": "textarea", "label": "Что важно знать о ребёнке"}
+    {
+     "name": "ФИО родителя",
+     "type": "text",
+     "label": "ФИО родителя (законного представителя)",
+     "required": true
+    },
+    {
+     "name": "Телефон",
+     "type": "tel",
+     "label": "Телефон",
+     "required": true
+    },
+    {
+     "name": "E-mail",
+     "type": "email",
+     "label": "E-mail"
+    },
+    {
+     "name": "Имя ребёнка",
+     "type": "text",
+     "label": "Имя ребёнка",
+     "required": true
+    },
+    {
+     "name": "Дата рождения ребёнка",
+     "type": "date",
+     "label": "Дата рождения ребёнка",
+     "required": true
+    },
+    {
+     "name": "Район / школа",
+     "type": "text",
+     "label": "Желаемая школа или район"
+    },
+    {
+     "name": "Комментарий",
+     "type": "textarea",
+     "label": "Что важно знать о ребёнке"
+    }
    ]
   },
   "6078": {
    "title": "Стать волонтёром",
    "fields": [
-    {"name": "Имя", "type": "text", "label": "Ваше имя", "required": true},
-    {"name": "Возраст", "type": "number", "label": "Возраст"},
-    {"name": "Телефон", "type": "tel", "label": "Телефон", "required": true},
-    {"name": "E-mail", "type": "email", "label": "E-mail"},
-    {"name": "Чем хотите помочь", "type": "checkbox", "label": "Чем хотите помочь", "options": ["Помощь на мероприятиях", "Занятия с детьми", "Сопровождение в поездках", "Фото и видео", "Профессиональная помощь (юрист, дизайнер и т. д.)", "Другое"]},
-    {"name": "О себе", "type": "textarea", "label": "Расскажите немного о себе"}
+    {
+     "name": "Имя",
+     "type": "text",
+     "label": "Ваше имя",
+     "required": true
+    },
+    {
+     "name": "Возраст",
+     "type": "number",
+     "label": "Возраст"
+    },
+    {
+     "name": "Телефон",
+     "type": "tel",
+     "label": "Телефон",
+     "required": true
+    },
+    {
+     "name": "E-mail",
+     "type": "email",
+     "label": "E-mail"
+    },
+    {
+     "name": "Чем хотите помочь",
+     "type": "checkbox",
+     "label": "Чем хотите помочь",
+     "options": [
+      "Помощь на мероприятиях",
+      "Занятия с детьми",
+      "Сопровождение в поездках",
+      "Фото и видео",
+      "Профессиональная помощь (юрист, дизайнер и т. д.)",
+      "Другое"
+     ]
+    },
+    {
+     "name": "О себе",
+     "type": "textarea",
+     "label": "Расскажите немного о себе"
+    }
    ]
   },
   "6651": {
    "title": "Простыми словами — задать вопрос",
    "fields": [
-    {"name": "Имя", "type": "text", "label": "Ваше имя", "required": true},
-    {"name": "Контакт", "type": "text", "label": "Телефон или e-mail", "required": true},
-    {"name": "Вопрос", "type": "textarea", "label": "Ваш вопрос", "required": true}
+    {
+     "name": "Имя",
+     "type": "text",
+     "label": "Ваше имя",
+     "required": true
+    },
+    {
+     "name": "Контакт",
+     "type": "text",
+     "label": "Телефон или e-mail",
+     "required": true
+    },
+    {
+     "name": "Вопрос",
+     "type": "textarea",
+     "label": "Ваш вопрос",
+     "required": true
+    }
    ]
+  },
+  "zapis": {
+   "title": "Запись на занятия",
+   "fields": [
+    {
+     "name": "Кого записываем",
+     "type": "select",
+     "label": "Кого записываем",
+     "options": [
+      "Ребёнка",
+      "Себя (18+)",
+      "Подростка или взрослого (18+) — я родитель / представитель"
+     ],
+     "required": true
+    },
+    {
+     "name": "ФИО",
+     "type": "text",
+     "label": "Ваше имя и фамилия",
+     "required": true
+    },
+    {
+     "name": "Имя и возраст участника",
+     "type": "text",
+     "label": "Имя и возраст участника занятий",
+     "required": true
+    },
+    {
+     "name": "Телефон",
+     "type": "tel",
+     "label": "Телефон",
+     "required": true
+    },
+    {
+     "name": "E-mail",
+     "type": "email",
+     "label": "E-mail"
+    },
+    {
+     "name": "Программы",
+     "type": "programs",
+     "label": "Какие занятия интересуют"
+    },
+    {
+     "name": "Комментарий",
+     "type": "textarea",
+     "label": "Комментарий: что важно знать об участнике"
+    }
+   ]
+  },
+  "e6801e4": {
+   "alias": "zapis"
   }
  }
 }

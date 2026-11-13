@@ -78,6 +78,15 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
 .gal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 10px; }
 .gal div { position: relative; aspect-ratio: 1; border-radius: 8px; background: var(--soft) center/cover; }
 .gal button { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%; border: 0; background: rgba(0,0,0,.6); color: #fff; cursor: pointer; line-height: 1; }
+.set-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; padding-bottom: 80px; }
+.set-grid .box { border: 1px solid var(--line); border-radius: var(--r); padding: 20px; }
+.set-grid h3 { font-size: 15px; margin-bottom: 14px; }
+.set-wide { grid-column: 1 / -1; }
+.clr { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 14px; cursor: pointer; }
+.clr input { width: 46px; height: 36px; border: 1px solid var(--line); border-radius: 8px; padding: 2px; background: #fff; }
+.pgroup { border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 12px; display: grid; gap: 8px; }
+.pgroup .row2 { display: flex; gap: 8px; }
+@media (max-width: 860px) { .set-grid { grid-template-columns: 1fr; } }
 .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); background: var(--ink); color: #fff; padding: 12px 20px; border-radius: 999px; font-size: 14px; opacity: 0; transition: .3s; pointer-events: none; z-index: 50; max-width: 90vw; text-align: center; }
 .toast.on { opacity: 1; transform: translateX(-50%); }
 .toast.err { background: var(--err); }
@@ -110,6 +119,7 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
   <header class="top"><div class="wrap">
     <a class="brand" href="../" target="_blank"><img src="../wp-content/uploads/2017/01/logo-1.png" alt="">Искра Надежды</a>
     <span class="spacer"></span>
+    <a class="btn ghost small" href="#settings">Настройки</a>
     <button class="btn ghost small" id="b-logout">Выйти</button>
   </div></header>
 
@@ -127,6 +137,36 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
     <div id="pending" class="pending hidden"></div>
     <div class="list" id="list"></div>
     <div class="pager" id="pager"></div>
+  </main>
+
+  <!-- настройки сайта -->
+  <main id="v-settings" class="wrap hidden">
+    <div class="ed-head"><a class="btn ghost small" href="#">← К списку</a><span class="spacer"></span><button class="btn" id="b-set-save">Сохранить настройки</button></div>
+    <div class="set-grid">
+      <section class="box"><h3>Картинка на главной</h3>
+        <div class="cover" id="s-hero"></div>
+        <button class="btn ghost small" id="b-hero">Заменить картинку</button>
+        <p class="hint">Лучше горизонтальное или квадратное фото от 1200 px.</p></section>
+      <section class="box"><h3>Цвета сайта</h3>
+        <label class="clr"><input type="color" id="c-cta"> Кнопка «Помочь»</label>
+        <label class="clr"><input type="color" id="c-accent"> Ссылки и акценты</label>
+        <label class="clr"><input type="color" id="c-ink"> Текст и основные кнопки</label>
+        <button class="btn ghost small" id="b-colors-reset">Вернуть как было</button></section>
+      <section class="box"><h3>Соцсети</h3>
+        <p class="hint">Пустое поле — значок показывается бледным, без ссылки.</p>
+        <div class="field"><label>ВКонтакте</label><input type="text" id="s-vk" placeholder="https://vk.com/..."></div>
+        <div class="field"><label>Telegram</label><input type="text" id="s-telegram" placeholder="https://t.me/..."></div>
+        <div class="field"><label>Max</label><input type="text" id="s-max" placeholder="https://max.ru/..."></div>
+        <div class="field"><label>Одноклассники</label><input type="text" id="s-ok" placeholder="https://ok.ru/..."></div>
+        <div class="field"><label>YouTube</label><input type="text" id="s-youtube" placeholder="https://www.youtube.com/..."></div></section>
+      <section class="box set-wide"><h3>Программы в форме записи на занятия</h3>
+        <p class="hint">Каждая программа — с новой строки. Группы можно добавлять и удалять.</p>
+        <div id="s-progs"></div><button class="btn ghost small" id="b-prog-add">+ Добавить группу</button></section>
+      <section class="box set-wide"><h3>Пожертвования</h3>
+        <div class="field"><label>Заголовок страницы</label><input type="text" id="s-don-title"></div>
+        <div class="field"><label>Текст</label><textarea id="s-don-text" rows="3"></textarea></div>
+        <div class="field"><label>Суммы на кнопках, ₽ (через запятую)</label><input type="text" id="s-don-amounts" placeholder="300, 500, 1000, 3000"></div></section>
+    </div>
   </main>
 
   <!-- редактор -->
@@ -186,7 +226,7 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
 (function () {
   "use strict";
   var API = (window.HA_CONFIG || {}).API_URL || "";
-  var $ = function (s) { return document.querySelector(s); };
+  var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var esc = function (s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
   var token = sessionStorage.getItem("ha_token") || "";
@@ -300,6 +340,52 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
   }
   $("#b-new").onclick = function () { location.hash = "#new-" + state.tab; };
 
+  /* ---------- настройки сайта ---------- */
+  var SET = null, DEF_COLORS = { cta: "#e8590c", accent: "#1d6fd1", ink: "#111318" };
+  function showSettings() {
+    $("#v-list").classList.add("hidden"); $("#v-edit").classList.add("hidden"); $("#v-settings").classList.remove("hidden"); scrollTo(0, 0);
+    busy(true, "Загружаем настройки…");
+    api("settings").then(function (j) { SET = j.settings || {}; fillSettings(); })
+      .catch(function (e) { toast(e.message, true); }).then(function () { busy(false); });
+  }
+  function fillSettings() {
+    var c = Object.assign({}, DEF_COLORS, SET.colors || {});
+    $("#c-cta").value = c.cta; $("#c-accent").value = c.accent; $("#c-ink").value = c.ink;
+    var soc = SET.social || {};
+    ["vk", "telegram", "max", "ok", "youtube"].forEach(function (k) { $("#s-" + k).value = soc[k] || ""; });
+    renderHero(); renderProgs();
+    var d = SET.donate || {};
+    $("#s-don-title").value = d.title || ""; $("#s-don-text").value = d.text || ""; $("#s-don-amounts").value = (d.amounts || []).join(", ");
+  }
+  function renderHero() { var el = $("#s-hero"); el.style.backgroundImage = SET.hero_image ? 'url("' + pv(SET.hero_image) + '")' : ""; el.textContent = SET.hero_image ? "" : "нет картинки"; }
+  function renderProgs() {
+    $("#s-progs").innerHTML = (SET.programs || []).map(function (g, i) {
+      return '<div class="pgroup" data-i="' + i + '"><div class="row2"><input type="text" class="pg-name" value="' + esc(g.group) + '" placeholder="Группа, например «Для детей»">' +
+        '<button class="btn danger small pg-del" type="button">Удалить</button></div><textarea class="pg-items" rows="5" placeholder="Программа — с новой строки">' + esc((g.items || []).join("\n")) + "</textarea></div>";
+    }).join("");
+  }
+  function readProgs() {
+    return $$(".pgroup").map(function (el) {
+      return { group: $(".pg-name", el).value.trim(), items: $(".pg-items", el).value.split("\n").map(function (x) { return x.trim(); }).filter(Boolean) };
+    }).filter(function (g) { return g.group && g.items.length; });
+  }
+  $("#s-progs").addEventListener("click", function (e) { var b = e.target.closest(".pg-del"); if (b) { SET.programs = readProgs(); SET.programs.splice(+b.closest(".pgroup").dataset.i, 1); renderProgs(); } });
+  $("#b-prog-add").onclick = function () { SET.programs = readProgs().concat([{ group: "", items: [] }]); renderProgs(); var n = $$(".pg-name"); n[n.length - 1].focus(); };
+  $("#b-colors-reset").onclick = function () { $("#c-cta").value = DEF_COLORS.cta; $("#c-accent").value = DEF_COLORS.accent; $("#c-ink").value = DEF_COLORS.ink; };
+  $("#b-hero").onclick = function () { pick("#file-img", function (f) { uploadImages([f[0]], function (u) { SET.hero_image = u[0]; renderHero(); toast("Картинка загружена — нажмите «Сохранить настройки»"); }); }); };
+  $("#b-set-save").onclick = function () {
+    var soc = {}; ["vk", "telegram", "max", "ok", "youtube"].forEach(function (k) { soc[k] = $("#s-" + k).value.trim(); });
+    var bad = Object.keys(soc).filter(function (k) { return soc[k] && !/^https:\/\//.test(soc[k]); });
+    if (bad.length) { toast("Ссылки на соцсети должны начинаться с https://", true); return; }
+    var payload = { hero_image: SET.hero_image || "", colors: { cta: $("#c-cta").value, accent: $("#c-accent").value, ink: $("#c-ink").value },
+      social: soc, programs: readProgs(),
+      donate: { title: $("#s-don-title").value, text: $("#s-don-text").value,
+        amounts: $("#s-don-amounts").value.split(/[,\s;]+/).map(function (x) { return x.replace(/\D/g, ""); }).filter(Boolean).map(Number) } };
+    busy(true);
+    api("settings", { settings: payload }).then(function (j) { SET = j.settings; fillSettings(); toast("Настройки сохранены. На сайте обновятся через 2–3 минуты."); })
+      .catch(function (e) { toast(e.message, true); }).then(function () { busy(false); });
+  };
+
   /* ---------- рубрики ---------- */
   function renderCats() {
     var cats = DATA.categories, roots = Object.keys(cats).filter(function (s) { return !cats[s].parent; });
@@ -311,6 +397,8 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
   /* ---------- редактор ---------- */
   function route() {
     var h = location.hash;
+    if (h === "#settings") { showSettings(); return; }
+    $("#v-settings").classList.add("hidden");
     if (h.indexOf("#edit=") === 0) openDoc(decodeURIComponent(h.slice(6)), true);
     else if (h.indexOf("#new-") === 0) newDoc(h.slice(5) === "page" ? "page" : "post");
     else showList();
@@ -378,7 +466,7 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
     if (b.dataset.c) { document.execCommand(b.dataset.c, false, b.dataset.v ? "<" + b.dataset.v + ">" : null); return; }
     if (b.dataset.x === "link") { var u = prompt("Адрес ссылки (https://…)"); if (u) document.execCommand("createLink", false, u); }
     if (b.dataset.x === "image") { pick("#file-img", function (files) { uploadImages(files, function (urls) {
-      urls.forEach(function (u) { document.execCommand("insertHTML", false, '<figure><img src="..' + u + '" alt=""></figure><p><br></p>'); }); }); }); }
+      urls.forEach(function (u) { document.execCommand("insertHTML", false, '<figure><img src="' + pv(u) + '" data-site="' + u + '" alt=""></figure><p><br></p>'); }); }); }); }
     if (b.dataset.x === "file") { pick("#file-doc", function (files) { var f = files[0]; busy(true, "Загружаем файл…");
       toBase64(f).then(function (data) { return api("upload", { name: f.name, data: data }); })
         .then(function (j) { document.execCommand("insertHTML", false, '<p><a href="..' + j.url + '">' + esc(f.name) + "</a></p>"); })
@@ -405,23 +493,31 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
       }; img.src = URL.createObjectURL(file);
     });
   }
+  var PREVIEW = {};  // адрес на сайте -> локальное превью (файл появится на сайте после пересборки)
+  function pv(u) { return PREVIEW[u] || ("../" + String(u).replace(/^\//, "")); }
   function uploadImages(files, cb) {
     busy(true, "Загружаем фото…"); var urls = [];
-    files.reduce(function (p, f) { return p.then(function () { return shrink(f); }).then(function (s) { return toBase64(s.blob).then(function (d) { return api("upload", { name: s.name, data: d }); }); })
-      .then(function (j) { urls.push(j.url); }); }, Promise.resolve())
+    files.reduce(function (p, f) { var sh; return p.then(function () { return shrink(f); }).then(function (s) { sh = s; return toBase64(s.blob).then(function (d) { return api("upload", { name: s.name, data: d }); }); })
+      .then(function (j) { PREVIEW[j.url] = URL.createObjectURL(sh.blob); urls.push(j.url); }); }, Promise.resolve())
       .then(function () { cb(urls); }).catch(function (e) { toast(e.message, true); }).then(function () { busy(false); });
   }
   function renderCover() {
-    var c = $("#e-cover"); c.style.backgroundImage = state.cover ? 'url("..' + state.cover + '")' : ""; c.textContent = state.cover ? "" : "нет обложки";
+    var c = $("#e-cover"); c.style.backgroundImage = state.cover ? 'url("' + pv(state.cover) + '")' : ""; c.textContent = state.cover ? "" : "нет обложки";
     $("#b-cover-x").classList.toggle("hidden", !state.cover);
   }
   $("#b-cover").onclick = function () { pick("#file-img", function (f) { uploadImages([f[0]], function (u) { state.cover = u[0]; renderCover(); }); }); };
   $("#b-cover-x").onclick = function () { state.cover = ""; renderCover(); };
   function renderGallery() {
-    $("#e-gal").innerHTML = state.gallery.map(function (u, i) { return '<div style="background-image:url(&quot;..' + esc(u) + '&quot;)"><button data-i="' + i + '" title="Убрать">×</button></div>'; }).join("");
+    $("#e-gal").innerHTML = state.gallery.map(function (u, i) { return '<div style="background-image:url(&quot;' + esc(pv(u)) + '&quot;)"><button data-i="' + i + '" title="Убрать">×</button></div>'; }).join("");
   }
   $("#e-gal").addEventListener("click", function (e) { var b = e.target.closest("button"); if (b) { state.gallery.splice(+b.dataset.i, 1); renderGallery(); } });
   $("#b-gal").onclick = function () { pick("#file-img", function (f) { uploadImages(f, function (u) { state.gallery = state.gallery.concat(u); renderGallery(); }); }); };
+
+  function editorHtmlForSave() {
+    var d = $("#e-content").cloneNode(true);
+    $$("img[data-site]", d).forEach(function (img) { img.setAttribute("src", ".." + img.getAttribute("data-site")); img.removeAttribute("data-site"); });
+    return d.innerHTML;
+  }
 
   /* ---------- сохранение / удаление ---------- */
   $("#b-save").onclick = function () {
@@ -429,7 +525,7 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
     if (!title) { toast("Введите заголовок", true); $("#e-title").focus(); return; }
     var doc = { type: d.type || "post", title: title, date: $("#e-date").value, slug: $("#e-slug").value.trim(),
       categories: $$("#e-cats input:checked").map(function (i) { return i.value; }),
-      thumbnail: state.cover, gallery: state.gallery, content: fromEditorHtml(clean($("#e-content").innerHTML)) };
+      thumbnail: state.cover, gallery: state.gallery, content: fromEditorHtml(clean(editorHtmlForSave())) };
     busy(true);
     api("save", { doc: doc, file: state.file }).then(function (j) {
       pending[j.file] = { type: doc.type, title: doc.title, date: doc.date, path: j.path, categories: doc.categories, old: state.file, t: Date.now() };

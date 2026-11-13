@@ -408,3 +408,57 @@ details.ha-acc[open] summary::after { transform: rotate(45deg); }
 .ha-listhead { text-align: left !important; }
 #site-navigation .dropdownmenu { display: none !important; }
 .navbar-toggle, .navbar-toggle:hover, .navbar-toggle:focus, .navbar-toggle:not(.collapsed) { background-color: #fff !important; }
+
+/* ===================== правки заказчика ===================== */
+:root { --cta: #e8590c; }
+/* кнопка «Помочь» — акцентный цвет (меняется в админке) */
+.ha-btn--cta, .btn.ha-btn--cta, a.ha-btn--cta { background: var(--cta) !important; border-color: var(--cta) !important; color: #fff !important; }
+.ha-btn--cta:hover { filter: brightness(1.08); background: var(--cta) !important; }
+.btn.ha-btn--ghost { background: transparent !important; color: var(--ink) !important; border-color: var(--ink) !important; }
+.btn.ha-btn--ghost:hover { background: var(--ink) !important; color: #fff !important; }
+#site-navigation .nav > li.ha-nav-cta > a { background: var(--cta) !important; color: #fff !important; border-radius: 999px; padding: 8px 18px !important; margin: 18px 0 0 10px; }
+#site-navigation .nav > li.ha-nav-cta > a::after { display: none; }
+@media (max-width: 767px) { #site-navigation .nav > li.ha-nav-cta { border: 0; padding: 14px 0 4px; } #site-navigation .nav > li.ha-nav-cta > a { display: block; text-align: center !important; margin: 0; padding: 14px !important; } }
+
+/* соцсети: верхняя полоса и подвал */
+.social-logo .social-block { gap: 6px 14px; }
+.ha-topmail { color: var(--text) !important; font-size: 13px; margin-right: 6px; }
+.ha-soc, .ha-fsoc { display: inline-grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; color: var(--ink) !important; transition: background-color .2s, color .2s, opacity .2s; }
+.ha-soc:hover, .ha-fsoc:hover { background: var(--ink); color: #fff !important; }
+.ha-soc.is-soon, .ha-fsoc.is-soon { opacity: .3; cursor: default; }
+.ha-soc.is-soon:hover, .ha-fsoc.is-soon:hover { background: none; color: var(--ink) !important; }
+.ha-footer__social { gap: 4px !important; }
+.ha-footer__social .ha-fsoc { background: #fff; border: 1px solid var(--line); padding: 0 !important; width: 38px; height: 38px; }
+@media (max-width: 767px) { .ha-topmail { display: none; } }
+
+/* центрирование: первый экран и блок кнопок */
+.ha-hero, .ha-hero__lead { text-align: center; margin-left: auto !important; margin-right: auto !important; }
+.ha-hero__eyebrow { justify-content: center; }
+.ha-home .header-content-wrap .buttons, .ha-hero__facts, .purchase-now .container { justify-content: center !important; }
+.ha-hero__facts { text-align: center; }
+@media (min-width: 768px) { .ha-hero { align-self: center; } }
+@media (max-width: 767px) { .ha-home .header-content-wrap .buttons { align-items: center; } .ha-home .header-content-wrap .buttons .btn { max-width: 360px; } .purchase-now .container { align-items: center; } .purchase-now .btn { max-width: 360px; } }
+
+/* форма записи: группы программ */
+.ha-progs { margin: 4px 0 10px; }
+.ha-progs__group { display: block; font: 600 13px var(--head); color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin: 10px 0 8px; }
+
+/* пожертвование */
+.ha-lead { font-size: 19px; color: var(--ink); }
+.ha-donate-box { padding: 28px; border: 1px solid var(--line); border-radius: var(--radius); margin: 28px 0 40px; }
+.ha-donate-form { display: grid; gap: 18px; }
+.ha-amounts { display: flex; flex-wrap: wrap; gap: 10px; }
+.ha-amount input { position: absolute; opacity: 0; pointer-events: none; }
+.ha-amount span { display: inline-flex; align-items: center; padding: 12px 20px; border: 1.5px solid var(--line); border-radius: 999px; font: 600 16px var(--head); color: var(--ink); cursor: pointer; transition: border-color .2s, background-color .2s, color .2s; }
+.ha-amount input:checked + span { border-color: var(--cta); background: var(--cta); color: #fff; }
+.ha-amount input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ha-donate-form input[type=email], .ha-donate-form input[type=text], .ha-donate-form input[type=number] { width: 100%; font: inherit; font-size: 16px; padding: 13px 15px; border: 1px solid var(--line); border-radius: var(--radius-sm); }
+.ha-donate-form .ha-btn { justify-self: start; text-decoration: none !important; }
+.ha-hint { font-size: 13.5px; color: var(--muted); margin: 14px 0 0 !important; }
+.hidden { display: none !important; }
+@media (max-width: 767px) { .ha-donate-box { padding: 20px 16px; } .ha-donate-form .ha-btn { justify-self: stretch; } }
+@media (max-width: 767px) {
+  .ha-home .header-content-wrap .buttons { width: 100%; align-items: center !important; justify-content: center !important; margin-left: auto !important; margin-right: auto !important; }
+  .ha-home .header-content-wrap .buttons .btn { width: 100% !important; max-width: 340px !important; align-self: center !important; }
+  .ha-hero__facts { justify-content: center; }
+}
