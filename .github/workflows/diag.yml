@@ -1,28 +1,33 @@
-name: Diagnose admin API
+name: Check admin end-to-end
 
+# Ручная проверка админки на боевом сайте: вход -> создать тестовую новость -> дождаться её на сайте -> удалить -> дождаться, что пропала.
 on:
   workflow_dispatch:
 
 jobs:
-  diag:
+  e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - name: Check API with real password
+      - name: Admin end-to-end
         env:
           ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+          API: https://api.helpautism.ru/
+          SITE: https://helpautism.ru
         run: |
-          API=$(curl -s http://helpautism.ru.website.yandexcloud.net/assets/config.js | grep -o 'https://functions.yandexcloud.net/[a-z0-9]*' | head -1)
-          echo "API: $API"
-          echo "--- preflight (как делает браузер)"
-          curl -s -o /dev/null -w "OPTIONS: %{http_code} за %{time_total}s\n" -X OPTIONS "$API?a=login" \
-            -H "Origin: http://helpautism.ru.website.yandexcloud.net" -H "Access-Control-Request-Method: POST" -H "Access-Control-Request-Headers: content-type,x-admin-token" -D /tmp/h.txt
-          grep -i "access-control" /tmp/h.txt || echo "нет заголовков CORS"
-          echo "--- вход с настоящим паролем"
+          set -e
           BODY=$(python3 -c 'import json,os;print(json.dumps({"password":os.environ["ADMIN_PASSWORD"]}))')
-          curl -s -o /tmp/l.json -w "login: %{http_code} за %{time_total}s\n" -X POST "$API?a=login" -H "Content-Type: application/json" -H "Origin: http://helpautism.ru.website.yandexcloud.net" --data "$BODY"
-          python3 -c 'import json;d=json.load(open("/tmp/l.json"));print("ответ:", "токен получен" if d.get("token") else d)'
-          TOKEN=$(python3 -c 'import json;print(json.load(open("/tmp/l.json")).get("token",""))')
-          curl -s -o /tmp/p.json -w "ping с токеном: %{http_code} за %{time_total}s\n" "$API?a=ping" -H "X-Admin-Token: $TOKEN"
-          cat /tmp/p.json; echo
-          curl -s -o /dev/null -w "admin.json: %{http_code}\n" http://helpautism.ru.website.yandexcloud.net/data/admin.json
-          echo "--- длина пароля в секрете: ${#ADMIN_PASSWORD} символов"
+          TOKEN=$(curl -s -X POST "$API?a=login" -H "Content-Type: application/json" --data "$BODY" | python3 -c 'import json,sys;print(json.load(sys.stdin).get("token",""))')
+          [ -n "$TOKEN" ] || { echo "::error::Вход в админку не удался"; exit 1; }
+          echo "1. Вход в админку: ок"
+          curl -s "$API?a=settings" -H "X-Admin-Token: $TOKEN" | python3 -c 'import json,sys;d=json.load(sys.stdin)["settings"];print("2. Настройки читаются: групп программ", len(d.get("programs",[])))'
+          DOC='{"doc":{"type":"post","title":"Проверка админки (будет удалена)","date":"2000-01-01","categories":[],"content":"<p>Тестовая запись для проверки админки.</p>"}}'
+          R=$(curl -s -X POST "$API?a=save" -H "Content-Type: application/json" -H "X-Admin-Token: $TOKEN" --data "$DOC")
+          FILE=$(echo "$R" | python3 -c 'import json,sys;print(json.load(sys.stdin)["file"])'); P=$(echo "$R" | python3 -c 'import json,sys;print(json.load(sys.stdin)["path"])')
+          echo "3. Новость сохранена: $FILE -> $SITE$P"
+          for i in $(seq 1 40); do C=$(curl -s -o /dev/null -w "%{http_code}" "$SITE$P"); [ "$C" = 200 ] && break; sleep 15; done
+          [ "$C" = 200 ] && echo "4. Новость появилась на сайте через ~$((i*15)) с" || { echo "::error::Новость не появилась на сайте"; exit 1; }
+          curl -s -X POST "$API?a=delete" -H "Content-Type: application/json" -H "X-Admin-Token: $TOKEN" --data "{\"file\":\"$FILE\"}" >/dev/null
+          for i in $(seq 1 40); do C=$(curl -s -o /dev/null -w "%{http_code}" "$SITE$P"); [ "$C" = 404 ] && break; sleep 15; done
+          [ "$C" = 404 ] && echo "5. Новость удалена и пропала с сайта через ~$((i*15)) с" || { echo "::error::Удалённая новость осталась на сайте"; exit 1; }
+          echo "Админка работает полностью"
