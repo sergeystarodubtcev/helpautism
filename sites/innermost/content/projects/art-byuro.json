@@ -1,0 +1,16 @@
+{
+ "id": 3001,
+ "type": "project",
+ "slug": "art-byuro",
+ "title": "Арт-бюро",
+ "subtitle": "Творческая мастерская",
+ "order": 2,
+ "date": "2025-01-01",
+ "modified": "2025-01-01",
+ "categories": [],
+ "thumbnail": "/uploads/craftum/art-byuro.jpg",
+ "gallery": [],
+ "excerpt": "",
+ "content": "<p>Творческая мастерская «Арт-бюро».</p>",
+ "path": "/proekty/art-byuro/"
+}

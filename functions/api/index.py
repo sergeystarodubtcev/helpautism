@@ -137,7 +137,7 @@ SITE = SITES["main"]
 
 
 def file_ok(f):
-    return bool(re.match(r"^" + re.escape(SITE["prefix"]) + r"content/(posts/\d{4}|pages)/[a-z0-9_\-%.]+\.json$", f or "", re.I))
+    return bool(re.match(r"^" + re.escape(SITE["prefix"]) + r"content/(posts/\d{4}|pages|projects)/[a-z0-9_\-%.]+\.json$", f or "", re.I))
 
 
 # ---------- записи ----------
@@ -178,7 +178,9 @@ def save_doc(body):
     title = str(d.get("title", "")).strip()
     if not title:
         raise HttpErr(400, "Нужен заголовок")
-    typ = "page" if d.get("type") == "page" else "post"
+    typ = d.get("type") if d.get("type") in ("page", "project") else "post"
+    if typ == "project" and SITE is not SITES["innermost"]:
+        raise HttpErr(400, "Проекты есть только у сайта «Сокровенный человек»")
     date = str(d.get("date") or time.strftime("%Y-%m-%d"))
     if not re.match(r"^\d{4}-\d{2}-\d{2}$", date):
         raise HttpErr(400, "Неверная дата")
@@ -200,7 +202,15 @@ def save_doc(body):
         "thumbnail": str(d.get("thumbnail") or ""), "gallery": [str(x) for x in d.get("gallery", [])][:200],
         "excerpt": str(d.get("excerpt") or "").strip() or excerpt(content), "content": content,
     })
-    if typ == "post":
+    if typ == "project":
+        try:
+            order = max(1, min(999, int(d.get("order") or prev.get("order") or 99)))
+        except (TypeError, ValueError):
+            order = 99
+        doc.update({"subtitle": str(d.get("subtitle") or "").strip()[:160], "order": order, "categories": []})
+        doc["path"] = f"/proekty/{slug}/"
+        new = f"{SITE['prefix']}content/projects/{slug}.json"
+    elif typ == "post":
         doc["path"] = f"/{date[:4]}/{date[5:7]}/{date[8:10]}/{slug}/"
         new = f"{SITE['prefix']}content/posts/{date[:4]}/{slug}.json"
     else:

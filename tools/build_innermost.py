@@ -62,6 +62,10 @@ S = load(os.path.join(SRC, "content", "settings.json"), {}) or {}
 POSTS = sorted((d for d in (load(p) for p in glob.glob(os.path.join(SRC, "content", "posts", "*", "*.json"))) if d and d.get("title")),
                key=lambda d: d.get("date", ""), reverse=True)
 PAGES = [d for d in (load(p) for p in glob.glob(os.path.join(SRC, "content", "pages", "*.json"))) if d and d.get("title")]
+PROJECTS = sorted((d for d in (load(p) for p in glob.glob(os.path.join(SRC, "content", "projects", "*.json"))) if d and d.get("title")),
+                  key=lambda d: (int(d.get("order") or 999), d.get("title", "")))
+for p in PROJECTS:
+    p["path"] = f"/proekty/{p['slug']}/"
 for p in POSTS:
     p.setdefault("path", "/{0}/{1}/{2}/{3}/".format(*p["date"].split("-"), p["slug"]))
 for p in PAGES:
@@ -156,13 +160,16 @@ def news_card(p):
             f'<span class="more">Читать →</span></span></a>')
 
 
+def project_card(p):
+    img = f'<img src="{E(p["thumbnail"])}" alt="" loading="lazy">' if p.get("thumbnail") else ""
+    return (f'<a class="proj reveal" href="{E(p["path"])}"><div class="proj-img">{img}</div>'
+            f'<h3>{E(p["title"])}</h3><p class="sub">{E(p.get("subtitle"))}</p><span class="more">Подробнее →</span></a>')
+
+
 def home():
     h, a, hp, d, c = (S.get(k, {}) for k in ("hero", "about", "help", "donate", "contacts"))
     hh, ht = help_href()
-    projects = "".join(
-        f'<article class="proj reveal"><div class="proj-img">{("<img src=" + chr(34) + E(p.get("image")) + chr(34) + " alt=" + chr(34) + chr(34) + " loading=lazy>") if p.get("image") else ""}</div>'
-        f'<h3>{E(p.get("title"))}</h3><p class="sub">{E(p.get("subtitle"))}</p>{("<p>" + E(p.get("text")) + "</p>") if p.get("text") else ""}</article>'
-        for p in S.get("projects", []))
+    projects = "".join(project_card(p) for p in PROJECTS) or '<p class="muted">Проекты скоро появятся.</p>'
     items = "".join(f'<li class="reveal">{E(x)}</li>' for x in hp.get("items", []))
     req = "<br>".join(E(x) for x in str(d.get("requisites", "")).split("\n") if x.strip())
     qr = f'<img class="qr" src="{E(d.get("qr"))}" alt="QR-код для пожертвования" loading="lazy">' if d.get("qr") else ""
@@ -253,8 +260,17 @@ def gallery_html(g):
 def post_page(p, kind="post"):
     cover = f'<figure class="post-cover"><img src="{E(p["thumbnail"])}" alt=""></figure>' if p.get("thumbnail") else ""
     meta = f'<time datetime="{E(p["date"])}">{ru_date(p["date"])}</time>' if kind == "post" else ""
-    back = '<a class="back" href="/novosti/">← Все новости</a>' if kind == "post" else '<a class="back" href="/">← На главную</a>'
+    if kind == "project" and p.get("subtitle"):
+        meta = f'<p class="eyebrow">{E(p["subtitle"])}</p>'
+    back = {"post": '<a class="back" href="/novosti/">← Все новости</a>', "project": '<a class="back" href="/#projects">← Все проекты</a>'}.get(
+        kind, '<a class="back" href="/">← На главную</a>')
     more = ""
+    if kind == "project":
+        others = [x for x in PROJECTS if x is not p][:4]
+        if others:
+            more = f'<section class="sec"><div class="wrap"><div class="sec-head"><h2>Другие проекты</h2></div><div class="grid2">{"".join(project_card(x) for x in others)}</div></div></section>'
+        hh, ht = help_href()
+        more = f'<div class="wrap narrow"><a class="btn btn-cta" href="{E(hh)}"{ht}>Поддержать проект</a></div>' + more
     if kind == "post":
         others = [x for x in POSTS if x is not p][:3]
         if others:
@@ -283,12 +299,14 @@ def main():
         write(os.path.join(OUT, p["path"].strip("/"), "index.html"), post_page(p))
     for p in PAGES:
         write(os.path.join(OUT, p["path"].strip("/"), "index.html"), post_page(p, "page"))
+    for p in PROJECTS:
+        write(os.path.join(OUT, p["path"].strip("/"), "index.html"), post_page(p, "project"))
     write(os.path.join(OUT, "404.html"), layout("Страница не найдена", '<section class="sec page-top"><div class="wrap narrow"><h1>Страница не найдена</h1>'
           '<p>Возможно, её перенесли. Начните с <a href="/">главной</a> или посмотрите <a href="/novosti/">новости</a>.</p></div></section>', cls="inner"))
     # вход в админку — общая админка на helpautism.ru, профиль «Сокровенный человек»
     write(os.path.join(OUT, "admin", "index.html"), f'<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex">'
           f'<meta http-equiv="refresh" content="0;url={ADMIN_URL}"><a href="{ADMIN_URL}">Админка</a>')
-    urls = ["/", "/novosti/"] + [p["path"] for p in POSTS + PAGES]
+    urls = ["/", "/novosti/"] + [p["path"] for p in POSTS + PAGES + PROJECTS]
     write(os.path.join(OUT, "sitemap.xml"), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
           + "".join(f"<url><loc>{SITE_URL}{u}</loc></url>\n" for u in urls) + "</urlset>\n")
     write(os.path.join(OUT, "robots.txt"), f"User-agent: *\nDisallow: /admin/\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n")
@@ -297,6 +315,9 @@ def main():
                      for f in glob.glob(os.path.join(SRC, "content", "posts", "*", "*.json")) for d in [load(f)] if d],
            "pages": [{"file": rel(f), "title": d["title"], "date": d.get("date", ""), "path": d.get("path", ""), "categories": []}
                      for f in glob.glob(os.path.join(SRC, "content", "pages", "*.json")) for d in [load(f)] if d],
+           "projects": [{"file": rel(f), "title": d["title"], "date": d.get("date", ""), "path": f"/proekty/{d.get('slug', '')}/", "order": d.get("order") or 999,
+                         "subtitle": d.get("subtitle", ""), "categories": []}
+                        for f in glob.glob(os.path.join(SRC, "content", "projects", "*.json")) for d in [load(f)] if d],
            "categories": {}}
     for p in idx["posts"] + idx["pages"]:
         p["path"] = p["path"] or ""

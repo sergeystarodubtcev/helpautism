@@ -140,7 +140,7 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
   <!-- список -->
   <main id="v-list" class="wrap">
     <div class="toolbar">
-      <div class="tabs"><button data-t="post" class="on">Новости</button><button data-t="page">Страницы</button></div>
+      <div class="tabs"><button data-t="post" class="on">Новости</button><button data-t="page">Страницы</button><button data-t="project" data-only="innermost">Проекты</button></div>
       <input type="search" id="q" placeholder="Поиск по заголовку">
       <select id="f-cat" class="flt"><option value="">Все рубрики</option></select>
       <select id="f-year" class="flt"><option value="">Все годы</option></select>
@@ -195,7 +195,7 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
         <div class="field"><label>Блок «О нас» — надпись на кнопке</label><input type="text" id="i-a-btn"></div>
         <div class="field"><label>Текст в подвале</label><textarea id="i-foot" rows="2"></textarea></div></section>
       <section class="box set-wide" data-only="innermost"><h3>Наши проекты</h3>
-        <div id="i-projects"></div><button class="btn ghost small" id="b-proj-add" type="button">+ Добавить проект</button></section>
+        <p class="hint" style="margin:0">Проекты редактируются во вкладке <a href="#" id="go-projects">«Проекты»</a> на главной странице админки: у каждого — своя страница с текстом и фото, там же кнопка «+ Новый проект».</p></section>
       <section class="box" data-only="innermost"><h3>Блок «Принимаем любую помощь»</h3>
         <div class="field"><label>Заголовок</label><input type="text" id="i-help-title"></div>
         <div class="field"><label>Текст</label><textarea id="i-help-text" rows="3"></textarea></div>
@@ -245,7 +245,9 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
       </div>
       <aside class="side">
         <div class="box">
-          <div class="field"><label for="e-date">Дата публикации</label><input type="date" id="e-date"></div>
+          <div class="field" id="f-date"><label for="e-date">Дата публикации</label><input type="date" id="e-date"></div>
+          <div class="field hidden" id="f-proj"><label for="e-sub">Подпись под названием</label><input type="text" id="e-sub" placeholder="например, «Театральная студия»">
+            <label for="e-order" style="margin-top:10px">Порядок на главной</label><input type="text" id="e-order" inputmode="numeric" placeholder="1, 2, 3…"><span class="hint">Меньше число — выше в списке.</span></div>
           <div class="field" style="margin:0"><label for="e-slug">Адрес (латиницей)</label><input type="text" id="e-slug" placeholder="заполнится сам"><span class="hint" id="e-path"></span></div>
         </div>
         <div class="box" id="box-cats"><h3>Рубрики</h3><div class="cats" id="e-cats"></div></div>
@@ -356,12 +358,12 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
 
   /* ---------- список ---------- */
   function items() {
-    var arr = (state.tab === "post" ? DATA.posts : DATA.pages).slice();
+    var arr = LISTS()[state.tab].slice();
     Object.keys(pending).forEach(function (f) {
       var p = pending[f]; if (p.type !== state.tab || (f.indexOf("sites/") === 0) !== (SITE !== "main") || (SITE !== "main" && f.indexOf("sites/" + SITE + "/") !== 0)) return;
       var i = arr.findIndex(function (x) { return x.file === f || x.file === p.old; });
       if (p.deleted) { if (i >= 0) arr.splice(i, 1); return; }
-      var row = { file: f, title: p.title, date: p.date, path: p.path, categories: p.categories || [], fresh: true };
+      var row = { file: f, title: p.title, date: p.date, path: p.path, categories: p.categories || [], subtitle: p.subtitle, order: p.order, fresh: true };
       if (i >= 0) arr[i] = row; else arr.unshift(row);
     });
     var q = state.q.trim().toLowerCase();
@@ -372,6 +374,7 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
     }
     if (state.tab === "post" && state.year) arr = arr.filter(function (x) { return (x.date || "").slice(0, 4) === state.year; });
     if (state.tab === "post") arr.sort(function (a, b) { return (b.date || "").localeCompare(a.date || ""); });
+    else if (state.tab === "project") arr.sort(function (a, b) { return (a.order || 999) - (b.order || 999) || (a.title || "").localeCompare(b.title || "", "ru"); });
     else arr.sort(function (a, b) { return (a.title || "").localeCompare(b.title || "", "ru"); });
     return arr;
   }
@@ -379,13 +382,15 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
     var arr = items(), pages = Math.max(1, Math.ceil(arr.length / PER));
     if (state.page > pages) state.page = pages;
     var chunk = arr.slice((state.page - 1) * PER, state.page * PER);
-    var total = (state.tab === "post" ? DATA.posts : DATA.pages).length;
-    $("#count").textContent = (state.tab === "post" ? "Новостей: " : "Страниц: ") + total +
+    var total = LISTS()[state.tab].length;
+    $("#b-new").textContent = TABN[state.tab][1];
+    $("#count").textContent = TABN[state.tab][0] + total +
       (arr.length !== total ? " · найдено: " + arr.length : "") + (pages > 1 ? " · страница " + state.page + " из " + pages : "");
     $$(".flt").forEach(function (el) { el.classList.toggle("hidden", state.tab !== "post"); });
     $("#list").innerHTML = chunk.map(function (x) {
       var cats = (x.categories || []).map(function (c) { return (DATA.categories[c] || {}).name || c; }).join(", ");
-      return '<div class="row"><span class="d">' + esc(x.date ? x.date.split("-").reverse().join(".") : "") + (x.fresh ? " · сохранено" : "") + '</span>' +
+      if (state.tab === "project") cats = x.subtitle || "";
+      return '<div class="row"><span class="d">' + esc(state.tab === "project" ? "№ " + (x.order || "—") : x.date ? x.date.split("-").reverse().join(".") : "") + (x.fresh ? " · сохранено" : "") + '</span>' +
         '<span class="t" data-f="' + esc(x.file) + '">' + esc(x.title) + (cats ? '<span class="c">' + esc(cats) + "</span>" : "") + "</span>" +
         '<span class="acts"><a class="btn ghost small" target="_blank" href="' + esc(S().url + x.path) + '">Открыть</a><button class="btn small" data-f="' + esc(x.file) + '">Изменить</button></span></div>';
     }).join("") || '<p style="padding:30px 0;color:var(--muted)">Ничего не найдено</p>';
@@ -414,6 +419,9 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
     $("#f-year").innerHTML = '<option value="">Все годы</option>' + Object.keys(years).sort().reverse().map(function (y) { return "<option>" + y + "</option>"; }).join("");
   }
   $("#b-new").onclick = function () { location.hash = "#new-" + state.tab; };
+  function LISTS() { return { post: DATA.posts || [], page: DATA.pages || [], project: DATA.projects || [] }; }
+  var TABN = { post: ["Новостей: ", "+ Новая запись"], page: ["Страниц: ", "+ Новая страница"], project: ["Проектов: ", "+ Новый проект"] };
+  $("#go-projects").onclick = function (e) { e.preventDefault(); state.tab = "project"; $$(".tabs button").forEach(function (x) { x.classList.toggle("on", x.dataset.t === "project"); }); location.hash = ""; };
 
   /* ---------- настройки сайта ---------- */
   var SET = null;
@@ -443,31 +451,10 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
     val("#i-help-title", hp.title); val("#i-help-text", hp.text); val("#i-help-items", (hp.items || []).join("\n"));
     ["caption", "person", "phone", "email", "org", "inn"].forEach(function (k) { val("#i-c-" + k, c[k]); });
     val("#i-c-docs", (c.docs || []).map(function (x) { return x.title + " | " + x.url; }).join("\n"));
-    val("#i-req", d.requisites); renderQr(); renderProjects();
+    val("#i-req", d.requisites); renderQr();
   }
   function renderQr() { var el = $("#i-qr"), q = (SET.donate || {}).qr; el.style.backgroundImage = q ? 'url("' + pv(q) + '")' : ""; el.style.backgroundSize = "contain"; el.textContent = q ? "" : "нет QR-кода"; }
   $("#b-qr").onclick = function () { pick("#file-img", function (f) { uploadImages([f[0]], function (u) { SET.donate = Object.assign({}, SET.donate, { qr: u[0] }); renderQr(); toast("QR-код загружен — нажмите «Сохранить настройки»"); }, true); }); };
-  function renderProjects() {
-    $("#i-projects").innerHTML = (SET.projects || []).map(function (p, i) {
-      return '<div class="pgroup proj" data-i="' + i + '"><div style="display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:start">' +
-        '<div><div class="cover" style="aspect-ratio:1;margin-bottom:6px;' + (p.image ? 'background-image:url(&quot;' + esc(pv(p.image)) + '&quot;)' : "") + '">' + (p.image ? "" : "нет фото") + '</div>' +
-        '<button class="btn ghost small pr-img" type="button" style="width:100%">Фото</button></div>' +
-        '<div style="display:grid;gap:8px"><input type="text" class="pr-title" placeholder="Название, например «Сокровенные»" value="' + esc(p.title) + '">' +
-        '<input type="text" class="pr-sub" placeholder="Подпись, например «Театральная студия»" value="' + esc(p.subtitle) + '">' +
-        '<textarea class="pr-text" rows="2" placeholder="Описание (необязательно)">' + esc(p.text) + '</textarea>' +
-        '<div><button class="btn danger small pr-del" type="button">Удалить проект</button></div></div></div></div>';
-    }).join("");
-  }
-  function readProjects() {
-    return $$("#i-projects .proj").map(function (el) { var p = (SET.projects || [])[+el.dataset.i] || {};
-      return { title: $(".pr-title", el).value.trim(), subtitle: $(".pr-sub", el).value.trim(), text: $(".pr-text", el).value.trim(), image: p.image || "" }; });
-  }
-  $("#i-projects").addEventListener("click", function (e) {
-    var el = e.target.closest(".proj"); if (!el) return; var i = +el.dataset.i;
-    if (e.target.closest(".pr-del")) { SET.projects = readProjects(); SET.projects.splice(i, 1); renderProjects(); }
-    if (e.target.closest(".pr-img")) pick("#file-img", function (f) { uploadImages([f[0]], function (u) { SET.projects = readProjects(); SET.projects[i].image = u[0]; renderProjects(); }); });
-  });
-  $("#b-proj-add").onclick = function () { SET.projects = readProjects().concat([{ title: "", subtitle: "", text: "", image: "" }]); renderProjects(); };
   function readInner(payload) {
     var lines = function (id) { return $(id).value.split("\n").map(function (x) { return x.trim(); }).filter(Boolean); };
     var docs = lines("#i-c-docs").map(function (l) { var k = l.lastIndexOf("|"); return k < 0 ? null : { title: l.slice(0, k).trim(), url: l.slice(k + 1).trim() }; });
@@ -478,7 +465,6 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
     payload.help = { title: $("#i-help-title").value, text: $("#i-help-text").value, items: lines("#i-help-items") };
     payload.contacts = { caption: $("#i-c-caption").value, person: $("#i-c-person").value, phone: $("#i-c-phone").value, email: $("#i-c-email").value,
       org: $("#i-c-org").value, inn: $("#i-c-inn").value, docs: docs };
-    payload.projects = readProjects().filter(function (p) { return p.title; });
     payload.donate.requisites = $("#i-req").value; payload.donate.qr = (SET.donate || {}).qr || "";
     delete payload.programs;
   }
@@ -526,7 +512,7 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
     if (h === "#settings") { showSettings(); return; }
     $("#v-settings").classList.add("hidden");
     if (h.indexOf("#edit=") === 0) openDoc(decodeURIComponent(h.slice(6)), true);
-    else if (h.indexOf("#new-") === 0) newDoc(h.slice(5) === "page" ? "page" : "post");
+    else if (h.indexOf("#new-") === 0) newDoc(h.slice(5) === "page" ? "page" : h.slice(5) === "project" && SITE === "innermost" ? "project" : "post");
     else showList();
   }
   addEventListener("hashchange", function () { if (token) route(); });
@@ -541,7 +527,10 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
     $("#e-path").textContent = doc.path ? "Сейчас: " + doc.path : "";
     $("#e-content").innerHTML = toEditorHtml(doc.content || "");
     $$("#e-cats input").forEach(function (i) { i.checked = (doc.categories || []).indexOf(i.value) >= 0; });
-    $("#box-cats").classList.toggle("hidden", doc.type === "page" || !Object.keys(DATA.categories || {}).length);
+    $("#f-date").classList.toggle("hidden", doc.type === "project");
+    $("#f-proj").classList.toggle("hidden", doc.type !== "project");
+    $("#e-sub").value = doc.subtitle || ""; $("#e-order").value = doc.order || "";
+    $("#box-cats").classList.toggle("hidden", doc.type !== "post" || !Object.keys(DATA.categories || {}).length);
     state.cover = doc.thumbnail || ""; state.gallery = (doc.gallery || []).slice();
     renderCover(); renderGallery();
     $("#b-del").classList.toggle("hidden", !file);
@@ -656,9 +645,10 @@ input:focus, textarea:focus, .editor:focus { outline: 0; border-color: var(--ink
     var doc = { type: d.type || "post", title: title, date: $("#e-date").value, slug: $("#e-slug").value.trim(),
       categories: $$("#e-cats input:checked").map(function (i) { return i.value; }),
       thumbnail: state.cover, gallery: state.gallery, content: fromEditorHtml(clean(editorHtmlForSave())) };
+    if (doc.type === "project") { doc.subtitle = $("#e-sub").value.trim(); doc.order = parseInt($("#e-order").value, 10) || 99; doc.categories = []; }
     busy(true);
     api("save", { doc: doc, file: state.file }).then(function (j) {
-      pending[j.file] = { type: doc.type, title: doc.title, date: doc.date, path: j.path, categories: doc.categories, old: state.file, t: Date.now() };
+      pending[j.file] = { type: doc.type, title: doc.title, date: doc.date, path: j.path, categories: doc.categories, subtitle: doc.subtitle, order: doc.order, old: state.file, t: Date.now() };
       if (state.file && state.file !== j.file) pending[state.file] = { type: doc.type, deleted: true, t: Date.now() };
       localStorage.setItem("ha_pending", JSON.stringify(pending));
       toast("Сохранено. На сайте появится через 2–3 минуты.");

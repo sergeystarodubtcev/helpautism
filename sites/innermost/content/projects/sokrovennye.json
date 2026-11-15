@@ -1,0 +1,16 @@
+{
+ "id": 3000,
+ "type": "project",
+ "slug": "sokrovennye",
+ "title": "Сокровенные",
+ "subtitle": "Театральная студия",
+ "order": 1,
+ "date": "2025-01-01",
+ "modified": "2025-01-01",
+ "categories": [],
+ "thumbnail": "/uploads/craftum/teatr.jpg",
+ "gallery": [],
+ "excerpt": "",
+ "content": "<p>Инклюзивная театральная студия «Сокровенные». Занятия ведёт педагог и художественный руководитель ВЦСД | Воронежского Центра Современной Драмы Дмитрий Лысенко.</p>",
+ "path": "/proekty/sokrovennye/"
+}
