@@ -72,6 +72,25 @@ jobs:
           echo "Сертификат $ID: $STATUS"
           echo "status=$STATUS" >> "$GITHUB_OUTPUT"; echo "id=$ID" >> "$GITHUB_OUTPUT"
           cp "$RUNNER_TEMP/challenges.txt" "$RUNNER_TEMP/beget.txt"
+      - name: 2b. Certificate for innermost.helpautism.ru
+        id: icert
+        run: |
+          set -e
+          yc certificate-manager certificate get --name innermost >/dev/null 2>&1 || \
+            yc certificate-manager certificate request --name innermost --domains "innermost.$DOMAIN" --challenge dns >/dev/null
+          yc certificate-manager certificate get --name innermost --full --format json > "$RUNNER_TEMP/icert.json" 2>/dev/null || \
+            yc certificate-manager certificate get --name innermost --format json > "$RUNNER_TEMP/icert.json"
+          python3 - "$RUNNER_TEMP/icert.json" >> "$RUNNER_TEMP/beget.txt" <<'PY'
+          import json, sys
+          c = json.load(open(sys.argv[1]))
+          for ch in c.get("challenges", []):
+              d = ch.get("dns_challenge") or {}
+              if d.get("name") and d.get("value"):
+                  print(d.get("type", "CNAME"), d["name"], d["value"])
+          PY
+          echo "status=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("status",""))' "$RUNNER_TEMP/icert.json")" >> "$GITHUB_OUTPUT"
+          echo "id=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1])).get("id",""))' "$RUNNER_TEMP/icert.json")" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
       - name: 3. www bucket -> redirect to https://helpautism.ru
         run: |
           $S3API head-bucket --bucket "www.$DOMAIN" 2>/dev/null || $S3API create-bucket --bucket "www.$DOMAIN"
@@ -114,12 +133,17 @@ jobs:
           yc serverless api-gateway add-domain --name "$GW" --domain "api.$DOMAIN" --certificate-id "${{ steps.cert.outputs.id }}" || \
             yc serverless api-gateway add-domain --name "$GW" --domain-id "${{ steps.cert.outputs.id }}" || true
 
+      - name: 5b. HTTPS for innermost (when issued)
+        if: steps.icert.outputs.status == 'ISSUED'
+        run: yc storage bucket set-https --name "innermost.$DOMAIN" --certificate-id "${{ steps.icert.outputs.id }}" || true
+
       - name: Summary — что добавить в DNS на Бегете
         run: |
           echo "================ ДОБАВИТЬ / ИЗМЕНИТЬ В DNS НА БЕГЕТЕ ================"
           echo "helpautism.ru (корень)   A      213.180.193.247   (заменить старую A-запись 45.130.41.125)"
           echo "www                      A      213.180.193.247   (заменить старую)"
           echo "api                      CNAME  ${{ steps.gw.outputs.domain }}"
+          echo "innermost                CNAME  innermost.$DOMAIN.website.yandexcloud.net"
           while read -r TYPE NAME VALUE; do
             [ -z "$NAME" ] && continue
             REL=${NAME%.$DOMAIN.}; REL=${REL%.$DOMAIN}
@@ -127,6 +151,7 @@ jobs:
           done < "$RUNNER_TEMP/beget.txt"
           echo "MX / TXT (почта) — НЕ ТРОГАТЬ"
           echo "====================================================================="
+          echo "Сертификат innermost: ${{ steps.icert.outputs.status }}"
           echo "Сертификат: ${{ steps.cert.outputs.status }}  (после добавления записей запустите workflow ещё раз через 15–60 минут)"
           echo "Шлюз (проверка с телефона): https://${{ steps.gw.outputs.domain }}/?a=ping"
           rm -f "$RUNNER_TEMP/key.json"

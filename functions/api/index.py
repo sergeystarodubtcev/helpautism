@@ -10,6 +10,9 @@ API сайта «Искра Надежды» (Yandex Cloud Functions, Python 3.1
   a=upload  {name, data(base64)}          -> {url}                   (нужен токен)
   a=form    {form, title, fields, page}   -> {ok}   письмо с формы сайта на почту
 
+Параметр &site=innermost — то же самое для второго сайта «Сокровенный человек»
+(файлы в sites/innermost/…, картинки -> sites/innermost/media/uploads/…).
+
 Сохранение = коммит в GitHub; после коммита GitHub Actions пересобирает сайт и выкладывает его.
 
 Переменная окружения HA_SECRETS — base64(JSON) с ключами:
@@ -125,8 +128,19 @@ def gh_delete(path, message):
                                                              "committer": {"name": "Админка сайта", "email": "admin@helpautism.ru"}})
 
 
+# ---------- сайты (профили админки) ----------
+SITES = {
+    "main": {"prefix": "", "media": "media/wp-content/uploads", "url": "/wp-content/uploads"},
+    "innermost": {"prefix": "sites/innermost/", "media": "sites/innermost/media/uploads", "url": "/uploads"},
+}
+SITE = SITES["main"]
+
+
+def file_ok(f):
+    return bool(re.match(r"^" + re.escape(SITE["prefix"]) + r"content/(posts/\d{4}|pages)/[a-z0-9_\-%.]+\.json$", f or "", re.I))
+
+
 # ---------- записи ----------
-FILE_RE = re.compile(r"^content/(posts/\d{4}|pages)/[a-z0-9_\-%.]+\.json$", re.I)
 TR = dict(zip("абвгдеёжзийклмнопрстуфхцчшщъыьэюя", ["a", "b", "v", "g", "d", "e", "e", "zh", "z", "i", "j", "k", "l", "m", "n", "o", "p", "r", "s", "t", "u", "f", "h", "c", "ch", "sh", "shh", "", "y", "", "e", "yu", "ya"]))
 
 
@@ -151,7 +165,7 @@ def excerpt(h, n=220):
 
 def get_doc(q):
     f = q.get("file", "")
-    if not FILE_RE.match(f):
+    if not file_ok(f):
         raise HttpErr(400, "Неверный файл")
     r = gh_file(f)
     if not r:
@@ -171,7 +185,7 @@ def save_doc(body):
     slug = slugify(d.get("slug") or title)
     content = clean_html(d.get("content", ""))
     old = body.get("file") or ""
-    if old and not FILE_RE.match(old):
+    if old and not file_ok(old):
         raise HttpErr(400, "Неверный файл")
     prev = {}
     if old:
@@ -188,10 +202,10 @@ def save_doc(body):
     })
     if typ == "post":
         doc["path"] = f"/{date[:4]}/{date[5:7]}/{date[8:10]}/{slug}/"
-        new = f"content/posts/{date[:4]}/{slug}.json"
+        new = f"{SITE['prefix']}content/posts/{date[:4]}/{slug}.json"
     else:
         doc["path"] = prev.get("path") or f"/{slug}/"
-        new = old or f"content/pages/{slug}.json"
+        new = old or f"{SITE['prefix']}content/pages/{slug}.json"
     data = json.dumps(doc, ensure_ascii=False, indent=1).encode()
     existing = gh_file(new)
     if existing and new != old:
@@ -204,7 +218,7 @@ def save_doc(body):
 
 def delete_doc(body):
     f = body.get("file", "")
-    if not FILE_RE.match(f):
+    if not file_ok(f):
         raise HttpErr(400, "Неверный файл")
     gh_delete(f, "Админка: удалена запись " + f.rsplit("/", 1)[-1])
     return {"ok": True}
@@ -220,29 +234,32 @@ def upload(body):
         raise HttpErr(413, "Файл больше 15 МБ")
     base = slugify(name.rsplit(".", 1)[0])
     ym = time.strftime("%Y/%m")
-    rel = f"wp-content/uploads/{ym}/{base}-{int(time.time()) % 100000}.{ext}"
-    gh_put("media/" + rel, raw, "Админка: файл " + rel.rsplit("/", 1)[-1])
-    return {"url": "/" + rel}
+    rel = f"{ym}/{base}-{int(time.time()) % 100000}.{ext}"
+    gh_put(SITE["media"] + "/" + rel, raw, "Админка: файл " + rel.rsplit("/", 1)[-1])
+    return {"url": SITE["url"] + "/" + rel}
 
 
 # ---------- настройки сайта (content/settings.json) ----------
-SETTINGS_FILE = "content/settings.json"
 HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
 
 
+def settings_file():
+    return SITE["prefix"] + "content/settings.json"
+
+
 def get_settings():
-    r = gh_file(SETTINGS_FILE)
+    r = gh_file(settings_file())
     return {"settings": json.loads(base64.b64decode(r["content"]).decode()) if r else {}}
 
 
 def save_settings(body):
     new = body.get("settings") or {}
-    r = gh_file(SETTINGS_FILE)
+    r = gh_file(settings_file())
     cur = json.loads(base64.b64decode(r["content"]).decode()) if r else {}
     out = dict(cur)
     if "hero_image" in new:
         hi = str(new["hero_image"] or "")
-        if hi and not re.match(r"^/wp-content/uploads/[\w./%-]+$", hi):
+        if hi and not img_ok(hi):
             raise HttpErr(400, "Неверная картинка")
         out["hero_image"] = hi
     if "colors" in new:
@@ -275,8 +292,69 @@ def save_settings(body):
                 raise HttpErr(400, "Ссылка на оплату должна начинаться с https://")
             dd["url"] = u
         out["donate"] = dd
-    gh_put(SETTINGS_FILE, json.dumps(out, ensure_ascii=False, indent=1).encode(), "Админка: настройки сайта", r["sha"] if r else None)
+    if SITE is SITES["innermost"]:
+        inner_settings(new, cur, out)
+    gh_put(settings_file(), json.dumps(out, ensure_ascii=False, indent=1).encode(), "Админка: настройки сайта", r["sha"] if r else None)
     return {"ok": True, "settings": out}
+
+
+def img_ok(u):
+    return bool(re.match(r"^" + re.escape(SITE["url"]) + r"/[\w./%-]+$", str(u or "")))
+
+
+def link_ok(u):
+    return bool(re.match(r"^(https://[^\s\"'<>]+|/[\w./%#-]*|#[\w-]*)$", u))
+
+
+def _txt(v, n=600):
+    return str(v or "").strip()[:n]
+
+
+def inner_settings(new, cur, out):
+    """Тексты главной «Сокровенного человека»: каждое поле проверяется и обрезается."""
+    def section(name, keys):
+        if name in new and isinstance(new[name], dict):
+            sec = dict(cur.get(name, {}))
+            for k, n in keys.items():
+                if k in new[name]:
+                    sec[k] = _txt(new[name][k], n)
+            out[name] = sec
+    section("hero", {"title": 120, "subtitle": 160, "text": 600})
+    section("about", {"title": 80, "text": 3000, "button": 80})
+    section("contacts", {"caption": 200, "person": 120, "phone": 60, "email": 120, "org": 200, "inn": 20})
+    if "help" in new and isinstance(new["help"], dict):
+        h = new["help"]
+        out["help"] = {"title": _txt(h.get("title"), 120), "text": _txt(h.get("text"), 1000),
+                       "items": [_txt(x, 150) for x in (h.get("items") or []) if _txt(x)][:20]}
+    if "footer" in new:
+        out["footer"] = _txt(new["footer"], 600)
+    if "donate" in new:
+        d = new["donate"] or {}
+        if "requisites" in d:
+            out["donate"]["requisites"] = _txt(d["requisites"], 2000)
+        if "qr" in d:
+            q = _txt(d["qr"], 300)
+            if q and not img_ok(q):
+                raise HttpErr(400, "Неверная картинка QR-кода")
+            out["donate"]["qr"] = q
+    if "projects" in new:
+        pr = []
+        for p in (new["projects"] or [])[:12]:
+            img = _txt(p.get("image"), 300)
+            if img and not img_ok(img):
+                raise HttpErr(400, "Неверная картинка проекта")
+            if _txt(p.get("title")):
+                pr.append({"title": _txt(p.get("title"), 80), "subtitle": _txt(p.get("subtitle"), 160), "image": img, "text": _txt(p.get("text"), 1500)})
+        out["projects"] = pr
+    if "contacts" in new and isinstance(new["contacts"].get("docs"), list):
+        docs = []
+        for x in new["contacts"]["docs"][:10]:
+            u = _txt(x.get("url"), 500)
+            if _txt(x.get("title")) and u:
+                if not link_ok(u):
+                    raise HttpErr(400, "Ссылка на документ должна начинаться с https://")
+                docs.append({"title": _txt(x.get("title"), 80), "url": u})
+        out["contacts"]["docs"] = docs
 
 
 # ---------- формы сайта -> почта ----------
@@ -318,6 +396,10 @@ def handler(event, context):
                 raw = base64.b64decode(raw).decode()
             body = json.loads(raw)
         ip = ((event.get("requestContext") or {}).get("identity") or {}).get("sourceIp", "?")
+        global SITE
+        SITE = SITES.get(q.get("site") or "main")
+        if SITE is None:
+            raise HttpErr(400, "Неизвестный сайт")
         if a == "login":
             return resp(200, login(body, ip))
         if a == "form":

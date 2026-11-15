@@ -112,7 +112,7 @@ jobs:
         if: steps.check.outputs.skip != '1'
         env:
           HA_FORCE_HTTPS: "1"   # сертификат на helpautism.ru выпущен — http перенаправляется на https
-        run: python3 tools/build_site.py
+        run: python3 tools/build_site.py && python3 tools/build_innermost.py
       - name: Upload media and assets (only changed by size)
         if: steps.check.outputs.skip != '1'
         run: |
@@ -134,3 +134,27 @@ jobs:
         run: |
           $S3 website "s3://$BUCKET/" --index-document index.html --error-document 404.html
           echo "Готово: https://$BUCKET.website.yandexcloud.net/  (админка: /admin/)"
+
+      # ---------- второй сайт: «Сокровенный человек» (innermost.helpautism.ru) ----------
+      - name: Innermost — build
+        if: steps.check.outputs.skip != '1'
+        run: python3 tools/build_innermost.py
+      - name: Innermost — bucket
+        if: steps.check.outputs.skip != '1'
+        run: |
+          B=innermost.helpautism.ru
+          aws --endpoint-url=https://storage.yandexcloud.net s3api head-bucket --bucket "$B" 2>/dev/null || \
+            aws --endpoint-url=https://storage.yandexcloud.net s3api create-bucket --bucket "$B" --acl public-read
+          aws --endpoint-url=https://storage.yandexcloud.net s3api put-bucket-acl --bucket "$B" --acl public-read || echo "::warning::не удалось открыть бакет $B на чтение — включите «Публичный доступ: чтение объектов» в консоли"
+          $S3 website "s3://$B/" --index-document index.html --error-document 404.html
+      - name: Innermost — upload
+        if: steps.check.outputs.skip != '1'
+        run: |
+          B=innermost.helpautism.ru
+          $S3 sync site-innermost/ "s3://$B/" --size-only --no-progress --exclude "*.html" --exclude "*.json" --exclude "*.xml" --exclude "*.txt" --exclude "*.css" --exclude "*.js" \
+            --cache-control "public, max-age=2592000"
+          $S3 sync site-innermost/ "s3://$B/" --no-progress --exclude "*" --include "*.css" --include "*.js" --cache-control "public, max-age=3600"
+          $S3 sync site-innermost/ "s3://$B/" --no-progress --exclude "*" --include "*.html" --include "*.json" --include "*.xml" --include "*.txt" \
+            --cache-control "no-cache" --delete
+          curl -s -o /dev/null -w "Проверка: https://storage.yandexcloud.net/$B/index.html -> %{http_code}\n" "https://storage.yandexcloud.net/$B/index.html"
+          echo "Сайт: http://$B.website.yandexcloud.net/ ; после DNS — https://$B/"

@@ -63,3 +63,12 @@ python3 tools/optimize_media.py /временная/папка media/
 ## Перенос на российские серверы
 
 Готовый сайт — папка `site/`. Подойдут Yandex Cloud Object Storage (хостинг статического сайта), Selectel, VK Cloud или любой хостинг. Шрифты и скрипты лежат локально, к Google сайт не обращается. Админку для новостей планируется сделать после переезда (контент уже в JSON).
+
+## Второй сайт: «Сокровенный человек» (innermost.helpautism.ru)
+
+- Контент: `sites/innermost/content` (настройки главной, новости, страницы), картинки — `sites/innermost/media/uploads`.
+- Оформление: `sites/innermost/assets/style.css`, `site.js`. Сборка: `python3 tools/build_innermost.py` -> `site-innermost/`.
+- Админка общая: https://helpautism.ru/admin/ — профиль переключается в правом верхнем углу
+  (или ссылкой `/admin/?site=innermost`, или https://innermost.helpautism.ru/admin/).
+- Выкладка — тот же workflow `yandex-cloud.yml` (бакет `innermost.helpautism.ru`), сертификат — `domain.yml`.
+- DNS на Бегете: `innermost CNAME innermost.helpautism.ru.website.yandexcloud.net` + запись `_acme-challenge.innermost` из вывода `domain.yml`.
