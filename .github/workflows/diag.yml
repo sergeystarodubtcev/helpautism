@@ -21,6 +21,7 @@ jobs:
           [ -n "$TOKEN" ] || { echo "::error::Вход в админку не удался"; exit 1; }
           echo "1. Вход в админку: ок"
           curl -s "$API?a=settings" -H "X-Admin-Token: $TOKEN" | python3 -c 'import json,sys;d=json.load(sys.stdin)["settings"];print("2. Настройки читаются: групп программ", len(d.get("programs",[])))'
+          curl -s "$API?a=settings&site=innermost" -H "X-Admin-Token: $TOKEN" | python3 -c 'import json,sys;d=json.load(sys.stdin)["settings"];print("2b. Сокровенный человек: проектов", len(d.get("projects",[])), "-", d.get("hero",{}).get("title"))'
           DOC='{"doc":{"type":"post","title":"Проверка админки (будет удалена)","date":"2000-01-01","categories":[],"content":"<p>Тестовая запись для проверки админки.</p>"}}'
           R=$(curl -s -X POST "$API?a=save" -H "Content-Type: application/json" -H "X-Admin-Token: $TOKEN" --data "$DOC")
           FILE=$(echo "$R" | python3 -c 'import json,sys;print(json.load(sys.stdin)["file"])'); P=$(echo "$R" | python3 -c 'import json,sys;print(json.load(sys.stdin)["path"])')
