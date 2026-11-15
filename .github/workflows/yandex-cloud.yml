@@ -143,9 +143,16 @@ jobs:
         if: steps.check.outputs.skip != '1'
         run: |
           B=innermost.helpautism.ru
-          aws --endpoint-url=https://storage.yandexcloud.net s3api head-bucket --bucket "$B" 2>/dev/null || \
-            aws --endpoint-url=https://storage.yandexcloud.net s3api create-bucket --bucket "$B" --acl public-read
-          aws --endpoint-url=https://storage.yandexcloud.net s3api put-bucket-acl --bucket "$B" --acl public-read || echo "::warning::не удалось открыть бакет $B на чтение — включите «Публичный доступ: чтение объектов» в консоли"
+          if ! aws --endpoint-url=https://storage.yandexcloud.net s3api head-bucket --bucket "$B" 2>/dev/null; then
+            if command -v yc >/dev/null; then
+              yc storage bucket create --name "$B" --public-read --default-storage-class standard 2>&1 | tail -3 || true
+            fi
+            aws --endpoint-url=https://storage.yandexcloud.net s3api head-bucket --bucket "$B" 2>/dev/null || \
+              aws --endpoint-url=https://storage.yandexcloud.net s3api create-bucket --bucket "$B"
+          fi
+          if command -v yc >/dev/null; then
+            yc storage bucket update --name "$B" --public-read 2>&1 | tail -3 || echo "::warning::не удалось открыть бакет $B на чтение"
+          fi
           $S3 website "s3://$B/" --index-document index.html --error-document 404.html
       - name: Innermost — upload
         if: steps.check.outputs.skip != '1'
