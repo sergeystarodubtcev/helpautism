@@ -39,7 +39,7 @@ def social_items():
     return [(k, t, (soc.get(k) or "").strip(), svg) for k, (t, svg) in SOCIAL_ICONS.items()]
 
 
-def social_icons_html(cls):
+def social_icons_html(cls="ha-soc"):
     out = []
     for k, t, url, svg in social_items():
         icon = f'<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">{svg}</svg>'
@@ -315,32 +315,32 @@ def split_template(tpl):
     return tpl[:i], tpl[j:]
 
 
-def menu_html(items):
+def menu_html(items, depth=0):
     out = []
     for it in items:
-        title = esc(it["title"])
-        out.append(f'<li><a href="{esc(absu(it["url"]))}">{title}</a>')
-        if it["children"]:
-            out.append(f'<details class="ha-submenu"><summary aria-label="Подразделы: {title}"></summary>'
-                       f'<ul>{menu_html(it["children"])}</ul></details>')
+        has = bool(it["children"])
+        cls = "menu-item" + (" menu-item-has-children" if has else "")
+        out.append(f'<li class="{cls}"><a href="{esc(absu(it["url"]))}">{esc(it["title"])}</a>')
+        if has:
+            out.append('<ul class="sub-menu">' + menu_html(it["children"], depth + 1) + "</ul>")
         out.append("</li>")
     return "".join(out)
 
 
-def replace_header(text, site):
-    brand = ('<a class="ha-site-brand" href="https://helpautism.ru/">'
-             '<img src="https://helpautism.ru/wp-content/uploads/2017/01/logo-1.png" alt="" width="548" height="461">'
-             '<span>Искра Надежды</span></a>')
-    cta = f'<li class="ha-nav-cta"><a class="ha-btn ha-btn--cta" href="{esc(pay_url())}" target="_blank" rel="noopener">Помочь</a></li>'
-    bar = ('<div id="main-nav" class="ha-site-bar"><div class="container ha-site-bar__inner">'
-           f'{brand}<details class="ha-navigation">'
-           '<summary class="ha-navigation__toggle"><span class="ha-navigation__icon" aria-hidden="true"></span>Меню</summary>'
-           f'<nav class="ha-navigation__panel" aria-label="Основная навигация"><ul>{menu_html(site["menu"])}{cta}</ul></nav>'
-           '</details></div></div><div class="ha-site-bar-offset" aria-hidden="true"></div>')
-    start = text.index('<div id="main-nav"')
-    end_marker = "<!-- / END TOP BAR -->"
-    end = text.index(end_marker, start) + len(end_marker)
-    return text[:start] + bar + text[end:]
+def replace_menu(head, site):
+    i = head.find('<ul id="menu-verxnee-menyu"')
+    if i < 0:
+        return head
+    depth, k = 0, i
+    for m in re.finditer(r"(?i)<(/?)ul\b", head[i:]):
+        depth += -1 if m.group(1) else 1
+        if depth == 0:
+            k = i + m.end()
+            k = head.find(">", k) + 1
+            break
+    cta = f'<li class="menu-item ha-nav-cta"><a href="{esc(pay_url())}" target="_blank" rel="noopener">Помочь</a></li>'
+    new = '<ul id="menu-verxnee-menyu" class="nav navbar-nav navbar-right responsive-nav main-nav-list">' + menu_html(site["menu"]) + cta + "</ul>"
+    return head[:i] + new + head[k:]
 
 
 def set_title_and_body(head, title, body_class, description=""):
@@ -529,6 +529,10 @@ def pipeline(text, rel):
     j = text.find("</footer>", i)
     if i >= 0 and j > i:
         text = text[:i] + FOOTER.replace("%%SOCIAL%%", social_icons_html("ha-fsoc")) + text[j + len("</footer>"):]
+    # верхняя полоса: почта + ВКонтакте, Telegram, Max, Одноклассники, YouTube (без Instagram/Facebook)
+    text = re.sub(r'(?is)<div class="social-block">.*?</div>',
+                  lambda m: '<div class="social-block"><a href="mailto:helpautismvrn@yandex.ru" class="ha-topmail">helpautismvrn@yandex.ru</a>'
+                            + social_icons_html("ha-soc") + "</div>", text, count=1)
     text = text.replace("helpautismvrn@gmail.com", "helpautismvrn@yandex.ru")  # актуальная почта со страницы «Контакты»
     text = clean_html(text, rel)
     text = text.replace(
@@ -586,7 +590,7 @@ def main():
 
     tpl = read(os.path.join(A2020, "2020", "10", "05", "voskresnaya-vstrecha", "index.html"))
     head0, foot0 = split_template(tpl)
-    head0 = replace_header(head0, site)
+    head0 = replace_menu(head0, site)
     head0 = re.sub(r'(?is)<div class="preloader">.*?</div>\s*</div>', "", head0)
 
     def emit(path, title, body_class, inner, description=""):
@@ -686,7 +690,7 @@ def main():
 
     # 5. главная: оригинальная главная + свежие новости
     home = read(os.path.join(A2020, "index.html"))
-    home = replace_header(home, site)
+    home = replace_menu(home, site)
     news = [p for p in posts if "news" in p.get("categories", [])][:6] or posts[:6]
     grid = ('<div class="ha-grid ha-grid--home">' + "".join(card(p, site) for p in news) + "</div>"
             f'<div class="ha-more"><a class="ha-btn ha-btn--ghost" href="{absu("/category/news/")}">Все новости</a></div>')

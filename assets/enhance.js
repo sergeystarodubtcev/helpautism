@@ -8,7 +8,7 @@
 
   /* ---------- картинки, которых нет в веб-архиве ---------- */
   function brokenImages() {
-    var logo = $(".ha-site-brand img");
+    var logo = $(".navbar-brand img");
     var logoSrc = logo ? logo.src : "";
     function handle(img) {
       if (img.dataset.haFixed) return; img.dataset.haFixed = "1";
@@ -32,9 +32,18 @@
     top.onclick = function () { window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" }); };
     document.body.appendChild(top);
     var ticking = false;
+    var nav = $("#main-nav");
+    function navH() {
+      if (!nav) return;
+      // отступ под шапку нужен только когда она закреплена (на телефоне она стоит в потоке страницы)
+      var fixed = getComputedStyle(nav).position === "fixed";
+      document.documentElement.style.setProperty("--ha-nav-h", (fixed ? nav.offsetHeight : 0) + "px");
+    }
+    navH(); addEventListener("resize", navH, { passive: true }); addEventListener("load", navH);
     function update() {
       ticking = false;
       var y = window.scrollY || window.pageYOffset, h = document.documentElement.scrollHeight - innerHeight;
+      document.body.classList.toggle("ha-scrolled", y > 30);
       top.classList.toggle("ha-show", y > 700);
       bar.style.transform = "scaleX(" + (h > 0 ? y / h : 0) + ")";
     }
@@ -42,30 +51,20 @@
     update();
   }
 
-  /* ---------- навигация в закреплённой шапке ---------- */
-  function siteNavigation() {
-    var menu = $(".ha-navigation");
-    if (!menu) return;
-    var toggle = $(".ha-navigation__toggle", menu);
-
-    document.addEventListener("click", function (e) {
-      if (menu.open && !menu.contains(e.target)) menu.open = false;
+  /* ---------- мобильное меню: раскрывающиеся подменю ---------- */
+  function mobileMenu() {
+    $$("#site-navigation li.menu-item-has-children").forEach(function (li) {
+      var b = document.createElement("button");
+      b.type = "button"; b.className = "ha-sub-toggle"; b.setAttribute("aria-label", "Открыть подменю"); b.innerHTML = "&#9662;";
+      b.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); li.classList.toggle("ha-open"); });
+      var a = li.querySelector(":scope > a"); if (a) a.after(b);
     });
-    document.addEventListener("focusin", function (e) {
-      if (menu.open && !menu.contains(e.target)) menu.open = false;
-    });
-    menu.addEventListener("keydown", function (e) {
-      if (e.key !== "Escape" || !menu.open) return;
-      var submenu = e.target.closest(".ha-submenu[open]");
-      var disclosure = submenu || menu;
-      disclosure.open = false;
-      $(":scope > summary", disclosure).focus();
-      e.preventDefault();
-    });
-    menu.addEventListener("click", function (e) {
-      if (!e.target.closest("a")) return;
-      menu.open = false;
-      toggle.focus();
+    // закрывать меню после перехода по ссылке
+    $$("#site-navigation a").forEach(function (a) {
+      a.addEventListener("click", function () {
+        var t = $(".navbar-toggle"); var c = $("#site-navigation");
+        if (t && c && c.classList.contains("in") && a.getAttribute("href") && a.getAttribute("href").charAt(0) === "#") t.click();
+      });
     });
   }
 
@@ -194,17 +193,12 @@
   /* ---------- текущий раздел в меню ---------- */
   function currentNav() {
     var here = location.pathname.replace(/index\.html$/, "");
-    $$(".ha-navigation__panel > ul > li").forEach(function (li) {
+    $$("#site-navigation .nav > li").forEach(function (li) {
       var hit = $$("a", li).some(function (a) {
         var p = a.pathname.replace(/index\.html$/, "");
-        return a.host === location.host && p.length > 1 && here.indexOf(p) === 0;
+        return p.length > 1 && here.indexOf(p) === 0 && !/^\/?$/.test(p);
       });
       li.classList.toggle("ha-current", hit);
-    });
-    $$(".ha-navigation__panel a").forEach(function (a) {
-      if (a.host === location.host && a.pathname.replace(/index\.html$/, "") === here && !a.hash) {
-        a.setAttribute("aria-current", "page");
-      }
     });
   }
 
@@ -307,7 +301,7 @@
   }
 
   function start() {
-    brokenImages(); chrome(); siteNavigation(); currentNav(); teamLinks(); marquee(); heroMedia(); share(); lightbox(); forms(); reveal(); transitions();
+    brokenImages(); chrome(); mobileMenu(); currentNav(); teamLinks(); marquee(); heroMedia(); share(); lightbox(); forms(); reveal(); transitions();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
 })();
