@@ -1,9 +1,50 @@
 <!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Страница не найдена | Искра надежды</title>
-<style>body{font-family:"Open Sans",Arial,sans-serif;text-align:center;padding:80px 20px;color:#404040}h1{font-family:Montserrat,Arial,sans-serif;color:#e96656;font-size:64px;margin:0}a{display:inline-block;margin-top:20px;padding:12px 28px;background:#e96656;color:#fff;border-radius:4px;text-decoration:none}</style>
-<script>
-  // на GitHub Pages сайт лежит в подпапке /helpautism/ — отправляем на главную этой подпапки
-  (function(){var p=location.pathname.split("/").filter(Boolean);var base=/\.github\.io$/.test(location.hostname)&&p.length?"/"+p[0]+"/":"/";document.addEventListener("DOMContentLoaded",function(){document.getElementById("home").href=base;});})();
-</script></head>
-<body><h1>404</h1><p>Такой страницы нет. Возможно, она не сохранилась в архиве.</p><a id="home" href="/">На главную</a></body></html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Материал недоступен | Искра Надежды</title>
+  <style>
+    :root { color: #111318; background: #f6f7f8; font: 16px/1.6 system-ui, sans-serif; }
+    body { margin: 0; padding: clamp(24px, 9vh, 100px) 16px; }
+    main { max-width: 560px; margin: auto; padding: clamp(24px, 5vw, 52px); background: #fff; border: 1px solid #e8e9ec; border-radius: 20px; }
+    h1 { margin: 0 0 16px; font-size: clamp(28px, 6vw, 42px); line-height: 1.12; }
+    p { margin: 0 0 12px; color: #3a3f4a; }
+    nav { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 24px; }
+    a { box-sizing: border-box; display: inline-flex; justify-content: center; align-items: center; min-height: 44px; padding: 8px 18px; border: 1px solid #111318; border-radius: 999px; color: #111318; font-weight: 600; text-decoration: none; text-align: center; }
+    a:hover { background: #eaf2fc; }
+    #home { background: #111318; color: #fff; }
+    #home:hover { background: #343942; }
+    a:focus-visible { outline: 2px solid #1d6fd1; outline-offset: 3px; }
+    @media (max-width: 420px) { nav { flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Материал недоступен</h1>
+    <p>После кибератаки, которая затронула наш прежний сайт на хостинге Beget, часть страниц и файлов не сохранилась. Мы восстанавливаем архив и возвращаем доступные материалы на сайт.</p>
+    <p>Спасибо, что остаётесь с нами.</p>
+    <nav aria-label="Продолжить просмотр">
+      <a id="back" href="/category/news/">К новостям</a>
+      <a id="home" href="/">На главную</a>
+    </nav>
+  </main>
+  <script>
+    (function () {
+      const base = location.hostname.endsWith(".github.io") ? "/helpautism/" : "/";
+      const back = document.getElementById("back");
+      document.getElementById("home").href = base;
+      back.href = base + "category/news/";
+
+      if (!document.referrer) return;
+      const previous = new URL(document.referrer);
+      if (previous.origin === location.origin && previous.pathname.startsWith(base) &&
+          previous.pathname !== location.pathname && previous.pathname !== base + "404.html") {
+        back.href = previous.href;
+        back.textContent = "Вернуться в предыдущий раздел";
+      }
+    })();
+  </script>
+</body>
+</html>

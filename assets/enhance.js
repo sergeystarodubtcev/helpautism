@@ -12,6 +12,11 @@
     var logoSrc = logo ? logo.src : "";
     function handle(img) {
       if (img.dataset.haFixed) return; img.dataset.haFixed = "1";
+      var unavailable = img.closest('a[href$="/404.html"][referrerpolicy="same-origin"], a[href="404.html"][referrerpolicy="same-origin"]');
+      if (unavailable && !unavailable.textContent.trim()) {
+        unavailable.textContent = img.alt.trim() || "Материал недоступен";
+        return;
+      }
       var card = img.closest(".ha-card__media");
       if (card) { img.remove(); var sp = document.createElement("span"); sp.className = "ha-card__noimg"; card.appendChild(sp); return; }
       var thumb = img.closest(".pt-cv-ifield, .post-img-wrap") || /thumbnail|wp-post-image/.test(img.className);

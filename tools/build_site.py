@@ -463,8 +463,9 @@ def media_exists(path):
 
 class NewTabLinks(HTMLParser):
     """Set the target on navigation links while preserving the original document."""
-    def __init__(self, text):
+    def __init__(self, text, page):
         super().__init__(convert_charrefs=False)
+        self.page = page
         self.line_offsets = [0] + [m.end() for m in re.finditer("\n", text)]
         self.changes = []
         self.feed(text)
@@ -475,24 +476,48 @@ class NewTabLinks(HTMLParser):
             return
         attrs = dict(attrs)
         href = (attrs.get("href") or "").strip()
-        if not href or href.startswith("#") or "download" in attrs:
+        if not href or href.startswith("#"):
             return
         scheme = re.match(r"^([a-z][a-z0-9+.-]*):", href, re.I)
-        if scheme and scheme[1].lower() not in {"http", "https"}:
+        broken = missing_link(href, scheme, self.page)
+        if not broken and ("download" in attrs or scheme and scheme[1].lower() not in {"http", "https"}):
             return
-        rel = (attrs.get("rel") or "").split()
+        rel = set((attrs.get("rel") or "").lower().split())
+        if broken:
+            attrs["href"] = relurl(self.page, "/404.html")
+            attrs.pop("download", None)
+            attrs["referrerpolicy"] = "same-origin"
+            rel.discard("noreferrer")
         attrs["target"] = "_blank"
-        attrs["rel"] = " ".join(sorted({word.lower() for word in rel} - {"opener"} | {"noopener"}))
+        attrs["rel"] = " ".join(sorted(rel - {"opener"} | {"noopener"}))
         rendered = "".join(f' {name}="{esc(value)}"' if value is not None else f" {name}" for name, value in attrs.items())
         line, column = self.getpos()
         start = self.line_offsets[line - 1] + column
         self.changes.append((start, start + len(self.get_starttag_text()), f"<a{rendered}>"))
 
 
-def open_links_in_new_tabs(text):
+def missing_link(href, scheme, page):
+    if scheme:
+        # Ссылки из старого архива на временные файлы и офлайн-версию КонсультантПлюс.
+        return href.startswith(("blob:/", "consultantplus://offline/"))
+    if href.startswith("//"):
+        return False
+    path = urllib.parse.unquote(urllib.parse.urlsplit(href).path)
+    if not path:
+        return False
+    base = OUT if path.startswith("/") else os.path.join(OUT, os.path.dirname(page))
+    destination = os.path.normpath(os.path.join(base, path.lstrip("/")))
+    if os.path.commonpath((OUT, destination)) != OUT:
+        return True
+    if os.path.isdir(destination) or path.endswith("/"):
+        destination = os.path.join(destination, "index.html")
+    return not os.path.isfile(destination)
+
+
+def open_links_in_new_tabs(text, page):
     parts = []
     previous = 0
-    for start, end, tag in NewTabLinks(text).changes:
+    for start, end, tag in NewTabLinks(text, page).changes:
         parts.extend((text[previous:start], tag))
         previous = end
     parts.append(text[previous:])
@@ -584,7 +609,7 @@ def pipeline(text, rel):
     text = fix_thumbs(text, rel)
     text = modernize(text, rel)
     text = text.replace("</head>", theme_style() + "</head>", 1)  # цвета из админки — после остальных стилей
-    return open_links_in_new_tabs(text)
+    return text
 
 
 def page_out(path):
@@ -777,7 +802,7 @@ def main():
     os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
     json.dump([{"date": p["date"], "title": p["title"], "url": p["path"], "categories": p.get("categories", [])} for p in posts],
               open(os.path.join(OUT, "data", "news.json"), "w", encoding="utf-8"), ensure_ascii=False)
-    write(os.path.join(OUT, "404.html"), open_links_in_new_tabs(read(os.path.join(ROOT, "tools", "404.html"))))
+    shutil.copyfile(os.path.join(ROOT, "tools", "404.html"), os.path.join(OUT, "404.html"))
     urls = ["/"] + [p["path"] for p in posts] + [p["path"] for p in pages] + [c["path"] for c in site["categories"].values()]
     write(os.path.join(OUT, "sitemap.xml"), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
           + "".join(f"<url><loc>{SITE_URL}{esc(u)}</loc></url>\n" for u in urls) + "</urlset>\n")
@@ -803,14 +828,19 @@ def main():
             if not f.endswith(".html"):
                 continue
             p = os.path.join(d, f)
-            for u in re.findall(r'(?:src|href)=["\']([^"\'#?]+)', read(p)):
+            text = read(p)
+            for u in re.findall(r'(?:src|href)=["\']([^"\'#?]+)', text):
                 if re.match(r"^(https?:|//|data:|mailto:|tel:|javascript:)", u) or not u.strip():
                     continue
-                t = os.path.normpath(os.path.join(d, urllib.parse.unquote(u)))
+                path = urllib.parse.unquote(u)
+                t = os.path.normpath(os.path.join(OUT if path.startswith("/") else d, path.lstrip("/")))
                 if u.endswith("/"):
                     t = os.path.join(t, "index.html")
                 if not os.path.exists(t):
                     missing.add(os.path.relpath(t, OUT))
+            rel = os.path.relpath(p, OUT)
+            if rel != "404.html" and rel.split(os.sep, 1)[0] not in {"admin", "assets", "wp-content"}:
+                write(p, open_links_in_new_tabs(text, rel))
     write(os.path.join(ROOT, "archive", "missing.txt"), "\n".join(sorted(missing)) + "\n")
     print(f"Страниц: {n} (записей {len(posts)}, страниц {len(pages)}), файлов оформления: {copied}, битых ссылок: {len(missing)} (archive/missing.txt)")
 
