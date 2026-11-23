@@ -464,8 +464,8 @@ def media_exists(path):
     return os.path.exists(os.path.join(OUT, rel))
 
 
-class NewTabLinks(HTMLParser):
-    """Set the target on navigation links while preserving the original document."""
+class SiteLinks(HTMLParser):
+    """Set navigation targets and replace links to unavailable archive material."""
     def __init__(self, text, page):
         super().__init__(convert_charrefs=False)
         self.page = page
@@ -482,7 +482,11 @@ class NewTabLinks(HTMLParser):
         if not href or href.startswith("#"):
             return
         scheme = re.match(r"^([a-z][a-z0-9+.-]*):", href, re.I)
-        broken = missing_link(href, scheme, self.page)
+        local_path = None
+        if not scheme and not href.startswith("//"):
+            local_path = urllib.parse.unquote(urllib.parse.urlsplit(href).path)
+        broken = (missing_link(local_path, self.page) if local_path is not None else
+                  href.startswith(("blob:/", "consultantplus://offline/")))
         if not broken and ("download" in attrs or scheme and scheme[1].lower() not in {"http", "https"}):
             return
         rel = set((attrs.get("rel") or "").lower().split())
@@ -490,22 +494,22 @@ class NewTabLinks(HTMLParser):
             attrs["href"] = relurl(self.page, "/404.html")
             attrs.pop("download", None)
             attrs["referrerpolicy"] = "same-origin"
-            rel.discard("noreferrer")
-        attrs["target"] = "_blank"
-        attrs["rel"] = " ".join(sorted(rel - {"opener"} | {"noopener"}))
+            if "noreferrer" in rel:
+                rel.remove("noreferrer")
+                attrs["rel"] = " ".join(sorted(rel))
+        if local_path is not None and (local_path.endswith("/") or
+                                       os.path.splitext(local_path)[1].lower() in {"", ".htm", ".html", ".php"}):
+            attrs.pop("target", None)
+        else:
+            attrs["target"] = "_blank"
+            attrs["rel"] = " ".join(sorted(rel - {"opener"} | {"noopener"}))
         rendered = "".join(f' {name}="{esc(value)}"' if value is not None else f" {name}" for name, value in attrs.items())
         line, column = self.getpos()
         start = self.line_offsets[line - 1] + column
         self.changes.append((start, start + len(self.get_starttag_text()), f"<a{rendered}>"))
 
 
-def missing_link(href, scheme, page):
-    if scheme:
-        # Ссылки из старого архива на временные файлы и офлайн-версию КонсультантПлюс.
-        return href.startswith(("blob:/", "consultantplus://offline/"))
-    if href.startswith("//"):
-        return False
-    path = urllib.parse.unquote(urllib.parse.urlsplit(href).path)
+def missing_link(path, page):
     if not path:
         return False
     base = OUT if path.startswith("/") else os.path.join(OUT, os.path.dirname(page))
@@ -517,10 +521,10 @@ def missing_link(href, scheme, page):
     return not os.path.isfile(destination)
 
 
-def open_links_in_new_tabs(text, page):
+def prepare_links(text, page):
     parts = []
     previous = 0
-    for start, end, tag in NewTabLinks(text, page).changes:
+    for start, end, tag in SiteLinks(text, page).changes:
         parts.extend((text[previous:start], tag))
         previous = end
     parts.append(text[previous:])
@@ -807,7 +811,7 @@ def main():
               open(os.path.join(OUT, "data", "news.json"), "w", encoding="utf-8"), ensure_ascii=False)
     error_rel = "404.html"
     error_page = read(os.path.join(ROOT, "tools", error_rel))
-    header = open_links_in_new_tabs(localize(site_header(site), error_rel), error_rel)
+    header = prepare_links(localize(site_header(site), error_rel), error_rel)
     error_page = error_page.replace("<!-- SITE HEADER -->", f'<header>{header}</header>')
     error_page = inject_enhance(error_page, error_rel)
     write(os.path.join(OUT, error_rel), error_page.replace("</head>", theme_style() + "</head>", 1))
@@ -848,7 +852,7 @@ def main():
                     missing.add(os.path.relpath(t, OUT))
             rel = os.path.relpath(p, OUT)
             if rel != "404.html" and rel.split(os.sep, 1)[0] not in {"admin", "assets", "wp-content"}:
-                write(p, open_links_in_new_tabs(text, rel))
+                write(p, prepare_links(text, rel))
     write(os.path.join(ROOT, "archive", "missing.txt"), "\n".join(sorted(missing)) + "\n")
     print(f"Страниц: {n} (записей {len(posts)}, страниц {len(pages)}), файлов оформления: {copied}, битых ссылок: {len(missing)} (archive/missing.txt)")
 
