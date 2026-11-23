@@ -53,7 +53,7 @@
      "children": []
     },
     {
-     "title": "SP. МАНУФАКТУРА",
+     "title": "СП.Мануфактура",
      "url": "/category/deyatelnost/sp-manufactory/",
      "children": [
       {
@@ -90,11 +90,6 @@
    "title": "Информирование",
    "url": "/my-informiruem/",
    "children": [
-    {
-     "title": "Гуманитарная помощь",
-     "url": "/category/informirovanie/gumanitarnaya-pomoshh/",
-     "children": []
-    },
     {
      "title": "Вопрос юристу",
      "url": "/vopros-yuristu/",

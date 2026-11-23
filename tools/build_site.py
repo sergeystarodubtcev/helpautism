@@ -444,6 +444,13 @@ def media_exists(path):
     return os.path.exists(os.path.join(OUT, rel))
 
 
+def open_document_in_new_tab(match):
+    tag = match[0]
+    if re.search(r'(?i)\s(?:target\s*=|download(?=\s|=|>))', tag):
+        return tag
+    return tag[:-1] + ' target="_blank">'
+
+
 def render_body(doc, site, forms):
     c = doc["content"]
     c = re.sub(r'<div class="ha-form" data-form="(\d+)"></div>', lambda m: render_form(m.group(1), forms), c)
@@ -456,6 +463,11 @@ def render_body(doc, site, forms):
     # ссылки от корня -> абсолютные (localize потом сделает относительными)
     c = re.sub(r'((?:src|href|poster)=["\'])(/[^"\']*)', lambda m: m.group(1) + absu(mapu(m.group(2))), c)
     c = re.sub(r'\s+srcset="[^"]*"', "", c)
+    c = re.sub(
+        r'''(?i)<a\s+[^>]*?\bhref=(["'])[^"'?#]+\.(?:pdf|rtf|docx?|xlsx?|odt)(?:[?#][^"']*)?\1[^>]*>''',
+        open_document_in_new_tab,
+        c,
+    )
     return c
 
 
@@ -523,6 +535,11 @@ def pipeline(text, rel):
                             + social_icons_html("ha-soc") + "</div>", text, count=1)
     text = text.replace("helpautismvrn@gmail.com", "helpautismvrn@yandex.ru")  # актуальная почта со страницы «Контакты»
     text = clean_html(text, rel)
+    text = text.replace(
+        "</head>",
+        f'<link rel="icon" type="image/png" href="{absu("/wp-content/uploads/2017/01/logo-1.png")}">\n</head>',
+        1,
+    )
     text = localize(text, rel)
     text = inject_enhance(text, rel)
     text = fix_thumbs(text, rel)
