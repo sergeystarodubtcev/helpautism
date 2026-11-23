@@ -8,7 +8,7 @@
 
   /* ---------- картинки, которых нет в веб-архиве ---------- */
   function brokenImages() {
-    var logo = $(".navbar-brand img");
+    var logo = $(".ha-site-brand img");
     var logoSrc = logo ? logo.src : "";
     function handle(img) {
       if (img.dataset.haFixed) return; img.dataset.haFixed = "1";
@@ -32,18 +32,9 @@
     top.onclick = function () { window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" }); };
     document.body.appendChild(top);
     var ticking = false;
-    var nav = $("#main-nav");
-    function navH() {
-      if (!nav) return;
-      // отступ под шапку нужен только когда она закреплена (на телефоне она стоит в потоке страницы)
-      var fixed = getComputedStyle(nav).position === "fixed";
-      document.documentElement.style.setProperty("--ha-nav-h", (fixed ? nav.offsetHeight : 0) + "px");
-    }
-    navH(); addEventListener("resize", navH, { passive: true }); addEventListener("load", navH);
     function update() {
       ticking = false;
       var y = window.scrollY || window.pageYOffset, h = document.documentElement.scrollHeight - innerHeight;
-      document.body.classList.toggle("ha-scrolled", y > 30);
       top.classList.toggle("ha-show", y > 700);
       bar.style.transform = "scaleX(" + (h > 0 ? y / h : 0) + ")";
     }
@@ -51,20 +42,30 @@
     update();
   }
 
-  /* ---------- мобильное меню: раскрывающиеся подменю ---------- */
-  function mobileMenu() {
-    $$("#site-navigation li.menu-item-has-children").forEach(function (li) {
-      var b = document.createElement("button");
-      b.type = "button"; b.className = "ha-sub-toggle"; b.setAttribute("aria-label", "Открыть подменю"); b.innerHTML = "&#9662;";
-      b.addEventListener("click", function (e) { e.preventDefault(); e.stopPropagation(); li.classList.toggle("ha-open"); });
-      var a = li.querySelector(":scope > a"); if (a) a.after(b);
+  /* ---------- навигация в закреплённой шапке ---------- */
+  function siteNavigation() {
+    var menu = $(".ha-navigation");
+    if (!menu) return;
+    var toggle = $(".ha-navigation__toggle", menu);
+
+    document.addEventListener("click", function (e) {
+      if (menu.open && !menu.contains(e.target)) menu.open = false;
     });
-    // закрывать меню после перехода по ссылке
-    $$("#site-navigation a").forEach(function (a) {
-      a.addEventListener("click", function () {
-        var t = $(".navbar-toggle"); var c = $("#site-navigation");
-        if (t && c && c.classList.contains("in") && a.getAttribute("href") && a.getAttribute("href").charAt(0) === "#") t.click();
-      });
+    document.addEventListener("focusin", function (e) {
+      if (menu.open && !menu.contains(e.target)) menu.open = false;
+    });
+    menu.addEventListener("keydown", function (e) {
+      if (e.key !== "Escape" || !menu.open) return;
+      var submenu = e.target.closest(".ha-submenu[open]");
+      var disclosure = submenu || menu;
+      disclosure.open = false;
+      $(":scope > summary", disclosure).focus();
+      e.preventDefault();
+    });
+    menu.addEventListener("click", function (e) {
+      if (!e.target.closest("a")) return;
+      menu.open = false;
+      toggle.focus();
     });
   }
 
@@ -166,39 +167,20 @@
     });
   }
 
-  /* ---------- просмотр фото на весь экран ---------- */
-  function lightbox() {
-    var links = $$(".ha-gallery__item, .entry-content a[href$='.jpg'], .entry-content a[href$='.jpeg'], .entry-content a[href$='.png'], .entry-content a[href$='.JPG']");
-    if (!links.length) return;
-    var box = document.createElement("div"); box.className = "ha-lightbox";
-    box.innerHTML = '<img alt=""><button class="ha-lb-close" aria-label="Закрыть">&times;</button><button class="ha-lb-prev" aria-label="Назад">&#8249;</button><button class="ha-lb-next" aria-label="Вперёд">&#8250;</button>';
-    document.body.appendChild(box);
-    var img = box.querySelector("img"), idx = 0;
-    var visible = function () { return links.filter(function (a) { return a.offsetParent !== null; }); };
-    function show(i) { var v = visible(); if (!v.length) return; idx = (i + v.length) % v.length; img.src = v[idx].getAttribute("href"); box.classList.add("is-open"); }
-    function close() { box.classList.remove("is-open"); }
-    links.forEach(function (a) { a.addEventListener("click", function (e) { e.preventDefault(); show(visible().indexOf(a)); }); });
-    box.querySelector(".ha-lb-close").onclick = close;
-    box.querySelector(".ha-lb-prev").onclick = function (e) { e.stopPropagation(); show(idx - 1); };
-    box.querySelector(".ha-lb-next").onclick = function (e) { e.stopPropagation(); show(idx + 1); };
-    box.addEventListener("click", function (e) { if (e.target === box) close(); });
-    addEventListener("keydown", function (e) {
-      if (!box.classList.contains("is-open")) return;
-      if (e.key === "Escape") close(); if (e.key === "ArrowLeft") show(idx - 1); if (e.key === "ArrowRight") show(idx + 1);
-    });
-    var sx = 0; box.addEventListener("touchstart", function (e) { sx = e.touches[0].clientX; }, { passive: true });
-    box.addEventListener("touchend", function (e) { var d = e.changedTouches[0].clientX - sx; if (Math.abs(d) > 50) show(idx + (d < 0 ? 1 : -1)); });
-  }
-
   /* ---------- текущий раздел в меню ---------- */
   function currentNav() {
     var here = location.pathname.replace(/index\.html$/, "");
-    $$("#site-navigation .nav > li").forEach(function (li) {
+    $$(".ha-navigation__panel > ul > li, .ha-inline-menu > ul > li").forEach(function (li) {
       var hit = $$("a", li).some(function (a) {
         var p = a.pathname.replace(/index\.html$/, "");
-        return p.length > 1 && here.indexOf(p) === 0 && !/^\/?$/.test(p);
+        return a.host === location.host && p.length > 1 && here.indexOf(p) === 0;
       });
       li.classList.toggle("ha-current", hit);
+    });
+    $$(".ha-navigation__panel a, .ha-inline-menu a").forEach(function (a) {
+      if (a.host === location.host && a.pathname.replace(/index\.html$/, "") === here && !a.hash) {
+        a.setAttribute("aria-current", "page");
+      }
     });
   }
 
@@ -275,33 +257,17 @@
 
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 
-  /* ---------- плавный переход между страницами ---------- */
-  function transitions() {
-    if (reduced) return;
-    document.addEventListener("click", function (e) {
-      var a = e.target.closest && e.target.closest("a"); if (!a) return;
-      var href = a.getAttribute("href") || "";
-      if (e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || a.target === "_blank" || a.hasAttribute("download")) return;
-      if (!href || href.charAt(0) === "#" || /^(mailto:|tel:|javascript:)/.test(href) || a.closest(".ha-lightbox, .ha-gallery")) return;
-      if (a.host && a.host !== location.host) return;
-      if (/\.(jpe?g|png|gif|pdf|docx?|xlsx?)$/i.test(href)) return;
-      e.preventDefault(); document.body.classList.add("ha-page-out");
-      setTimeout(function () { location.href = a.href; }, 220);
-    });
-    addEventListener("pageshow", function () { document.body.classList.remove("ha-page-out"); });
-  }
-
   /* ---------- карточки «Родительский час» целиком кликабельны ---------- */
   function teamLinks() {
     $$(".our-team .team-member").forEach(function (card) {
       var a = $(".social-icons a, .details a", card); if (!a) return;
       card.style.cursor = "pointer";
-      card.addEventListener("click", function (e) { if (!e.target.closest("a")) location.href = a.href; });
+      card.addEventListener("click", function (e) { if (!e.target.closest("a")) a.click(); });
     });
   }
 
   function start() {
-    brokenImages(); chrome(); mobileMenu(); currentNav(); teamLinks(); marquee(); heroMedia(); share(); lightbox(); forms(); reveal(); transitions();
+    brokenImages(); chrome(); siteNavigation(); currentNav(); teamLinks(); marquee(); heroMedia(); share(); forms(); reveal();
   }
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
 })();

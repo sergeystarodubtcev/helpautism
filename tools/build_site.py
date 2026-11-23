@@ -12,6 +12,10 @@
 (/2020/10/21/slug/ -> site/2020/10/21/slug/index.html), все ссылки делаются
 относительными, поэтому сайт работает и на GitHub Pages, и на любом хостинге.
 """
+import hashlib
+from functools import cache
+from html.parser import HTMLParser
+
 import html, json, os, re, shutil, sys, urllib.parse
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -39,7 +43,7 @@ def social_items():
     return [(k, t, (soc.get(k) or "").strip(), svg) for k, (t, svg) in SOCIAL_ICONS.items()]
 
 
-def social_icons_html(cls="ha-soc"):
+def social_icons_html(cls):
     out = []
     for k, t, url, svg in social_items():
         icon = f'<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-hidden="true">{svg}</svg>'
@@ -144,6 +148,15 @@ def clean_html(text, rel):
     return text
 
 
+@cache
+def versioned_asset(name):
+    source = os.path.join(ROOT, "assets", name)
+    with open(source, "rb") as asset:
+        digest = hashlib.sha256(asset.read()).hexdigest()[:12]
+    stem, ext = os.path.splitext(name)
+    return f"{stem}.{digest}{ext}"
+
+
 def inject_enhance(text, rel):
     # шрифты Google -> локальные (assets/fonts), без обращений к зарубежным серверам
     fonts = relurl(rel, "/assets/fonts/fonts.css")
@@ -151,8 +164,8 @@ def inject_enhance(text, rel):
     text = text.replace("</head>", f'<link rel="stylesheet" href="{fonts}">\n</head>', 1)
     text = re.sub(r"(?:https?:)?//ajax\.googleapis\.com/ajax/libs/jquery/3\.1\.0/jquery\.min\.js", relurl(rel, "/assets/vendor/jquery-3.1.0.min.js"), text)
     css = relurl(rel, "/assets/enhance.css")
-    modern = relurl(rel, "/assets/modern.css")
-    js = relurl(rel, "/assets/enhance.js")
+    modern = relurl(rel, "/assets/" + versioned_asset("modern.css"))
+    js = relurl(rel, "/assets/" + versioned_asset("enhance.js"))
     cfg = relurl(rel, "/assets/config.js")
     text = text.replace("</head>", f'<link rel="stylesheet" href="{css}">\n<link rel="stylesheet" href="{modern}">\n'
                                    '<meta name="theme-color" content="#1f7fd1">\n</head>', 1)
@@ -315,32 +328,36 @@ def split_template(tpl):
     return tpl[:i], tpl[j:]
 
 
-def menu_html(items, depth=0):
+def menu_html(items, collapsible=True):
     out = []
     for it in items:
-        has = bool(it["children"])
-        cls = "menu-item" + (" menu-item-has-children" if has else "")
-        out.append(f'<li class="{cls}"><a href="{esc(absu(it["url"]))}">{esc(it["title"])}</a>')
-        if has:
-            out.append('<ul class="sub-menu">' + menu_html(it["children"], depth + 1) + "</ul>")
+        title = esc(it["title"])
+        out.append(f'<li><a href="{esc(absu(it["url"]))}">{title}</a>')
+        if it["children"]:
+            children = f'<ul>{menu_html(it["children"], collapsible)}</ul>'
+            if collapsible:
+                children = f'<details class="ha-submenu"><summary aria-label="Подразделы: {title}"></summary>{children}</details>'
+            out.append(children)
         out.append("</li>")
     return "".join(out)
 
 
-def replace_menu(head, site):
-    i = head.find('<ul id="menu-verxnee-menyu"')
-    if i < 0:
-        return head
-    depth, k = 0, i
-    for m in re.finditer(r"(?i)<(/?)ul\b", head[i:]):
-        depth += -1 if m.group(1) else 1
-        if depth == 0:
-            k = i + m.end()
-            k = head.find(">", k) + 1
-            break
-    cta = f'<li class="menu-item ha-nav-cta"><a href="{esc(pay_url())}" target="_blank" rel="noopener">Помочь</a></li>'
-    new = '<ul id="menu-verxnee-menyu" class="nav navbar-nav navbar-right responsive-nav main-nav-list">' + menu_html(site["menu"]) + cta + "</ul>"
-    return head[:i] + new + head[k:]
+def replace_header(text, site):
+    brand = ('<a class="ha-site-brand" href="https://helpautism.ru/">'
+             '<img src="https://helpautism.ru/wp-content/uploads/2017/01/logo-1.png" alt="" width="48" height="40">'
+             '<span>Искра Надежды</span></a>')
+    cta = f'<li class="ha-nav-cta"><a class="ha-btn ha-btn--cta" href="{esc(pay_url())}" target="_blank" rel="noopener">Помочь</a></li>'
+    bar = ('<div id="main-nav" class="ha-site-bar"><div class="container ha-site-bar__inner">'
+           f'{brand}<details class="ha-navigation">'
+           '<summary class="ha-navigation__toggle"><span class="ha-navigation__icon" aria-hidden="true"></span>Меню</summary>'
+           f'<nav class="ha-navigation__panel" aria-label="Основная навигация"><ul>{menu_html(site["menu"])}{cta}</ul></nav>'
+           '</details>'
+           f'<nav class="ha-inline-menu" aria-label="Основная навигация"><ul>{menu_html(site["menu"], collapsible=False)}{cta}</ul></nav>'
+           '</div></div><div class="ha-site-bar-offset" aria-hidden="true"></div>')
+    start = text.index('<div id="main-nav"')
+    end_marker = "<!-- / END TOP BAR -->"
+    end = text.index(end_marker, start) + len(end_marker)
+    return text[:start] + bar + text[end:]
 
 
 def set_title_and_body(head, title, body_class, description=""):
@@ -444,11 +461,42 @@ def media_exists(path):
     return os.path.exists(os.path.join(OUT, rel))
 
 
-def open_document_in_new_tab(match):
-    tag = match[0]
-    if re.search(r'(?i)\s(?:target\s*=|download(?=\s|=|>))', tag):
-        return tag
-    return tag[:-1] + ' target="_blank">'
+class NewTabLinks(HTMLParser):
+    """Set the target on navigation links while preserving the original document."""
+    def __init__(self, text):
+        super().__init__(convert_charrefs=False)
+        self.line_offsets = [0] + [m.end() for m in re.finditer("\n", text)]
+        self.changes = []
+        self.feed(text)
+        self.close()
+
+    def handle_starttag(self, tag, attrs):
+        if tag != "a":
+            return
+        attrs = dict(attrs)
+        href = (attrs.get("href") or "").strip()
+        if not href or href.startswith("#") or "download" in attrs:
+            return
+        scheme = re.match(r"^([a-z][a-z0-9+.-]*):", href, re.I)
+        if scheme and scheme[1].lower() not in {"http", "https"}:
+            return
+        rel = (attrs.get("rel") or "").split()
+        attrs["target"] = "_blank"
+        attrs["rel"] = " ".join(sorted({word.lower() for word in rel} - {"opener"} | {"noopener"}))
+        rendered = "".join(f' {name}="{esc(value)}"' if value is not None else f" {name}" for name, value in attrs.items())
+        line, column = self.getpos()
+        start = self.line_offsets[line - 1] + column
+        self.changes.append((start, start + len(self.get_starttag_text()), f"<a{rendered}>"))
+
+
+def open_links_in_new_tabs(text):
+    parts = []
+    previous = 0
+    for start, end, tag in NewTabLinks(text).changes:
+        parts.extend((text[previous:start], tag))
+        previous = end
+    parts.append(text[previous:])
+    return "".join(parts)
 
 
 def render_body(doc, site, forms):
@@ -463,11 +511,6 @@ def render_body(doc, site, forms):
     # ссылки от корня -> абсолютные (localize потом сделает относительными)
     c = re.sub(r'((?:src|href|poster)=["\'])(/[^"\']*)', lambda m: m.group(1) + absu(mapu(m.group(2))), c)
     c = re.sub(r'\s+srcset="[^"]*"', "", c)
-    c = re.sub(
-        r'''(?i)<a\s+[^>]*?\bhref=(["'])[^"'?#]+\.(?:pdf|rtf|docx?|xlsx?|odt)(?:[?#][^"']*)?\1[^>]*>''',
-        open_document_in_new_tab,
-        c,
-    )
     return c
 
 
@@ -529,10 +572,6 @@ def pipeline(text, rel):
     j = text.find("</footer>", i)
     if i >= 0 and j > i:
         text = text[:i] + FOOTER.replace("%%SOCIAL%%", social_icons_html("ha-fsoc")) + text[j + len("</footer>"):]
-    # верхняя полоса: почта + ВКонтакте, Telegram, Max, Одноклассники, YouTube (без Instagram/Facebook)
-    text = re.sub(r'(?is)<div class="social-block">.*?</div>',
-                  lambda m: '<div class="social-block"><a href="mailto:helpautismvrn@yandex.ru" class="ha-topmail">helpautismvrn@yandex.ru</a>'
-                            + social_icons_html("ha-soc") + "</div>", text, count=1)
     text = text.replace("helpautismvrn@gmail.com", "helpautismvrn@yandex.ru")  # актуальная почта со страницы «Контакты»
     text = clean_html(text, rel)
     text = text.replace(
@@ -545,7 +584,7 @@ def pipeline(text, rel):
     text = fix_thumbs(text, rel)
     text = modernize(text, rel)
     text = text.replace("</head>", theme_style() + "</head>", 1)  # цвета из админки — после остальных стилей
-    return text
+    return open_links_in_new_tabs(text)
 
 
 def page_out(path):
@@ -590,7 +629,7 @@ def main():
 
     tpl = read(os.path.join(A2020, "2020", "10", "05", "voskresnaya-vstrecha", "index.html"))
     head0, foot0 = split_template(tpl)
-    head0 = replace_menu(head0, site)
+    head0 = replace_header(head0, site)
     head0 = re.sub(r'(?is)<div class="preloader">.*?</div>\s*</div>', "", head0)
 
     def emit(path, title, body_class, inner, description=""):
@@ -690,7 +729,7 @@ def main():
 
     # 5. главная: оригинальная главная + свежие новости
     home = read(os.path.join(A2020, "index.html"))
-    home = replace_menu(home, site)
+    home = replace_header(home, site)
     news = [p for p in posts if "news" in p.get("categories", [])][:6] or posts[:6]
     grid = ('<div class="ha-grid ha-grid--home">' + "".join(card(p, site) for p in news) + "</div>"
             f'<div class="ha-more"><a class="ha-btn ha-btn--ghost" href="{absu("/category/news/")}">Все новости</a></div>')
@@ -722,21 +761,23 @@ def main():
             continue
         target = relurl(rel, new)
         write(os.path.join(OUT, rel), f'<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0;url={target}">'
-              f'<link rel="canonical" href="{SITE_URL}{new}"><title>Переход…</title><a href="{target}">Перейти</a>')
+              f'<link rel="canonical" href="{SITE_URL}{new}"><title>Переход…</title><a href="{target}" target="_blank" rel="noopener">Перейти</a>')
 
     # 6. служебное
     for sub in ("fonts", "vendor"):
         shutil.copytree(os.path.join(ROOT, "assets", sub), os.path.join(OUT, "assets", sub), dirs_exist_ok=True)
-    for f in ("enhance.css", "enhance.js", "modern.css", "config.js"):
+    for f in ("enhance.css", "config.js"):
         if os.path.exists(os.path.join(ROOT, "assets", f)):
             shutil.copy2(os.path.join(ROOT, "assets", f), os.path.join(OUT, "assets", f))
+    for f in ("enhance.js", "modern.css"):
+        shutil.copy2(os.path.join(ROOT, "assets", f), os.path.join(OUT, "assets", versioned_asset(f)))
     if os.path.exists(os.path.join(ROOT, "CNAME")):
         shutil.copy2(os.path.join(ROOT, "CNAME"), OUT)
     open(os.path.join(OUT, ".nojekyll"), "w").close()
     os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
     json.dump([{"date": p["date"], "title": p["title"], "url": p["path"], "categories": p.get("categories", [])} for p in posts],
               open(os.path.join(OUT, "data", "news.json"), "w", encoding="utf-8"), ensure_ascii=False)
-    write(os.path.join(OUT, "404.html"), read(os.path.join(ROOT, "tools", "404.html")))
+    write(os.path.join(OUT, "404.html"), open_links_in_new_tabs(read(os.path.join(ROOT, "tools", "404.html"))))
     urls = ["/"] + [p["path"] for p in posts] + [p["path"] for p in pages] + [c["path"] for c in site["categories"].values()]
     write(os.path.join(OUT, "sitemap.xml"), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
           + "".join(f"<url><loc>{SITE_URL}{esc(u)}</loc></url>\n" for u in urls) + "</urlset>\n")
