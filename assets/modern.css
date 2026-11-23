@@ -560,3 +560,33 @@ details.ha-acc[open] summary::after { transform: rotate(45deg); }
 }
 
 .ha-btn--big { padding: 18px 34px !important; font-size: 17px !important; text-decoration: none !important; }
+
+/* ---------- страница недоступного материала ---------- */
+@font-face {
+  font-family: Tolstyak;
+  font-display: swap;
+  src: url("../wp-content/themes/zerif-lite/fonts/Tolstyak.ttf") format("truetype");
+}
+body.ha-error-page { margin: 0; }
+.ha-error-page *, .ha-error-page *::before, .ha-error-page *::after { box-sizing: border-box; }
+.ha-error-page .ha-site-bar__inner { width: 80%; }
+.ha-error {
+  width: min(80%, 780px);
+  margin-inline: auto;
+  padding: clamp(48px, 10vw, 120px) 15px 60px;
+}
+.ha-error h1 {
+  margin: 0 0 24px;
+  font-size: clamp(34px, 6vw, 70px);
+  line-height: 1.06;
+  overflow-wrap: anywhere;
+}
+.ha-error p { max-width: 610px; margin: 0 0 16px; font-size: clamp(16px, 2vw, 19px); }
+.ha-error__actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+.ha-error__actions a { min-height: 44px; text-align: center; }
+@media (max-width: 992px) {
+  .ha-error-page .ha-site-bar__inner, .ha-error { width: 95%; }
+}
+@media (max-width: 480px) {
+  .ha-error__actions { flex-direction: column; align-items: stretch; }
+}

@@ -342,22 +342,25 @@ def menu_html(items, collapsible=True):
     return "".join(out)
 
 
-def replace_header(text, site):
+def site_header(site):
     brand = ('<a class="ha-site-brand" href="https://helpautism.ru/">'
              '<img src="https://helpautism.ru/wp-content/uploads/2017/01/logo-1.png" alt="" width="48" height="40">'
              '<span>Искра Надежды</span></a>')
     cta = f'<li class="ha-nav-cta"><a class="ha-btn ha-btn--cta" href="{esc(pay_url())}" target="_blank" rel="noopener">Помочь</a></li>'
-    bar = ('<div id="main-nav" class="ha-site-bar"><div class="container ha-site-bar__inner">'
+    return ('<div id="main-nav" class="ha-site-bar"><div class="container ha-site-bar__inner">'
            f'{brand}<details class="ha-navigation">'
            '<summary class="ha-navigation__toggle"><span class="ha-navigation__icon" aria-hidden="true"></span>Меню</summary>'
            f'<nav class="ha-navigation__panel" aria-label="Основная навигация"><ul>{menu_html(site["menu"])}{cta}</ul></nav>'
            '</details>'
            f'<nav class="ha-inline-menu" aria-label="Основная навигация"><ul>{menu_html(site["menu"], collapsible=False)}{cta}</ul></nav>'
            '</div></div><div class="ha-site-bar-offset" aria-hidden="true"></div>')
+
+
+def replace_header(text, site):
     start = text.index('<div id="main-nav"')
     end_marker = "<!-- / END TOP BAR -->"
     end = text.index(end_marker, start) + len(end_marker)
-    return text[:start] + bar + text[end:]
+    return text[:start] + site_header(site) + text[end:]
 
 
 def set_title_and_body(head, title, body_class, description=""):
@@ -802,7 +805,12 @@ def main():
     os.makedirs(os.path.join(OUT, "data"), exist_ok=True)
     json.dump([{"date": p["date"], "title": p["title"], "url": p["path"], "categories": p.get("categories", [])} for p in posts],
               open(os.path.join(OUT, "data", "news.json"), "w", encoding="utf-8"), ensure_ascii=False)
-    shutil.copyfile(os.path.join(ROOT, "tools", "404.html"), os.path.join(OUT, "404.html"))
+    error_rel = "404.html"
+    error_page = read(os.path.join(ROOT, "tools", error_rel))
+    header = open_links_in_new_tabs(localize(site_header(site), error_rel), error_rel)
+    error_page = error_page.replace("<!-- SITE HEADER -->", f'<header>{header}</header>')
+    error_page = inject_enhance(error_page, error_rel)
+    write(os.path.join(OUT, error_rel), error_page.replace("</head>", theme_style() + "</head>", 1))
     urls = ["/"] + [p["path"] for p in posts] + [p["path"] for p in pages] + [c["path"] for c in site["categories"].values()]
     write(os.path.join(OUT, "sitemap.xml"), '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
           + "".join(f"<url><loc>{SITE_URL}{esc(u)}</loc></url>\n" for u in urls) + "</urlset>\n")
