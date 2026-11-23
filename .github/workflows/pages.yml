@@ -5,28 +5,62 @@ on:
     branches: [main, claude/eager-curie-nnh11r]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 concurrency:
   group: pages
   cancel-in-progress: true
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      artifact_id: ${{ steps.upload.outputs.artifact_id }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Build site from archive
+        run: python3 tools/build_site.py
+      - name: Upload Pages artifact
+        id: upload
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+          name: github-pages
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Build site from archive
-        run: python3 tools/build_site.py
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: site
+      - uses: actions/configure-pages@v6
+      - name: Wait for the Pages artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: ${{ needs.build.outputs.artifact_id }}
+        run: |
+          if [[ ! "$ARTIFACT_ID" =~ ^[0-9]+$ ]]; then
+            echo "::error::The build job did not return a Pages artifact ID."
+            exit 1
+          fi
+          for attempt in {1..8}; do
+            if gh api "repos/$GITHUB_REPOSITORY/actions/artifacts/$ARTIFACT_ID" \
+              --jq 'select(.name == "github-pages" and .expired == false) | .id' \
+              | grep -Fxq "$ARTIFACT_ID"; then
+              exit 0
+            fi
+            if (( attempt < 8 )); then
+              sleep 5
+            fi
+          done
+          echo "::error::GitHub did not make Pages artifact $ARTIFACT_ID available."
+          exit 1
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
+        with:
+          artifact_name: github-pages
